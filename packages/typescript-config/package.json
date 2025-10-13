@@ -5,5 +5,10 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@tsconfig/next": "^2.0.3",
+    "@tsconfig/node-lts": "^22.0.2",
+    "@tsconfig/recommended": "^1.0.10"
   }
 }
