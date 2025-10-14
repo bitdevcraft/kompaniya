@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@repo/shared-ui": "workspace:^",
-    "next": "15.5.4",
+    "next": "catalog:",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
@@ -18,13 +18,13 @@
     "@eslint/eslintrc": "^3.3.1",
     "@repo/eslint-config": "workspace:^",
     "@repo/typescript-config": "workspace:^",
-    "@tailwindcss/postcss": "^4.1.14",
+    "@tailwindcss/postcss": "catalog:",
     "@types/node": "^24.7.2",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.1",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "eslint": "^9.37.0",
-    "eslint-config-next": "15.5.4",
-    "tailwindcss": "^4.1.14",
+    "eslint-config-next": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "^5.9.3"
   }
 }
