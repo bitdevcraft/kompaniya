@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
+import { AuthModule as BetterAuthModule } from '@thallesp/nestjs-better-auth';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthServiceModule } from './modules/auth-service/auth-service.module';
+import { auth } from './modules/auth/auth';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
-  imports: [AuthServiceModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [AuthModule, BetterAuthModule.forRoot(auth), UserModule],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

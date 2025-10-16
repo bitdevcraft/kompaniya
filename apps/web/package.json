@@ -9,6 +9,7 @@
     "lint": "eslint --max-warnings=0 src"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "catalog:",
     "@radix-ui/react-collapsible": "catalog:",
     "@radix-ui/react-dialog": "catalog:",
@@ -16,12 +17,21 @@
     "@radix-ui/react-separator": "catalog:",
     "@radix-ui/react-slot": "catalog:",
     "@radix-ui/react-tooltip": "catalog:",
+    "@repo/shared": "workspace:^",
     "@repo/shared-ui": "workspace:^",
+    "@t3-oss/env-nextjs": "catalog:",
+    "@tanstack/react-query": "^5.90.3",
+    "@tanstack/react-query-devtools": "^5.90.2",
+    "better-auth": "catalog:",
     "class-variance-authority": "catalog:",
     "lucide-react": "catalog:",
     "next": "catalog:",
+    "next-intl": "^4.3.12",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.65.0",
+    "sonner": "^2.0.7",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
