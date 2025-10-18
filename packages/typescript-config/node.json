@@ -2,7 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": ["./base.json", "@tsconfig/node-lts/tsconfig.json"],
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "experimentalDecorators": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": true
   }
 }

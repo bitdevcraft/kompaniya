@@ -32,6 +32,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    autoSignIn: false,
   },
   advanced: {
     database: {
@@ -74,8 +75,36 @@ export const auth = betterAuth({
         maximumTeams: 5,
         allowRemovingAllTeams: false,
       },
+      schema: {
+        organization: {
+          additionalFields: {
+            organizationSize: {
+              type: 'string',
+              input: true,
+              required: false,
+            },
+            industry: {
+              type: 'string',
+              input: true,
+              required: false,
+            },
+          },
+        },
+      },
     }),
     //
   ],
   trustedOrigins: ['http://localhost:3001'],
+  rateLimit: {
+    enabled: true,
+  },
+  user: {
+    additionalFields: {
+      metadata: {
+        type: 'json',
+        input: false,
+      },
+    },
+  },
+  hooks: {},
 });

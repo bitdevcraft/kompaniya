@@ -31,6 +31,7 @@ export const queryClient = postgres(connectionString, {
 
 // Drizzle ORM instance
 export const db = drizzle(queryClient, { schema });
+export type Db = typeof db;
 
 // Migration function
 export async function runMigrations() {

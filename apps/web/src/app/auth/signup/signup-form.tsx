@@ -37,6 +37,7 @@ const useSignupWithPassword = () => {
         email: payload.email,
         password: payload.password,
         name: payload.name,
+        metadata: "",
       });
 
       if (error) throw new Error(error.message);

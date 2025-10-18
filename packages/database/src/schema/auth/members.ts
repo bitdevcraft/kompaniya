@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
@@ -15,3 +16,17 @@ export const membersTable = pgTable("members", {
   role: text("role").default("member").notNull(),
   createdAt: timestamp("created_at").notNull(),
 });
+
+export const memberRelations = relations(membersTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [membersTable.userId],
+    references: [usersTable.id],
+  }),
+  organization: one(organizationsTable, {
+    fields: [membersTable.organizationId],
+    references: [organizationsTable.id],
+  }),
+}));
+
+export type Member = typeof membersTable.$inferSelect;
+export type NewMember = typeof membersTable.$inferInsert;

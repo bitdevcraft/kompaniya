@@ -8,6 +8,20 @@
       "when": 1760509504755,
       "tag": "0000_lonely_veda",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1760597305049,
+      "tag": "0001_smiling_arachne",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760687711205,
+      "tag": "0002_amused_mindworm",
+      "breakpoints": true
     }
   ]
 }

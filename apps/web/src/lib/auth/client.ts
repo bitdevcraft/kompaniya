@@ -1,6 +1,8 @@
 import {
   apiKeyClient,
   emailOTPClient,
+  inferAdditionalFields,
+  inferOrgAdditionalFields,
   organizationClient,
   phoneNumberClient,
   usernameClient,
@@ -18,6 +20,28 @@ export const authClient = createAuthClient({
     phoneNumberClient(),
     //
     apiKeyClient(),
-    organizationClient(),
+    organizationClient({
+      schema: inferOrgAdditionalFields({
+        organization: {
+          additionalFields: {
+            organizationSize: {
+              type: "string",
+            },
+            industry: {
+              type: "string",
+            },
+          },
+        },
+      }),
+    }),
+
+    //
+    inferAdditionalFields({
+      user: {
+        metadata: {
+          type: "string",
+        },
+      },
+    }),
   ],
 });

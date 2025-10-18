@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
@@ -20,3 +21,10 @@ export const sessionsTable = pgTable("sessions", {
   activeTeamId: text("active_team_id"),
   impersonatedBy: text("impersonated_by"),
 });
+
+export const sessionRelations = relations(sessionsTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [sessionsTable.userId],
+    references: [usersTable.id],
+  }),
+}));

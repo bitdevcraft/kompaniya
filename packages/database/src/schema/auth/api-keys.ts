@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
@@ -35,3 +36,10 @@ export const apikeysTable = pgTable("apikeys", {
   permissions: text("permissions"),
   metadata: text("metadata"),
 });
+
+export const apiKeyRelations = relations(apikeysTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [apikeysTable.userId],
+    references: [usersTable.id],
+  }),
+}));

@@ -9,6 +9,6 @@
       "@/repositories": ["./src/repositories"]
     }
   },
-  "include": ["src/**/*.ts", "**/*.config.ts"],
+  "include": ["src/**/*.ts", "**/*.config.ts", "**/*.config.mjs"],
   "exclude": ["node_modules", "dist"]
 }

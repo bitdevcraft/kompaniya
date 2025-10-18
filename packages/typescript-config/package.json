@@ -9,6 +9,7 @@
   "devDependencies": {
     "@tsconfig/next": "catalog:",
     "@tsconfig/node-lts": "catalog:",
+    "@tsconfig/node22": "^22.0.2",
     "@tsconfig/recommended": "catalog:"
   }
 }

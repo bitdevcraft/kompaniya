@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
@@ -14,3 +15,14 @@ export const teamMembersTable = pgTable("team_members", {
     .references(() => usersTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at"),
 });
+
+export const teamMemberRelations = relations(teamMembersTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [teamMembersTable.userId],
+    references: [usersTable.id],
+  }),
+  team: one(teamsTable, {
+    fields: [teamMembersTable.teamId],
+    references: [teamsTable.id],
+  }),
+}));

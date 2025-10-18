@@ -36,13 +36,29 @@ export const useLoginWithEmailAndPassword = () => {
     mutationFn: async (
       payload: LoginWithEmailPasswordPayload,
     ): Promise<LoginWithEmailPasswordResponse> => {
-      const { data, error } = await authClient.signIn.email({
+      const { data, error: errSignIn } = await authClient.signIn.email({
         email: payload.email,
         password: payload.password,
         rememberMe: true,
       });
 
-      if (error) throw new Error(error.message);
+      if (errSignIn) throw new Error(errSignIn.message);
+
+      const { data: organizations, error: orgListError } =
+        await authClient.organization.list();
+
+      if (orgListError) throw new Error(orgListError.message);
+
+      if (organizations.length === 0)
+        throw new Error("No Organization Available");
+
+      const { error: errActiveOrganization } =
+        await authClient.organization.setActive({
+          organizationId: organizations[0].id,
+          organizationSlug: organizations[0].slug,
+        });
+
+      if (errActiveOrganization) throw new Error(errActiveOrganization.message);
 
       const userData = data.user as typeof data.user & { role: string };
       return {
@@ -133,7 +149,7 @@ export const LoginForm = () => {
             </div>
             <div className="mt-4 text-center text-sm">
               {t("login.dont_have_account")}
-              <Link className="ml-1 underline" href="/auth/signup">
+              <Link className="ml-1 underline" href="/auth/onboarding">
                 {t("signup_button")}
               </Link>
             </div>
