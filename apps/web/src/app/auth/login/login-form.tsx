@@ -86,7 +86,7 @@ export const LoginForm = () => {
   const onSubmit: SubmitHandler<LoginWithEmailPasswordPayload> = (data) => {
     login.mutate(data, {
       onSuccess: () => {
-        router.push("/");
+        router.push("/dashboard");
       },
     });
   };

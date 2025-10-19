@@ -4,8 +4,8 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build:pkg": "tsup",
+    "dev:pkg": "tsup --watch",
     "lint": "eslint --max-warnings=0 src",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
@@ -37,16 +37,19 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
+      "require": "./dist/index.mjs",
       "default": "./dist/index.js"
     },
     "./schema": {
       "types": "./dist/schema.d.ts",
       "import": "./dist/schema.js",
+      "require": "./dist/schema.mjs",
       "default": "./dist/schema.js"
     },
     "./repositories": {
       "types": "./dist/repositories.d.ts",
       "import": "./dist/repositories.js",
+      "require": "./dist/repositories.mjs",
       "default": "./dist/repositories.js"
     },
     "./package.json": "./package.json"

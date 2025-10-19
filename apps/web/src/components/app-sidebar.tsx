@@ -9,14 +9,13 @@ import {
 } from "@repo/shared-ui/components/common/sidebar";
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   Command,
   Frame,
   GalleryVerticalEnd,
   Map,
   PieChart,
   Settings2,
+  ShoppingBag,
   SquareTerminal,
 } from "lucide-react";
 import * as React from "react";
@@ -24,7 +23,8 @@ import * as React from "react";
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
+
+import { NavCompanyHeader } from "./nav-company-header";
 
 // This is sample data.
 const data = {
@@ -88,63 +88,13 @@ const data = {
       ],
     },
     {
-      title: "Playground",
+      title: "Inventory",
       url: "#",
-      icon: SquareTerminal,
-      isActive: true,
+      icon: ShoppingBag,
+      isActive: false,
       items: [
         {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
+          title: "Items",
           url: "#",
         },
       ],
@@ -153,22 +103,27 @@ const data = {
       title: "Settings",
       url: "#",
       icon: Settings2,
+      isActive: false,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Users",
+          url: "/settings/users",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Teams",
+          url: "/settings/teams",
+        },
+        {
+          title: "Permissions",
+          url: "/settings/permissions",
+        },
+        {
+          title: "Security",
+          url: "/settings/security",
         },
         {
           title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          url: "/settings/billing",
         },
       ],
     },
@@ -196,7 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <NavCompanyHeader />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
