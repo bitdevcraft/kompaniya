@@ -68,7 +68,9 @@ export const auth = betterAuth({
 
     // Authorization
     apiKey(),
-    admin(),
+    admin({
+      adminRoles: ['admin', 'superadmin'],
+    }),
     organization({
       teams: {
         enabled: true,
@@ -102,7 +104,7 @@ export const auth = betterAuth({
     additionalFields: {
       metadata: {
         type: 'json',
-        input: false,
+        input: true,
       },
     },
   },

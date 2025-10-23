@@ -6,7 +6,7 @@ import { Input } from "@repo/shared-ui/components/common/input";
 import { cn } from "@repo/shared-ui/lib/utils";
 import * as React from "react";
 
-import type { ExtendedColumnFilter } from "./_types/data-table";
+import type { ExtendedColumnFilter } from "./types/data-table";
 
 interface DataTableRangeFilterProps<TData> extends React.ComponentProps<"div"> {
   filter: ExtendedColumnFilter<TData>;

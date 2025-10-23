@@ -14,7 +14,7 @@ import { Separator } from "@repo/shared-ui/components/common/separator";
 import { CalendarIcon, XCircle } from "lucide-react";
 import * as React from "react";
 
-import { formatDate } from "./_lib/format";
+import { formatDate } from "./lib/format";
 
 interface DataTableDateFilterProps<TData> {
   column: Column<TData, unknown>;

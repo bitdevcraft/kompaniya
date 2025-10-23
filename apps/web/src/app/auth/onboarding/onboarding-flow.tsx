@@ -23,7 +23,8 @@ const useSignupWithPassword = () => {
         email: payload.user.email,
         password: payload.user.password,
         name: [payload.user.lastName, payload.user.firstName].join(","),
-        metadata: JSON.stringify(payload.organization),
+        // @ts-expect-error never
+        metadata: payload.organization,
       });
 
       if (error) throw new Error(error.message);

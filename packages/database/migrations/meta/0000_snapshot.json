@@ -1,5 +1,5 @@
 {
-  "id": "2b2b6b90-b2b3-42de-b124-9933bbdb9bf8",
+  "id": "7a32eb1e-9010-413e-97fa-9cedae98c9d4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -448,6 +448,18 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "organization_size": {
+          "name": "organization_size",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "industry": {
+          "name": "industry",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -520,19 +532,19 @@
         },
         "active_organization_id": {
           "name": "active_organization_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "active_team_id": {
           "name": "active_team_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
         "impersonated_by": {
           "name": "impersonated_by",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         }
@@ -768,6 +780,12 @@
         "ban_expires": {
           "name": "ban_expires",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         }

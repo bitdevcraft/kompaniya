@@ -4,9 +4,9 @@ import type {
   ExtendedColumnFilter,
   FilterOperator,
   FilterVariant,
-} from "../_types/data-table";
+} from "../types/data-table";
 
-import { dataTableConfig } from "../_config/data-table";
+import { dataTableConfig } from "../config/data-table";
 
 export function getCommonPinningStyles<TData>({
   column,

@@ -39,7 +39,7 @@ import { cn } from "@repo/shared-ui/lib/utils";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { composeEventHandlers, useComposedRefs } from "./_lib/composition";
+import { composeEventHandlers, useComposedRefs } from "./lib/composition";
 
 const orientationConfig = {
   vertical: {

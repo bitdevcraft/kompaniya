@@ -68,5 +68,31 @@
         "save": "Save"
       }
     }
+  },
+  "settings": {
+    "user": {
+      "form": {
+        "new": { "title": "Create User" },
+        "email": {
+          "label": "Email"
+        },
+        "password": {
+          "label": "Password"
+        },
+        "name": {
+          "label": "Name"
+        },
+        "firstName": {
+          "label": "First Name"
+        },
+        "lastName": {
+          "label": "Last Name"
+        },
+        "role": {
+          "label": "Role",
+          "description": "Select one or more"
+        }
+      }
+    }
   }
 }

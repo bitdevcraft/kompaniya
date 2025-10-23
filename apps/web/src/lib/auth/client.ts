@@ -39,7 +39,7 @@ export const authClient = createAuthClient({
     inferAdditionalFields({
       user: {
         metadata: {
-          type: "string",
+          type: "json",
         },
       },
     }),

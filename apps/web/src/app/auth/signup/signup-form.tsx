@@ -37,7 +37,8 @@ const useSignupWithPassword = () => {
         email: payload.email,
         password: payload.password,
         name: payload.name,
-        metadata: "",
+        // @ts-expect-error never
+        metadata: null,
       });
 
       if (error) throw new Error(error.message);

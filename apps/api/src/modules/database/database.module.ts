@@ -1,19 +1,29 @@
 import { Global, Module, OnApplicationShutdown } from '@nestjs/common';
 import { db, queryClient } from '@repo/database';
+import { DRIZZLE_DB, PG_CLIENT } from 'src/constants/provider';
 
-export const DRIZZLE_DB = Symbol('DRIZZLE_DB');
-export const PG_CLIENT = Symbol('PG_CLIENT');
+import { OrganizationRepositoryService } from './repository/organization-repository/organization-repository.service';
+import { SessionRepositoryService } from './repository/session-repository/session-repository.service';
 
 @Global()
 @Module({
   providers: [
     { provide: DRIZZLE_DB, useValue: db },
     { provide: PG_CLIENT, useValue: queryClient },
+    SessionRepositoryService,
+    OrganizationRepositoryService,
   ],
-  exports: [DRIZZLE_DB, PG_CLIENT],
+  exports: [
+    DRIZZLE_DB,
+    PG_CLIENT,
+    SessionRepositoryService,
+    OrganizationRepositoryService,
+  ],
 })
 export class DatabaseModule implements OnApplicationShutdown {
   async onApplicationShutdown() {
     await queryClient.end?.();
   }
 }
+
+export { DRIZZLE_DB };

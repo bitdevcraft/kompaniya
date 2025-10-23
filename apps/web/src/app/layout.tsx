@@ -4,6 +4,7 @@ import { APP } from "@repo/shared";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 
 import { Providers } from "./providers";
@@ -28,7 +29,9 @@ export default async function RootLayout({
       <body className={`${inter.className}  antialiased`}>
         <NextIntlClientProvider messages={messages}>
           <div className="h-full min-h-0 w-full">
-            <Providers>{children}</Providers>
+            <Providers>
+              <NuqsAdapter>{children}</NuqsAdapter>
+            </Providers>
             <Toaster
               toastOptions={{
                 closeButton: true,

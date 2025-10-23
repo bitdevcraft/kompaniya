@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-import { dataTableConfig } from "./_config/data-table";
+import { dataTableConfig } from "./config/data-table";
 import {
   Sortable,
   SortableContent,

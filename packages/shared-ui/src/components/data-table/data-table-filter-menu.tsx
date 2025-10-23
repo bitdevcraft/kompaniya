@@ -37,17 +37,14 @@ import {
 import { useQueryState } from "nuqs";
 import * as React from "react";
 
-import type { ExtendedColumnFilter, FilterOperator } from "./_types/data-table";
+import type { ExtendedColumnFilter, FilterOperator } from "./types/data-table";
 
-import { useDebouncedCallback } from "./_hooks/use-debounced-callback";
-import {
-  getDefaultFilterOperator,
-  getFilterOperators,
-} from "./_lib/data-table";
-import { formatDate } from "./_lib/format";
-import { generateId } from "./_lib/id";
-import { getFiltersStateParser } from "./_lib/parsers";
 import { DataTableRangeFilter } from "./data-table-range-filter";
+import { useDebouncedCallback } from "./hooks/use-debounced-callback";
+import { getDefaultFilterOperator, getFilterOperators } from "./lib/data-table";
+import { formatDate } from "./lib/format";
+import { generateId } from "./lib/id";
+import { getFiltersStateParser } from "./lib/parsers";
 
 const FILTERS_KEY = "filters";
 const DEBOUNCE_MS = 300;

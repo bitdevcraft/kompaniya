@@ -64,6 +64,8 @@ CREATE TABLE "organizations" (
 	"logo" text,
 	"created_at" timestamp NOT NULL,
 	"metadata" text,
+	"organization_size" text,
+	"industry" text,
 	CONSTRAINT "organizations_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
@@ -76,9 +78,9 @@ CREATE TABLE "sessions" (
 	"ip_address" text,
 	"user_agent" text,
 	"user_id" uuid NOT NULL,
-	"active_organization_id" text,
-	"active_team_id" text,
-	"impersonated_by" text,
+	"active_organization_id" uuid,
+	"active_team_id" uuid,
+	"impersonated_by" uuid,
 	CONSTRAINT "sessions_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
@@ -113,6 +115,7 @@ CREATE TABLE "users" (
 	"banned" boolean DEFAULT false,
 	"ban_reason" text,
 	"ban_expires" timestamp,
+	"metadata" jsonb,
 	CONSTRAINT "users_email_unique" UNIQUE("email"),
 	CONSTRAINT "users_username_unique" UNIQUE("username"),
 	CONSTRAINT "users_phone_number_unique" UNIQUE("phone_number")

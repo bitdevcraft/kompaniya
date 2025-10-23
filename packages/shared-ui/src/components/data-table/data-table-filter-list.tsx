@@ -42,17 +42,9 @@ import type {
   ExtendedColumnFilter,
   FilterOperator,
   JoinOperator,
-} from "./_types/data-table";
+} from "./types/data-table";
 
-import { dataTableConfig } from "./_config/data-table";
-import { useDebouncedCallback } from "./_hooks/use-debounced-callback";
-import {
-  getDefaultFilterOperator,
-  getFilterOperators,
-} from "./_lib/data-table";
-import { formatDate } from "./_lib/format";
-import { generateId } from "./_lib/id";
-import { getFiltersStateParser } from "./_lib/parsers";
+import { dataTableConfig } from "./config/data-table";
 import { DataTableRangeFilter } from "./data-table-range-filter";
 import {
   Faceted,
@@ -65,6 +57,11 @@ import {
   FacetedList,
   FacetedTrigger,
 } from "./faceted";
+import { useDebouncedCallback } from "./hooks/use-debounced-callback";
+import { getDefaultFilterOperator, getFilterOperators } from "./lib/data-table";
+import { formatDate } from "./lib/format";
+import { generateId } from "./lib/id";
+import { getFiltersStateParser } from "./lib/parsers";
 import {
   Sortable,
   SortableContent,

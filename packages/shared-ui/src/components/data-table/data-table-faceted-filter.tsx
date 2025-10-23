@@ -23,7 +23,7 @@ import { cn } from "@repo/shared-ui/lib/utils";
 import { Check, PlusCircle, XCircle } from "lucide-react";
 import * as React from "react";
 
-import type { Option } from "./_types/data-table";
+import type { Option } from "./types/data-table";
 
 interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
