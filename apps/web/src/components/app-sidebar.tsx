@@ -21,7 +21,6 @@ import {
 import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 
 import { NavCompanyHeader } from "./nav-company-header";
@@ -52,7 +51,7 @@ const data = {
   ],
   navMain: [
     {
-      title: "CRM & Marketing",
+      title: "CRM",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
@@ -77,10 +76,14 @@ const data = {
           title: "Activities",
           url: "#",
         },
-        {
-          title: "Tasks",
-          url: "#",
-        },
+      ],
+    },
+    {
+      title: "Marketing",
+      url: "#",
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
         {
           title: "Emails",
           url: "#",
@@ -155,7 +158,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

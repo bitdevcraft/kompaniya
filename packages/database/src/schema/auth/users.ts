@@ -26,6 +26,7 @@ export const usersTable = pgTable("users", {
   phoneNumberVerified: boolean("phone_number_verified"),
   role: text("role"),
   banned: boolean("banned").default(false),
+  active: boolean("active").default(true),
   banReason: text("ban_reason"),
   banExpires: timestamp("ban_expires"),
   metadata: jsonb("metadata"),

@@ -4,8 +4,11 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Param,
   Post,
+  Put,
   Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   AuthService,
@@ -69,5 +72,29 @@ export class SystemAdminController {
     console.log('After Add Member');
 
     return { userId: newUser.user.id };
+  }
+
+  @Put('deactivate-user/:id')
+  async deactivateUser(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+  ) {
+    const user = await this.systemAdminService.getUserById(id);
+
+    const organization = await this.systemAdminService.getActiveOrganization(
+      session.user.id,
+    );
+
+    if (
+      !user ||
+      user.members.length === 0 ||
+      !user.members[0] ||
+      !organization ||
+      user.members[0].organizationId !== organization.id
+    ) {
+      throw new UnauthorizedException('Admin Session has no Organization');
+    }
+
+    await this.systemAdminService.deactivateUser(id);
   }
 }

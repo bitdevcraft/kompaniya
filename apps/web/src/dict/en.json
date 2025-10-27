@@ -72,7 +72,8 @@
   "settings": {
     "user": {
       "form": {
-        "new": { "title": "Create User" },
+        "new": { "title": "Create User", "submit": "Submit" },
+        "update": { "title": "Update User", "submit": "Update" },
         "email": {
           "label": "Email"
         },

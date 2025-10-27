@@ -9,4 +9,9 @@ export const Keys = {
       return `member:organization:${userId}`;
     },
   },
+  User: {
+    id(userId: string) {
+      return `user:id:${userId}`;
+    },
+  },
 };

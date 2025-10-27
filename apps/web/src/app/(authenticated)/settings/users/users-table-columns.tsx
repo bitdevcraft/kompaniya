@@ -13,7 +13,7 @@ import {
   makeRowAction,
 } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { ColumnDef } from "@tanstack/react-table";
-import { Ellipsis } from "lucide-react";
+import { Edit, Ellipsis, UserRoundX } from "lucide-react";
 
 export type ListMembers = {
   user: {
@@ -21,6 +21,7 @@ export type ListMembers = {
     name: string;
     email: string;
     image: string | null | undefined;
+    active?: boolean;
   };
   id: string;
   organizationId: string;
@@ -34,12 +35,13 @@ export function useContactColumns(
     React.SetStateAction<DataTableRowAction<ListMembers> | null>
   >,
 ) {
-  const onRemove = makeRowAction(setRowAction, "remove");
+  const onDeactivate = makeRowAction(setRowAction, "deactivate");
+  const onUpdate = makeRowAction(setRowAction, "update");
 
   const columns: ColumnDef<ListMembers>[] = [
     {
-      id: "name",
-      accessorKey: "name",
+      id: "user.name",
+      accessorKey: "user.name",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Name" />
       ),
@@ -49,16 +51,23 @@ export function useContactColumns(
       }),
     },
     {
-      id: "email",
-      accessorKey: "email",
+      id: "user.email",
+      accessorKey: "user.email",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Email" />
+      ),
       meta: defineMeta({
         label: "Email",
       }),
       cell: ({ row }) => row.original.user.email,
     },
+
     {
       id: "role",
       accessorKey: "role",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Role" />
+      ),
       meta: defineMeta({
         label: "Role",
       }),
@@ -83,7 +92,15 @@ export function useContactColumns(
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onSelect={() => onRemove(row)}>
+            <DropdownMenuItem onSelect={() => onUpdate(row)}>
+              <Edit />
+              Update
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => onDeactivate(row)}
+              variant="destructive"
+            >
+              <UserRoundX />
               Remove
             </DropdownMenuItem>
           </DropdownMenuContent>

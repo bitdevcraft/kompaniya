@@ -28,6 +28,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth/client";
 
@@ -88,6 +89,11 @@ export const LoginForm = () => {
       onSuccess: () => {
         router.push("/dashboard");
       },
+      onError: (_err) => {
+        toast.error(
+          "Invalid email or password. Check with your admin or support",
+        );
+      },
     });
   };
 
@@ -142,9 +148,6 @@ export const LoginForm = () => {
                 type="submit"
               >
                 {t("login_button")}
-              </Button>
-              <Button className="w-full" type="button" variant="outline">
-                {t("social_login.google")}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

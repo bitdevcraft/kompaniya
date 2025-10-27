@@ -15,23 +15,17 @@ export class SessionRepositoryService {
   ) {}
 
   async getUserSessionByToken(token: string) {
-    let data = await this.cacheService.get<UserSession>(
-      Keys.Session.token(token),
-    );
-
-    if (!data) {
-      data = await this.db.query.sessionsTable.findFirst({
-        where: eq(sessionsTable.token, token),
-        with: {
-          user: true,
-          organization: true,
-          team: true,
-        },
-      });
-
-      await this.cacheService.set(Keys.Session.token(token), data);
-    }
-
-    return data;
+    return await this.cacheService.wrapCache<UserSession | undefined>({
+      key: Keys.Session.token(token),
+      fn: async () =>
+        await this.db.query.sessionsTable.findFirst({
+          where: eq(sessionsTable.token, token),
+          with: {
+            user: true,
+            organization: true,
+            team: true,
+          },
+        }),
+    });
   }
 }

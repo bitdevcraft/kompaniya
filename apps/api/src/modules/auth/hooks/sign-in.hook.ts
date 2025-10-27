@@ -23,11 +23,16 @@ export class SignInHook {
     private readonly organizationRepositoryService: OrganizationRepositoryService,
     private authService: AuthService<typeof auth>,
   ) {}
+
   @AfterHook('/sign-in/email')
   async afterSignIn(ctx: AuthHookContext) {
     const tokenCookie = ctx.context.authCookies.sessionToken.name;
 
-    const token = await ctx.getSignedCookie(tokenCookie, ctx.context.secret);
+    let token = await ctx.getSignedCookie(tokenCookie, ctx.context.secret);
+
+    if (!token) {
+      token = ctx.context.newSession?.session.token ?? null;
+    }
 
     if (!token) return;
 
@@ -35,6 +40,12 @@ export class SignInHook {
       await this.sessionRepositoryService.getUserSessionByToken(token);
 
     if (!session?.user) {
+      throw new APIError('UNAUTHORIZED', {
+        message: 'No Session',
+      });
+    }
+
+    if (!session.user.active) {
       throw new APIError('UNAUTHORIZED', {
         message: 'No Session',
       });

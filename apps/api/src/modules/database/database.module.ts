@@ -4,6 +4,7 @@ import { DRIZZLE_DB, PG_CLIENT } from 'src/constants/provider';
 
 import { OrganizationRepositoryService } from './repository/organization-repository/organization-repository.service';
 import { SessionRepositoryService } from './repository/session-repository/session-repository.service';
+import { UserRepositoryService } from './repository/user-repository/user-repository.service';
 
 @Global()
 @Module({
@@ -12,12 +13,14 @@ import { SessionRepositoryService } from './repository/session-repository/sessio
     { provide: PG_CLIENT, useValue: queryClient },
     SessionRepositoryService,
     OrganizationRepositoryService,
+    UserRepositoryService,
   ],
   exports: [
     DRIZZLE_DB,
     PG_CLIENT,
     SessionRepositoryService,
     OrganizationRepositoryService,
+    UserRepositoryService,
   ],
 })
 export class DatabaseModule implements OnApplicationShutdown {

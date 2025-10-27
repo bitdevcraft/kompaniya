@@ -1,6 +1,7 @@
 "use client";
 
 import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
+import { ConfirmDialog } from "@repo/shared-ui/components/common/dialog-confirm";
 import {
   DataTable,
   DataTableSkeleton,
@@ -14,7 +15,7 @@ import React from "react";
 import { authClient } from "@/lib/auth/client";
 import { SearchParamsSchema } from "@/types/validations";
 
-import { fetchUsers } from "./actions";
+import { fetchUsers, useDeactivateUser } from "./actions";
 import { NewUserButton } from "./new/new-user-button";
 import { ListMembers, useContactColumns } from "./users-table-columns";
 
@@ -41,8 +42,10 @@ export function UsersTable(props: UsersTableProps) {
         : null,
   });
 
-  const [_rowAction, setRowAction] =
+  const [rowAction, setRowAction] =
     React.useState<DataTableRowAction<ListMembers> | null>(null);
+
+  const deactiveUser = useDeactivateUser();
 
   const columns = useContactColumns(setRowAction);
 
@@ -85,6 +88,24 @@ export function UsersTable(props: UsersTableProps) {
           </ButtonGroup>
         </DataTableToolbar>
       </DataTable>
+
+      {rowAction?.variant === "deactivate" && (
+        <ConfirmDialog
+          description="This user can't login after deactivated"
+          isOpen={rowAction?.variant === "deactivate"}
+          loading={deactiveUser.isPending}
+          onCancel={() => {
+            setRowAction(null);
+          }}
+          onConfirm={async () => {
+            deactiveUser.mutate(rowAction?.row.original.user.id);
+          }}
+          setIsOpen={(open) => {
+            if (!open) setRowAction(null);
+          }}
+          title="Deactive User?"
+        ></ConfirmDialog>
+      )}
     </>
   );
 }

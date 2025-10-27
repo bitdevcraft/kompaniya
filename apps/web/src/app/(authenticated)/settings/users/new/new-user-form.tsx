@@ -15,7 +15,7 @@ import {
 import { Input } from "@repo/shared-ui/components/common/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { Loader2, Send } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
@@ -194,17 +194,27 @@ export function NewUserForm(props: NewUserFormProps) {
           )}
         />
 
-        <Button
-          className="w-full md:w-auto"
-          disabled={createUser.isPending}
-          type="submit"
-        >
-          {createUser.isPending ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <Send />
-          )}
-        </Button>
+        <div className="flex w-full justify-end gap-2">
+          <Button
+            className="w-full md:w-auto"
+            disabled={createUser.isPending}
+            onClick={props.onFinish}
+            variant={"outline"}
+          >
+            Cancel
+          </Button>
+          <Button
+            className="w-full md:w-auto"
+            disabled={createUser.isPending}
+            type="submit"
+          >
+            {createUser.isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>{t("form.new.submit")}</>
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

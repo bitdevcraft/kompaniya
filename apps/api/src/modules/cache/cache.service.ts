@@ -23,4 +23,26 @@ export class CacheService {
   ): Promise<void> {
     await this.cache.set(key, value, ttl);
   }
+
+  async wrapCache<T = unknown>(options: {
+    key: string;
+    fn: () => Promise<T>;
+    ttl?: number | string;
+  }): Promise<T | undefined> {
+    const { key, fn, ttl } = options;
+
+    const cached = await this.cache.get<T>(key);
+
+    if (cached) {
+      return cached;
+    }
+
+    const recent = await fn();
+
+    if (recent) {
+      await this.cache.set<T>(key, recent, ttl);
+    }
+
+    return recent;
+  }
 }
