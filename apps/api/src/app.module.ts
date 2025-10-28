@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import environment from './config/environment';
 import { envValidation } from './config/validation';
 import { AuthModule } from './modules/auth/auth.module';
-import { CacheModule } from './modules/cache/cache.module';
-import { DatabaseModule } from './modules/database/database.module';
+import { CoreModule } from './modules/core/core.module';
+import { EmailModule } from './modules/email/email.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -18,11 +19,13 @@ import { UserModule } from './modules/user/user.module';
       validationSchema: envValidation,
     }),
 
-    DatabaseModule,
+    ScheduleModule.forRoot(),
+
     AuthModule,
     UserModule,
     OrganizationModule,
-    CacheModule,
+    EmailModule,
+    CoreModule,
   ],
   controllers: [],
   providers: [],

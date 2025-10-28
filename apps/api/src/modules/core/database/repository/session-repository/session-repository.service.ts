@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
-import { CacheService } from '~/modules/cache/cache.service';
+import { CacheService } from '~/modules/core/cache/cache.service';
 
 @Injectable()
 export class SessionRepositoryService {

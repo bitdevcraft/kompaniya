@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { OrganizationRepositoryService } from '~/modules/database/repository/organization-repository/organization-repository.service';
-import { UserRepositoryService } from '~/modules/database/repository/user-repository/user-repository.service';
+import { OrganizationRepositoryService } from '~/modules/core/database/repository/organization-repository/organization-repository.service';
+import { UserRepositoryService } from '~/modules/core/database/repository/user-repository/user-repository.service';
 
 @Injectable()
 export class SystemAdminService {

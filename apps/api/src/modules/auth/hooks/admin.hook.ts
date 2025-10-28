@@ -6,7 +6,7 @@ import {
 } from '@thallesp/nestjs-better-auth';
 import { APIError } from 'better-auth';
 
-import { SessionRepositoryService } from '~/modules/database/repository/session-repository/session-repository.service';
+import { SessionRepositoryService } from '~/modules/core/database/repository/session-repository/session-repository.service';
 
 @Hook()
 @Injectable()

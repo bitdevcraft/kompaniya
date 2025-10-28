@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { organizationSchema } from '@repo/shared';
+import { OrganizationData, organizationSchema } from '@repo/shared';
 import {
   AfterHook,
   type AuthHookContext,
@@ -9,8 +9,8 @@ import {
 import { APIError } from 'better-auth';
 import { nanoid } from 'nanoid';
 
-import { OrganizationRepositoryService } from '~/modules/database/repository/organization-repository/organization-repository.service';
-import { SessionRepositoryService } from '~/modules/database/repository/session-repository/session-repository.service';
+import { OrganizationRepositoryService } from '~/modules/core/database/repository/organization-repository/organization-repository.service';
+import { SessionRepositoryService } from '~/modules/core/database/repository/session-repository/session-repository.service';
 import { convertCase } from '~/utils/string-convert-case';
 
 import { auth } from '../auth';
@@ -39,43 +39,68 @@ export class SignInHook {
     const session =
       await this.sessionRepositoryService.getUserSessionByToken(token);
 
-    if (!session?.user) {
+    if (!session?.user?.active) {
       throw new APIError('UNAUTHORIZED', {
         message: 'No Session',
       });
     }
 
-    if (!session.user.active) {
-      throw new APIError('UNAUTHORIZED', {
-        message: 'No Session',
-      });
-    }
+    const orgExist = await this.hasExistingOrganization(ctx, session.user.id);
 
-    const activeOrg =
-      await this.organizationRepositoryService.getActiveOrganization(
-        session.user.id,
-      );
+    if (orgExist) return;
 
-    if (activeOrg) {
-      return;
-    }
-
-    const organization = organizationSchema.safeParse(session.user?.metadata);
+    const organization = organizationSchema.safeParse(session.user.metadata);
 
     if (organization.error) {
-      throw new APIError('BAD_REQUEST', {
-        message: 'No Onboarding data',
+      throw new APIError('UNAUTHORIZED', {
+        message: 'No Session',
       });
     }
 
-    await this.authService.api.createOrganization({
+    await this.createNewOrganization(ctx, organization.data);
+  }
+
+  private async createNewOrganization(
+    ctx: AuthHookContext,
+    organization: OrganizationData,
+  ) {
+    const newOrg = await this.authService.api.createOrganization({
       body: {
-        name: organization.data.companyName,
-        slug: `${convertCase(organization.data.companyName, 'sentence', 'kebab')}-(${nanoid()})`,
-        organizationSize: organization.data.companySize,
-        industry: organization.data.industry,
+        name: organization.companyName,
+        slug: `${convertCase(organization.companyName, 'sentence', 'kebab')}-(${nanoid()})`,
+        organizationSize: organization.companySize,
+        industry: organization.industry,
       },
       headers: ctx.headers,
     });
+
+    if (newOrg) {
+      await this.authService.api.setActiveOrganization({
+        body: {
+          organizationId: newOrg.id,
+          organizationSlug: newOrg.slug,
+        },
+        headers: ctx.headers,
+      });
+    }
+  }
+
+  private async hasExistingOrganization(ctx: AuthHookContext, userId: string) {
+    const activeOrg =
+      await this.organizationRepositoryService.getActiveOrganization(userId);
+
+    if (activeOrg) {
+      await this.authService.api.setActiveOrganization({
+        body: {
+          organizationId: activeOrg.id,
+          organizationSlug: activeOrg.slug,
+        },
+        headers: ctx.headers,
+      });
+
+      return true;
+    }
+
+    return false;
   }
 }
