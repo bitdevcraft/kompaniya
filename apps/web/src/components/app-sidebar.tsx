@@ -24,6 +24,7 @@ import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 
 import { NavCompanyHeader } from "./nav-company-header";
+import { NavSettings } from "./nav-settings";
 
 // This is sample data.
 const data = {
@@ -102,6 +103,8 @@ const data = {
         },
       ],
     },
+  ],
+  navSettings: [
     {
       title: "Settings",
       url: "#",
@@ -109,24 +112,16 @@ const data = {
       isActive: false,
       items: [
         {
-          title: "Users",
-          url: "/settings/users",
-        },
-        {
-          title: "Teams",
-          url: "/settings/teams",
-        },
-        {
-          title: "Permissions",
-          url: "/settings/permissions",
-        },
-        {
           title: "Security",
           url: "/settings/security",
         },
         {
-          title: "Billing",
-          url: "/settings/billing",
+          title: "Organization",
+          url: "/settings/organization/users",
+        },
+        {
+          title: "Email Setup",
+          url: "/settings/email-setup",
         },
       ],
     },
@@ -158,6 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavSettings items={data.navSettings} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

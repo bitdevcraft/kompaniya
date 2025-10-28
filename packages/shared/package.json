@@ -25,6 +25,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "import": "./dist/utils.js",
+      "default": "./dist/utils.js"
+    },
     "./package.json": "./package.json"
   }
 }

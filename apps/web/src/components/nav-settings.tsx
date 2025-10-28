@@ -17,7 +17,7 @@ import {
 } from "@repo/shared-ui/components/common/sidebar";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 
-export function NavMain({
+export function NavSettings({
   items,
 }: {
   items: {
@@ -33,7 +33,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Setup</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible

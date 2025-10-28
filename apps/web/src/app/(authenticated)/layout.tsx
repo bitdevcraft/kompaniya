@@ -1,11 +1,3 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@repo/shared-ui/components/common/breadcrumb";
 import { Separator } from "@repo/shared-ui/components/common/separator";
 import {
   SidebarInset,
@@ -16,6 +8,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { HeaderBreadcrumb } from "@/components/header-breadcrumb";
 import { ThemeModeToggle } from "@/components/theme/theme-mode-toggle";
 import { getUser } from "@/server/get-session";
 
@@ -45,19 +38,7 @@ export default async function AuthenticatedLayout({
                 className="mr-2 data-[orientation=vertical]:h-4"
                 orientation="vertical"
               />
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
-                      Building Your Application
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+              <HeaderBreadcrumb />
             </div>
             <div className="px-4">
               <ThemeModeToggle />

@@ -1,8 +1,8 @@
 # docker-compose.yml
 services:
   postgres:
-    image: postgres:latest
-    container_name: kompaniya-postgres
+    image: postgres:17
+    container_name: "${APP_NAME:-kompaniya}-postgres"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -24,8 +24,8 @@ services:
     restart: unless-stopped
 
   redis:
-    image: redis:latest
-    container_name: kompaniya-redis
+    image: redis:8
+    container_name: "${APP_NAME:-kompaniya}-redis"
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "${REDIS_PORT:-6379}:6379"
