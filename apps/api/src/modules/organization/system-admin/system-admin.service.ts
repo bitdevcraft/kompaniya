@@ -21,4 +21,11 @@ export class SystemAdminService {
   async getUserById(userId: string) {
     return this.userRepositoryService.getUser(userId);
   }
+
+  async getUserMembership(userId: string, organizationId: string) {
+    return this.organizationRepositoryService.getUserMembership(
+      userId,
+      organizationId,
+    );
+  }
 }

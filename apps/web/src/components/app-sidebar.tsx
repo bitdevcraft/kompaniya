@@ -12,11 +12,12 @@ import {
   Command,
   Frame,
   GalleryVerticalEnd,
+  Home,
   Map,
   PieChart,
+  SendHorizonal,
   Settings2,
-  ShoppingBag,
-  SquareTerminal,
+  Users2,
 } from "lucide-react";
 import * as React from "react";
 
@@ -54,7 +55,7 @@ const data = {
     {
       title: "CRM",
       url: "#",
-      icon: SquareTerminal,
+      icon: Users2,
       isActive: true,
       items: [
         {
@@ -79,26 +80,39 @@ const data = {
         },
       ],
     },
+
     {
-      title: "Marketing",
+      title: "Real Estate",
       url: "#",
-      icon: SquareTerminal,
+      icon: Home,
       isActive: true,
       items: [
         {
-          title: "Emails",
+          title: "Projects",
+          url: "#",
+        },
+        {
+          title: "Properties",
+          url: "#",
+        },
+        {
+          title: "Bookings",
+          url: "#",
+        },
+        {
+          title: "Payment Plans",
           url: "#",
         },
       ],
     },
     {
-      title: "Inventory",
+      title: "Marketing",
       url: "#",
-      icon: ShoppingBag,
-      isActive: false,
+      icon: SendHorizonal,
+      isActive: true,
       items: [
         {
-          title: "Items",
+          title: "Email Campaign",
           url: "#",
         },
       ],
@@ -109,7 +123,7 @@ const data = {
       title: "Settings",
       url: "#",
       icon: Settings2,
-      isActive: false,
+      isActive: true,
       items: [
         {
           title: "Security",
@@ -121,7 +135,7 @@ const data = {
         },
         {
           title: "Email Setup",
-          url: "/settings/email-setup",
+          url: "/settings/email-setup/domains",
         },
       ],
     },

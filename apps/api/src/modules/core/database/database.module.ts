@@ -3,6 +3,7 @@ import { db, queryClient } from '@repo/database';
 import { DRIZZLE_DB, PG_CLIENT } from 'src/constants/provider';
 
 import { OrganizationRepositoryService } from './repository/organization-repository/organization-repository.service';
+import { PaginationRepositoryService } from './repository/pagination-repository/pagination-repository.service';
 import { SessionRepositoryService } from './repository/session-repository/session-repository.service';
 import { UserRepositoryService } from './repository/user-repository/user-repository.service';
 
@@ -14,6 +15,7 @@ import { UserRepositoryService } from './repository/user-repository/user-reposit
     SessionRepositoryService,
     OrganizationRepositoryService,
     UserRepositoryService,
+    PaginationRepositoryService,
   ],
   exports: [
     DRIZZLE_DB,
@@ -21,6 +23,7 @@ import { UserRepositoryService } from './repository/user-repository/user-reposit
     SessionRepositoryService,
     OrganizationRepositoryService,
     UserRepositoryService,
+    PaginationRepositoryService,
   ],
 })
 export class DatabaseModule implements OnApplicationShutdown {

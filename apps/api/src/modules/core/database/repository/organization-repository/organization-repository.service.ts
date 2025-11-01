@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
-import { membersTable, Organization } from '@repo/database/schema';
+import { Member, membersTable, Organization } from '@repo/database/schema';
 import { eq } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
@@ -33,5 +33,15 @@ export class OrganizationRepositoryService {
     }
 
     return data;
+  }
+
+  async getUserMembership(userId: string, organizationId: string) {
+    return await this.cacheService.wrapCache<Member | undefined>({
+      key: Keys.Member.membership(userId, organizationId),
+      fn: async () =>
+        await this.db.query.membersTable.findFirst({
+          where: eq(membersTable.userId, userId),
+        }),
+    });
   }
 }

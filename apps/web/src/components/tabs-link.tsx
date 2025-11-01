@@ -20,10 +20,15 @@ export function TabList({ links }: TabProps) {
   const pathname = usePathname();
 
   return (
-    <Tabs value={pathname}>
-      <TabsList className="gap-4 w-full">
+    <Tabs defaultValue={pathname}>
+      <TabsList className="gap-4 w-full justify-start">
         {links.map((link) => (
-          <TabsTrigger asChild key={link.to} value={link.to}>
+          <TabsTrigger
+            asChild
+            className="max-w-32"
+            key={link.to}
+            value={link.to}
+          >
             <Link href={link.to}>{link.text}</Link>
           </TabsTrigger>
         ))}

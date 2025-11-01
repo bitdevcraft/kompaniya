@@ -20,7 +20,7 @@ export function HeaderBreadcrumb() {
       <Breadcrumb>
         <BreadcrumbList>
           {paths.map((path, i) => (
-            <>
+            <span className="flex items-center gap-2" key={i}>
               <BreadcrumbItem className="hidden md:block">
                 {i === paths.length - 1 ? (
                   <>
@@ -35,7 +35,7 @@ export function HeaderBreadcrumb() {
               {i < paths.length - 1 && i !== 0 && (
                 <BreadcrumbSeparator className="hidden md:block" />
               )}
-            </>
+            </span>
           ))}
         </BreadcrumbList>
       </Breadcrumb>

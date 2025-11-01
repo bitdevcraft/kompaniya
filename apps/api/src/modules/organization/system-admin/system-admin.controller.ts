@@ -95,6 +95,15 @@ export class SystemAdminController {
       throw new UnauthorizedException('Admin Session has no Organization');
     }
 
+    const membership = await this.systemAdminService.getUserMembership(
+      user.id,
+      organization.id,
+    );
+
+    if (membership?.role === 'owner') {
+      return;
+    }
+
     await this.systemAdminService.deactivateUser(id);
   }
 }

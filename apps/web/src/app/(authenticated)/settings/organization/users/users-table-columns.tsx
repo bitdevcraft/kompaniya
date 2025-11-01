@@ -96,13 +96,15 @@ export function useContactColumns(
               <Edit />
               Update
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => onDeactivate(row)}
-              variant="destructive"
-            >
-              <UserRoundX />
-              Remove
-            </DropdownMenuItem>
+            {row.original.role !== "owner" && (
+              <DropdownMenuItem
+                onSelect={() => onDeactivate(row)}
+                variant="destructive"
+              >
+                <UserRoundX />
+                Remove
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),

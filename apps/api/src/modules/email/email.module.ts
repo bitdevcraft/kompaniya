@@ -1,5 +1,5 @@
 import { SES } from '@aws-sdk/client-ses';
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import {
@@ -10,7 +10,9 @@ import {
 import { AWS_SES } from '~/constants/provider';
 
 import { AwsSesIdentityService } from './aws-ses-identity/aws-ses-identity.service';
+import { AwsSesVerificationService } from './aws-ses-verification/aws-ses-verification.service';
 
+@Global()
 @Module({
   imports: [],
   providers: [
@@ -29,6 +31,8 @@ import { AwsSesIdentityService } from './aws-ses-identity/aws-ses-identity.servi
       inject: [ConfigService],
     },
     AwsSesIdentityService,
+    AwsSesVerificationService,
   ],
+  exports: [AwsSesVerificationService],
 })
 export class EmailModule {}

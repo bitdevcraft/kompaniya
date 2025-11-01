@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { invitationsTable } from "./invitations";
@@ -17,6 +17,7 @@ export const organizationsTable = pgTable("organizations", {
     enum: ["1-10", "11-50", "51-200", "201-500", "500+"],
   }),
   industry: text("industry"),
+  active: boolean("active").default(true),
 });
 
 export const organizationRelations = relations(

@@ -1,6 +1,6 @@
 import { NavigationTabs } from "./_components/navigation-tabs";
 
-export default async function OrganizationSettingLayout({
+export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
@@ -8,7 +8,7 @@ export default async function OrganizationSettingLayout({
   return (
     <div className="grid gap-8">
       <NavigationTabs />
-      {children}
+      <div className="p-2 border rounded-xl bg-muted/20">{children}</div>
     </div>
   );
 }

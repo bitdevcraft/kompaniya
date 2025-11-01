@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CoreModule } from './modules/core/core.module';
 import { EmailModule } from './modules/email/email.module';
 import { OrganizationModule } from './modules/organization/organization.module';
+import { TaskScheduleModule } from './modules/task-schedule/task-schedule.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -26,6 +27,7 @@ import { UserModule } from './modules/user/user.module';
     OrganizationModule,
     EmailModule,
     CoreModule,
+    TaskScheduleModule,
   ],
   controllers: [],
   providers: [],

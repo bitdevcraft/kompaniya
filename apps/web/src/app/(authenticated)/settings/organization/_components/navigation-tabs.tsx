@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-import { TabList } from "./tabs";
+import { TabList } from "@/components/tabs-link";
 
 export function NavigationTabs() {
   const pathname = usePathname();

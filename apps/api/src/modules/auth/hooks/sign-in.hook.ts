@@ -45,7 +45,7 @@ export class SignInHook {
       });
     }
 
-    const orgExist = await this.hasExistingOrganization(ctx, session.user.id);
+    const orgExist = await this.hasExistingOrganization(session.user.id);
 
     if (orgExist) return;
 
@@ -85,19 +85,11 @@ export class SignInHook {
     }
   }
 
-  private async hasExistingOrganization(ctx: AuthHookContext, userId: string) {
+  private async hasExistingOrganization(userId: string) {
     const activeOrg =
       await this.organizationRepositoryService.getActiveOrganization(userId);
 
     if (activeOrg) {
-      await this.authService.api.setActiveOrganization({
-        body: {
-          organizationId: activeOrg.id,
-          organizationSlug: activeOrg.slug,
-        },
-        headers: ctx.headers,
-      });
-
       return true;
     }
 

@@ -36,6 +36,7 @@
     "better-auth": "catalog:",
     "cache-manager": "^7.2.4",
     "cacheable": "^2.1.1",
+    "date-fns": "^4.1.0",
     "drizzle-orm": "catalog:",
     "joi": "^18.0.1",
     "keyv": "^5.5.3",

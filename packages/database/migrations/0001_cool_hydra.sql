@@ -1,0 +1,1 @@
+ALTER TABLE "org_email_domains" ADD COLUMN "name" varchar(255);

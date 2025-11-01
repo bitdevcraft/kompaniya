@@ -6,6 +6,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     utils: "src/utils/index.ts",
+    config: "src/config/index.ts",
   },
   format: ["cjs", "esm"],
   sourcemap: true,

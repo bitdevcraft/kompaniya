@@ -1,10 +1,16 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query, UsePipes } from '@nestjs/common';
 import {
   AllowAnonymous,
   OptionalAuth,
   Session,
   type UserSession,
 } from '@thallesp/nestjs-better-auth';
+
+import {
+  paginationQueryParserSchema,
+  type PaginationQueryParserType,
+} from '~/lib/pagination/pagination-query-parser';
+import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 @Controller('api/users')
 export class UserController {
@@ -23,5 +29,13 @@ export class UserController {
   @AllowAnonymous() // Allow anonymous access
   getPublic() {
     return { message: 'Public route' };
+  }
+
+  @Get('pagination')
+  @AllowAnonymous() // Allow anonymous access
+  @UsePipes(new ZodValidationPipe(paginationQueryParserSchema))
+  getTest(@Query() queryParams: PaginationQueryParserType) {
+    console.log(queryParams);
+    return { message: 'test' };
   }
 }
