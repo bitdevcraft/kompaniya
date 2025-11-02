@@ -74,8 +74,8 @@ export class FileUploadService implements OnModuleInit {
       void this.server.handle(req, res);
     };
 
-    app.all(this.uploadEndpoint, handler);
-    app.all(`${this.uploadEndpoint}/*`, handler);
+    const routes = [this.uploadEndpoint, `${this.uploadEndpoint}/:fileId`];
+    routes.forEach((route) => app.all(route, handler));
 
     this.logger.log(`Tus upload endpoint registered at ${this.uploadEndpoint}`);
   }
