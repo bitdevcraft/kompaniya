@@ -7,6 +7,7 @@ import { envValidation } from './config/validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { CoreModule } from './modules/core/core.module';
 import { EmailModule } from './modules/email/email.module';
+import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { TaskScheduleModule } from './modules/task-schedule/task-schedule.module';
 import { UserModule } from './modules/user/user.module';
@@ -28,6 +29,7 @@ import { UserModule } from './modules/user/user.module';
     EmailModule,
     CoreModule,
     TaskScheduleModule,
+    FileUploadModule,
   ],
   controllers: [],
   providers: [],
