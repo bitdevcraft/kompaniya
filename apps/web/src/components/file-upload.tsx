@@ -109,6 +109,7 @@ export function FileUpload<Meta extends Record<string, string>>({
       height={height}
       note={note}
       proudlyDisplayPoweredByUppy={proudlyDisplayPoweredByUppy}
+      theme={"auto"}
       uppy={uppy}
       width={width}
     />

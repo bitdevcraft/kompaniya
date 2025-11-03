@@ -47,6 +47,23 @@ export class FileUploadService implements OnModuleInit {
     return this.uploadEndpoint;
   }
 
+  getUploadFilePath(uploadId: string) {
+    return join(this.storagePath, uploadId);
+  }
+
+  async getUploadMetadata(uploadId: string) {
+    if (!(this.server.datastore instanceof FileStore)) {
+      throw new Error('Unsupported datastore for metadata retrieval');
+    }
+
+    const upload = await this.server.datastore.getUpload(uploadId);
+    const metadata = upload.metadata ?? {};
+
+    return Object.fromEntries(
+      Object.entries(metadata).map(([key, value]) => [key, value ?? '']),
+    );
+  }
+
   handleTus(req: IncomingMessage, res: ServerResponse) {
     return this.server.handle(req, res);
   }

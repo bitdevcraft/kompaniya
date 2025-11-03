@@ -1,9 +1,9 @@
-import { FileUpload } from "@/components/file-upload";
+import CsvImporter from "./importer";
 
 export default async function Page() {
   return (
     <>
-      <FileUpload />
+      <CsvImporter />
     </>
   );
 }

@@ -6,6 +6,7 @@ import environment from './config/environment';
 import { envValidation } from './config/validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { CoreModule } from './modules/core/core.module';
+import { CsvImportModule } from './modules/csv-import/csv-import.module';
 import { EmailModule } from './modules/email/email.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { OrganizationModule } from './modules/organization/organization.module';
@@ -30,6 +31,7 @@ import { UserModule } from './modules/user/user.module';
     CoreModule,
     TaskScheduleModule,
     FileUploadModule,
+    CsvImportModule,
   ],
   controllers: [],
   providers: [],
