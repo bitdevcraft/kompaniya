@@ -8,12 +8,12 @@ import {
 import { OrganizationRepositoryService } from '~/modules/core/database/repository/organization-repository/organization-repository.service';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
-import { DomainService } from './domain.service';
+import { AccountService } from './account.service';
 
-@Controller('api/organization/domain')
-export class DomainController {
+@Controller('api/organization/account')
+export class AccountController {
   constructor(
-    private readonly domainService: DomainService,
+    private readonly accountService: AccountService,
     private readonly organizationRepositoryService: OrganizationRepositoryService,
   ) {}
 
@@ -32,7 +32,7 @@ export class DomainController {
       throw new BadRequestException('Admin Session has no Organization');
     }
 
-    return await this.domainService.getDataTable(
+    return await this.accountService.getDataTable(
       session.user.id,
       organization.id,
       query,

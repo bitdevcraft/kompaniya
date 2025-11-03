@@ -1,15 +1,16 @@
 import type { Db } from '@repo/database';
-import type { AnyPgTable } from 'drizzle-orm/pg-core';
+import type { AnyPgColumn, AnyPgTable } from 'drizzle-orm/pg-core';
 
 import {
   BadRequestException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Inject } from '@nestjs/common';
 import { orgLeadsTable } from '@repo/database/schema';
 import { parse } from 'csv-parse';
+import { and, eq } from 'drizzle-orm';
 import { constants as fsConstants } from 'node:fs';
 import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
@@ -32,12 +33,11 @@ type CsvImportColumn = {
 };
 
 type CsvImportColumnType = 'string' | 'number' | 'date' | 'string[]';
-
 type CsvImportTableConfig = {
   id: string;
   label: string;
   description?: string;
-  table: AnyPgTable;
+  table: SupportedTable;
   columns: CsvImportColumn[];
 };
 
@@ -48,15 +48,27 @@ type CsvPreview = {
   rows: string[][];
 };
 
+type MappedRow = { id?: string; values: Record<string, unknown> };
+
+type SupportedTable = AnyPgTable & {
+  organizationId: AnyPgColumn;
+  id: AnyPgColumn;
+};
+
 const ORG_LEADS_COLUMNS: CsvImportColumn[] = [
+  {
+    key: 'id',
+    label: 'ID',
+    type: 'string',
+    description:
+      'Provide an existing ID to update a record. Leave empty to create a new record.',
+  },
   { key: 'firstName', label: 'First Name', type: 'string' },
   { key: 'lastName', label: 'Last Name', type: 'string' },
   { key: 'salutation', label: 'Salutation', type: 'string' },
   { key: 'name', label: 'Full Name', type: 'string' },
   { key: 'phone', label: 'Phone', type: 'string' },
-  { key: 'phoneE164', label: 'Phone (E164)', type: 'string' },
   { key: 'email', label: 'Email', type: 'string' },
-  { key: 'emailNormalized', label: 'Email Normalized', type: 'string' },
   { key: 'nationality', label: 'Nationality', type: 'string' },
   {
     key: 'tags',
@@ -69,25 +81,6 @@ const ORG_LEADS_COLUMNS: CsvImportColumn[] = [
     label: 'Categories',
     type: 'string[]',
     description: 'Comma separated values will be stored as categories array.',
-  },
-  { key: 'notes', label: 'Notes', type: 'string' },
-  {
-    key: 'lastActivityAt',
-    label: 'Last Activity At',
-    type: 'date',
-    description: 'ISO date format is recommended.',
-  },
-  {
-    key: 'nextActivityAt',
-    label: 'Next Activity At',
-    type: 'date',
-    description: 'ISO date format is recommended.',
-  },
-  {
-    key: 'score',
-    label: 'Score',
-    type: 'number',
-    description: 'Numeric score. Non numeric values will be stored as null.',
   },
 ];
 
@@ -276,7 +269,7 @@ export class CsvImportService {
   }
 
   private async insertBatch(
-    table: AnyPgTable,
+    table: SupportedTable,
     rows: Record<string, unknown>[],
   ) {
     if (rows.length === 0) {
@@ -285,16 +278,17 @@ export class CsvImportService {
 
     await this.db.insert(table).values(rows as never);
   }
-
   private mapRow(
     row: string[],
     headerIndex: Map<string, number>,
     columns: CsvImportColumn[],
     mapping: ColumnMapping,
     organizationId: string,
-  ) {
-    const output: Record<string, unknown> = { organizationId };
+  ): MappedRow | null {
+    const values: Record<string, unknown> = { organizationId };
     let hasValues = false;
+
+    let id: string | undefined;
 
     for (const column of columns) {
       const headerName = mapping[column.key];
@@ -310,8 +304,15 @@ export class CsvImportService {
       const rawValue = row[index] ?? '';
       const converted = this.convertValue(rawValue, column.type);
 
+      if (column.key === 'id') {
+        if (typeof converted === 'string' && converted.trim().length > 0) {
+          id = converted.trim();
+        }
+        continue;
+      }
+
       if (converted !== undefined) {
-        output[column.key] = converted;
+        values[column.key] = converted;
         hasValues = true;
       }
     }
@@ -320,7 +321,7 @@ export class CsvImportService {
       return null;
     }
 
-    return output;
+    return { id, values };
   }
 
   private prepareRow(record: string[]) {
@@ -360,8 +361,11 @@ export class CsvImportService {
 
     let headers: string[] | null = null;
     let headerIndex = new Map<string, number>();
-    let batch: Record<string, unknown>[] = [];
+    let insertBatchRows: Record<string, unknown>[] = [];
+    let updateBatchRows: { id: string; values: Record<string, unknown> }[] = [];
     let processedRows = 0;
+    let insertedRows = 0;
+    let updatedRows = 0;
     const startTime = Date.now();
 
     try {
@@ -385,22 +389,36 @@ export class CsvImportService {
           continue;
         }
 
-        batch.push(mapped);
+        if (mapped.id) {
+          updateBatchRows.push({ id: mapped.id, values: mapped.values });
+          updatedRows += 1;
+        } else {
+          insertBatchRows.push(mapped.values);
+          insertedRows += 1;
+        }
         processedRows += 1;
 
-        if (batch.length >= this.batchSize) {
-          await this.insertBatch(table.table, batch);
-          batch = [];
+        if (insertBatchRows.length >= this.batchSize) {
+          await this.insertBatch(table.table, insertBatchRows);
+          insertBatchRows = [];
+        }
+        if (updateBatchRows.length >= this.batchSize) {
+          await this.updateBatch(table.table, updateBatchRows);
+          updateBatchRows = [];
         }
       }
 
-      if (batch.length > 0) {
-        await this.insertBatch(table.table, batch);
+      if (insertBatchRows.length > 0) {
+        await this.insertBatch(table.table, insertBatchRows);
+      }
+
+      if (updateBatchRows.length > 0) {
+        await this.updateBatch(table.table, updateBatchRows);
       }
 
       const duration = Date.now() - startTime;
       this.logger.log(
-        `Imported ${processedRows} rows into ${table.id} from file ${fileId} in ${duration}ms`,
+        `Imported ${processedRows} rows into ${table.id} from file ${fileId} in ${duration}ms (${insertedRows} inserts, ${updatedRows} updates attempted)`,
       );
     } catch (error) {
       this.logger.error(
@@ -467,5 +485,34 @@ export class CsvImportService {
       normalized[column.key] = value ?? null;
     }
     return normalized;
+  }
+
+  private async updateBatch(
+    table: SupportedTable,
+    rows: { id: string; values: Record<string, unknown> }[],
+  ) {
+    if (rows.length === 0) {
+      return;
+    }
+
+    await this.db.transaction(async (tx) => {
+      for (const { id, values } of rows) {
+        const { organizationId, ...setValues } = values;
+
+        if (
+          typeof organizationId !== 'string' ||
+          Object.keys(setValues).length === 0
+        ) {
+          continue;
+        }
+
+        await tx
+          .update(table)
+          .set(setValues as never)
+          .where(
+            and(eq(table.id, id), eq(table.organizationId, organizationId)),
+          );
+      }
+    });
   }
 }

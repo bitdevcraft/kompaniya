@@ -8,12 +8,12 @@ import {
 import { OrganizationRepositoryService } from '~/modules/core/database/repository/organization-repository/organization-repository.service';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
-import { DomainService } from './domain.service';
+import { EmailCampaignService } from './email-campaign.service';
 
-@Controller('api/organization/domain')
-export class DomainController {
+@Controller('api/organization/email-campaign')
+export class EmailCampaignController {
   constructor(
-    private readonly domainService: DomainService,
+    private readonly emailCampaignService: EmailCampaignService,
     private readonly organizationRepositoryService: OrganizationRepositoryService,
   ) {}
 
@@ -32,7 +32,7 @@ export class DomainController {
       throw new BadRequestException('Admin Session has no Organization');
     }
 
-    return await this.domainService.getDataTable(
+    return await this.emailCampaignService.getDataTable(
       session.user.id,
       organization.id,
       query,
