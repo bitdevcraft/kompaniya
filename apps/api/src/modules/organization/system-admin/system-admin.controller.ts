@@ -59,8 +59,6 @@ export class SystemAdminController {
       headers,
     });
 
-    console.log('Before Add Member');
-
     await this.authService.api.addMember({
       body: {
         userId: newUser.user.id,
@@ -69,7 +67,6 @@ export class SystemAdminController {
       },
       headers,
     });
-    console.log('After Add Member');
 
     return { userId: newUser.user.id };
   }

@@ -21,7 +21,7 @@ export class AccountService {
   ) {
     return await this.paginationRepositoryService.getPaginatedDataTable({
       table: orgAccountsTable,
-      cacheKey: `${Keys.Domain.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
+      cacheKey: `${Keys.Account.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
       query,
       organizationId,
     });

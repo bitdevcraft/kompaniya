@@ -60,23 +60,23 @@ const data = {
       items: [
         {
           title: "Leads",
-          url: "#",
+          url: "/crm/leads",
         },
         {
           title: "Accounts",
-          url: "#",
+          url: "/crm/accounts",
         },
         {
           title: "Contacts",
-          url: "#",
+          url: "/crm/contacts",
         },
         {
           title: "Opportunities",
-          url: "#",
+          url: "/crm/opportunities",
         },
         {
           title: "Activities",
-          url: "#",
+          url: "/crm/activities",
         },
       ],
     },
@@ -89,19 +89,19 @@ const data = {
       items: [
         {
           title: "Projects",
-          url: "#",
+          url: "/real-estate/projects",
         },
         {
           title: "Properties",
-          url: "#",
+          url: "/real-estate/properties",
         },
         {
           title: "Bookings",
-          url: "#",
+          url: "/real-estate/bookings",
         },
         {
           title: "Payment Plans",
-          url: "#",
+          url: "/real-estate/payment-plans",
         },
       ],
     },
@@ -113,7 +113,7 @@ const data = {
       items: [
         {
           title: "Email Campaign",
-          url: "#",
+          url: "/marketing/email-campaigns",
         },
       ],
     },

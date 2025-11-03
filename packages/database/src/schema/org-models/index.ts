@@ -11,4 +11,8 @@ export * from "./org-emails";
 export * from "./org-events";
 export * from "./org-leads";
 export * from "./org-opportunities";
+export * from "./org-real-estate-bookings";
+export * from "./org-real-estate-payment-plans";
+export * from "./org-real-estate-projects";
+export * from "./org-real-estate-properties";
 export * from "./org-tasks";

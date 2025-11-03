@@ -103,5 +103,58 @@
         }
       }
     }
+  },
+
+  "crm": {
+    "account": {
+      "form": {
+        "new": {
+          "title": "Create New Account",
+          "submit": "Submit"
+        }
+      }
+    },
+    "activity": {
+      "form": {
+        "new": {
+          "title": "Create New Activity",
+          "submit": "Submit"
+        }
+      }
+    },
+    "contact": {
+      "form": {
+        "new": {
+          "title": "Create New Contact",
+          "submit": "Submit"
+        }
+      }
+    },
+    "lead": {
+      "form": {
+        "new": {
+          "title": "Create New Lead",
+          "submit": "Submit"
+        }
+      }
+    },
+    "opportunity": {
+      "form": {
+        "new": {
+          "title": "Create New Opportunity",
+          "submit": "Submit"
+        }
+      }
+    }
+  },
+  "real-estate": {
+    "project": {
+      "form": {
+        "new": {
+          "title": "Create New Project",
+          "submit": "Submit"
+        }
+      }
+    }
   }
 }

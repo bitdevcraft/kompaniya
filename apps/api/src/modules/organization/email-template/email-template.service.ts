@@ -21,7 +21,7 @@ export class EmailTemplateService {
   ) {
     return await this.paginationRepositoryService.getPaginatedDataTable({
       table: orgEmailTemplatesTable,
-      cacheKey: `${Keys.Domain.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
+      cacheKey: `${Keys.EmailTemplate.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
       query,
       organizationId,
     });

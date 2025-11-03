@@ -552,7 +552,6 @@ export function getColumn<T extends Table>(
   table: T,
   columnKey: keyof T,
 ): AnyColumn {
-  console.log(table);
   return table[columnKey] as AnyColumn;
 }
 

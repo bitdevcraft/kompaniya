@@ -21,7 +21,7 @@ export class EmailCampaignService {
   ) {
     return await this.paginationRepositoryService.getPaginatedDataTable({
       table: orgEmailCampaignsTable,
-      cacheKey: `${Keys.Domain.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
+      cacheKey: `${Keys.EmailCampaign.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
       query,
       organizationId,
     });
