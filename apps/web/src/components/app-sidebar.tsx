@@ -13,9 +13,9 @@ import {
   Frame,
   GalleryVerticalEnd,
   Home,
+  Mail,
   Map,
   PieChart,
-  SendHorizonal,
   Settings2,
   Users2,
 } from "lucide-react";
@@ -106,13 +106,21 @@ const data = {
       ],
     },
     {
-      title: "Marketing",
+      title: "Email Marketing",
       url: "#",
-      icon: SendHorizonal,
+      icon: Mail,
       isActive: true,
       items: [
         {
-          title: "Email Campaign",
+          title: "Campaign",
+          url: "/marketing/email-campaigns",
+        },
+        {
+          title: "Template",
+          url: "/marketing/email-campaigns",
+        },
+        {
+          title: "Test Receivers",
           url: "/marketing/email-campaigns",
         },
       ],

@@ -6,6 +6,7 @@ import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
+  DataTableSortList,
 } from "@repo/shared-ui/components/data-table/index";
 import { useDataTable } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table";
 import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
@@ -80,6 +81,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
             <ButtonGroup>
               <NewButton />
             </ButtonGroup>
+            <DataTableSortList align="start" table={table} />
             <DataTableFilterList
               align="end"
               debounceMs={debounceMs}
