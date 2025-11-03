@@ -1,4 +1,4 @@
-import { OrgEmailDomain } from "@repo/database/schema";
+import { OrgRealEstateProperties } from "@repo/database/schema";
 import { Button } from "@repo/shared-ui/components/common/button";
 import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
 import {
@@ -19,14 +19,14 @@ import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 
 export function useDataTableColumns(
   setRowAction: React.Dispatch<
-    React.SetStateAction<DataTableRowAction<OrgEmailDomain> | null>
+    React.SetStateAction<DataTableRowAction<OrgRealEstateProperties> | null>
   >,
 ) {
   const onDelete = makeRowAction(setRowAction, "delete");
   const onUpdate = makeRowAction(setRowAction, "update");
   const onView = makeRowAction(setRowAction, "view");
 
-  const columns: ColumnDef<OrgEmailDomain>[] = [
+  const columns: ColumnDef<OrgRealEstateProperties>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -71,33 +71,7 @@ export function useDataTableColumns(
       },
       enableColumnFilter: true,
     },
-    {
-      id: "email",
-      accessorKey: "email",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Email" />
-      ),
-      meta: defineMeta({
-        label: "Email",
-        variant: "text",
-      }),
-      cell: ({ row }) => row.original.email,
-      enableColumnFilter: true,
-    },
 
-    {
-      id: "verified",
-      accessorKey: "verified",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Verified" />
-      ),
-      meta: defineMeta({
-        label: "Verified",
-        variant: "boolean",
-      }),
-      cell: ({ row }) => row.original.verified,
-      enableColumnFilter: true,
-    },
     {
       id: "actions",
       meta: defineMeta({
@@ -135,5 +109,5 @@ export function useDataTableColumns(
   ];
 
   // nothing added/removed/modified—just pass through
-  return getTableColumns<OrgEmailDomain>({ setRowAction, columns });
+  return getTableColumns<OrgRealEstateProperties>({ setRowAction, columns });
 }

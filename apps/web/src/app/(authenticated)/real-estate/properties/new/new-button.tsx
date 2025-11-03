@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import React from "react";
 
 export function NewButton() {
-  const t = useTranslations("settings.domain");
+  const t = useTranslations("realEstate.property");
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 

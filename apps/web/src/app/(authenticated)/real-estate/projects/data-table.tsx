@@ -1,6 +1,6 @@
 "use client";
 
-import { OrgEmailDomain } from "@repo/database/schema";
+import { OrgRealEstateProject } from "@repo/database/schema";
 import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
 import {
   DataTable,
@@ -33,7 +33,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
 
   const { data } = useQuery({
     queryKey: [
-      `domains-${activeOrganization?.id}`,
+      `real-estate-projects-${activeOrganization?.id}`,
       props.search.page,
       props.search.perPage,
       JSON.stringify(props.search.filters),
@@ -42,10 +42,10 @@ export function OrgDataTable(props: OrgDataTableProps) {
     ],
     queryFn: async () => {
       const response = await axios.get<{
-        data: OrgEmailDomain[];
+        data: OrgRealEstateProject[];
         pageCount: number;
       }>(
-        `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/paginated${qs ? "?" : ""}${qs}`,
+        `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/real-estate-project/paginated${qs ? "?" : ""}${qs}`,
         {
           withCredentials: true,
         },
@@ -55,7 +55,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
   });
 
   const [_rowAction, setRowAction] =
-    React.useState<DataTableRowAction<OrgEmailDomain> | null>(null);
+    React.useState<DataTableRowAction<OrgRealEstateProject> | null>(null);
 
   const columns = useDataTableColumns(setRowAction);
 

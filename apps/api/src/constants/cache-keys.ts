@@ -67,4 +67,24 @@ export const Keys = {
       return `opportunity:paginated:${userId}:${organizationId}`;
     },
   },
+  RealEstateProject: {
+    paginated(userId: string, organizationId: string) {
+      return `real-estate-project:paginated:${userId}:${organizationId}`;
+    },
+  },
+  RealEstateProperty: {
+    paginated(userId: string, organizationId: string) {
+      return `real-estate-property:paginated:${userId}:${organizationId}`;
+    },
+  },
+  RealEstateBooking: {
+    paginated(userId: string, organizationId: string) {
+      return `real-estate-booking:paginated:${userId}:${organizationId}`;
+    },
+  },
+  RealEstatePaymentPlan: {
+    paginated(userId: string, organizationId: string) {
+      return `real-estate-payment-plan:paginated:${userId}:${organizationId}`;
+    },
+  },
 };
