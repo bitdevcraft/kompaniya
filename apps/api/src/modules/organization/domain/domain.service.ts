@@ -5,14 +5,12 @@ import { orgEmailDomainsTable } from '@repo/database/schema';
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
 import { PaginationQueryParserType } from '~/lib/pagination/pagination-query-parser';
-import { CacheService } from '~/modules/core/cache/cache.service';
 import { PaginationRepositoryService } from '~/modules/core/database/repository/pagination-repository/pagination-repository.service';
 
 @Injectable()
 export class DomainService {
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: Db,
-    private readonly cacheService: CacheService,
     private readonly paginationRepositoryService: PaginationRepositoryService,
   ) {}
 

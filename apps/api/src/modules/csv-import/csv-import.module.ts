@@ -1,7 +1,7 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 
-import { FileUploadModule } from '../file-upload/file-upload.module';
+import { FileUploadModule } from '../core/file-upload/file-upload.module';
 import { CsvImportController } from './csv-import.controller';
 import { CsvImportProcessor } from './csv-import.processor';
 import {

@@ -16,7 +16,7 @@ import { access } from 'node:fs/promises';
 
 import { DRIZZLE_DB } from '~/constants/provider';
 
-import { FileUploadService } from '../file-upload/file-upload.service';
+import { FileUploadService } from '../core/file-upload/file-upload.service';
 import {
   type CsvImportJobData,
   CsvImportQueueService,

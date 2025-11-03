@@ -138,7 +138,7 @@ const data = {
           url: "/settings/email-setup/domains",
         },
         {
-          title: "Import Date",
+          title: "Import Data",
           url: "/settings/data-importer",
         },
       ],

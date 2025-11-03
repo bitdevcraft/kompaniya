@@ -15,7 +15,7 @@ import {
   makeRowAction,
 } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit, Ellipsis, Text, UserRoundX } from "lucide-react";
+import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 
 export function useDataTableColumns(
   setRowAction: React.Dispatch<
@@ -125,7 +125,7 @@ export function useDataTableColumns(
               onSelect={() => onDelete(row)}
               variant="destructive"
             >
-              <UserRoundX />
+              <Trash2 />
               Remove
             </DropdownMenuItem>
           </DropdownMenuContent>

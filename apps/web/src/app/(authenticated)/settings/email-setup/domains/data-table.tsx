@@ -1,7 +1,6 @@
 "use client";
 
 import { OrgEmailDomain } from "@repo/database/schema";
-import { Button } from "@repo/shared-ui/components/common/button";
 import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
 import {
   DataTable,
@@ -20,6 +19,7 @@ import { authClient } from "@/lib/auth/client";
 import { SearchParamsSchema } from "@/types/validations";
 
 import { useDataTableColumns } from "./data-table-columns";
+import { NewButton } from "./new/new-button";
 
 interface OrgDataTableProps {
   search: SearchParamsSchema;
@@ -75,12 +75,10 @@ export function OrgDataTable(props: OrgDataTableProps) {
     <>
       <DataTable pageSizeOptions={[10, 20, 50, 100, 200]} table={table}>
         <div className="flex items-center">
-          <div className="text-xl py-2">Title</div>
+          <div className="text-xl  pl-4"></div>
           <DataTableAdvancedToolbar hideViewColumns table={table}>
             <ButtonGroup>
-              <Button size={"sm"} variant={"outline"}>
-                New
-              </Button>
+              <NewButton />
             </ButtonGroup>
             <DataTableFilterList
               align="end"

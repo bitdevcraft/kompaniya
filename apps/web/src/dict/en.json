@@ -94,6 +94,14 @@
           "description": "Select one or more"
         }
       }
+    },
+    "domain": {
+      "form": {
+        "new": {
+          "title": "Register Domain",
+          "submit": "Register"
+        }
+      }
     }
   }
 }

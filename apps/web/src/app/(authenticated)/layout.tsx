@@ -31,7 +31,7 @@ export default async function AuthenticatedLayout({
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 justify-between">
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 justify-between z-999 relative">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
@@ -44,7 +44,20 @@ export default async function AuthenticatedLayout({
               <ThemeModeToggle />
             </div>
           </header>
-          <div className="px-6">{children}</div>
+          <div className="px-6">
+            <div className="flex flex-1 flex-col relative">
+              <div className="@container/main flex flex-1 flex-col gap-2">
+                <div>
+                  <div className="pointer-events-none fixed inset-0">
+                    <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background" />
+                    <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-blue-500/10 blur-[100px]" />
+                    <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-purple-500/10 blur-[100px]" />
+                  </div>
+                </div>
+                <div className="relative z-10">{children}</div>
+              </div>
+            </div>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </div>
