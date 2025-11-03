@@ -1,54 +1,37 @@
-import { Injectable, Logger } from '@nestjs/common';
+import type { JobsOptions, Queue } from 'bullmq';
 
-type CsvImportJob = {
+import { InjectQueue } from '@nestjs/bullmq';
+import { Injectable } from '@nestjs/common';
+
+import type { ColumnMapping } from './csv-import.service';
+
+export const CSV_IMPORT_QUEUE_NAME = 'csv-import';
+
+export type CsvImportJobData = {
+  fileId: string;
+  tableId: string;
+  organizationId: string;
+  mapping: ColumnMapping;
+};
+
+type CsvImportQueueJob = {
   name: string;
-  handler: () => Promise<void>;
+  data: CsvImportJobData;
+  options?: JobsOptions;
 };
 
 @Injectable()
 export class CsvImportQueueService {
-  private readonly logger = new Logger(CsvImportQueueService.name);
-  private processing = false;
-  private readonly queue: CsvImportJob[] = [];
+  constructor(
+    @InjectQueue(CSV_IMPORT_QUEUE_NAME)
+    private readonly queue: Queue<CsvImportJobData>,
+  ) {}
 
-  enqueue(job: CsvImportJob) {
-    this.queue.push(job);
-    void this.processQueue();
-  }
-
-  private async processQueue(): Promise<void> {
-    if (this.processing) {
-      return;
+  async enqueue(job: CsvImportQueueJob): Promise<void> {
+    const options: JobsOptions = { ...job.options };
+    if (!options.jobId) {
+      options.jobId = job.name;
     }
-
-    const job = this.queue.shift();
-    if (!job) {
-      return;
-    }
-
-    this.processing = true;
-    this.logger.log(`Starting CSV import job: ${job.name}`);
-
-    try {
-      await job.handler();
-      this.logger.log(`Completed CSV import job: ${job.name}`);
-    } catch (error) {
-      if (error instanceof Error) {
-        this.logger.error(
-          `CSV import job failed: ${job.name}`,
-          error.stack,
-          error.message,
-        );
-      } else {
-        this.logger.error(
-          `CSV import job failed: ${job.name} - ${JSON.stringify(error)}`,
-        );
-      }
-    } finally {
-      this.processing = false;
-      if (this.queue.length > 0) {
-        void this.processQueue();
-      }
-    }
+    await this.queue.add(job.name, job.data, options);
   }
 }

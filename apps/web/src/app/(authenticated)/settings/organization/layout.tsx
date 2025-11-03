@@ -6,9 +6,9 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-2">
       <NavigationTabs />
-      <div className="p-2 border rounded-xl bg-muted/20">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }

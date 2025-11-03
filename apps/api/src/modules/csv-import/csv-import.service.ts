@@ -17,9 +17,12 @@ import { access } from 'node:fs/promises';
 import { DRIZZLE_DB } from '~/constants/provider';
 
 import { FileUploadService } from '../file-upload/file-upload.service';
-import { CsvImportQueueService } from './csv-import.queue';
+import {
+  type CsvImportJobData,
+  CsvImportQueueService,
+} from './csv-import.queue';
 
-type ColumnMapping = Record<string, string | null>;
+export type ColumnMapping = Record<string, string | null>;
 
 type CsvImportColumn = {
   key: string;
@@ -138,16 +141,13 @@ export class CsvImportService {
       throw new NotFoundException('Uploaded CSV file was not found.');
     }
 
-    this.queue.enqueue({
+    await this.queue.enqueue({
       name: `${tableConfig.id}-${fileId}`,
-      handler: async () => {
-        await this.processCsvImport({
-          fileId,
-          filePath,
-          organizationId,
-          table: tableConfig,
-          mapping: sanitizedMapping,
-        });
+      data: {
+        fileId,
+        tableId: tableConfig.id,
+        organizationId,
+        mapping: sanitizedMapping,
       },
     });
 
@@ -196,6 +196,33 @@ export class CsvImportService {
         columns,
       }),
     );
+  }
+
+  async processImportJob(job: CsvImportJobData): Promise<void> {
+    const tableConfig = CSV_IMPORT_TABLES[job.tableId];
+
+    if (!tableConfig) {
+      this.logger.warn(
+        `Received CSV import job for unknown table: ${job.tableId}`,
+      );
+      throw new NotFoundException('Unknown table selected for CSV import.');
+    }
+
+    const filePath = this.fileUploadService.getUploadFilePath(job.fileId);
+
+    try {
+      await access(filePath, fsConstants.R_OK);
+    } catch {
+      throw new NotFoundException('Uploaded CSV file was not found.');
+    }
+
+    await this.processCsvImport({
+      fileId: job.fileId,
+      filePath,
+      organizationId: job.organizationId,
+      table: tableConfig,
+      mapping: job.mapping,
+    });
   }
 
   private buildUniqueHeaders(headerRow: string[]) {

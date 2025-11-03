@@ -127,7 +127,7 @@ const data = {
       items: [
         {
           title: "Security",
-          url: "/settings/security",
+          url: "/settings/security/password",
         },
         {
           title: "Organization",
@@ -136,6 +136,10 @@ const data = {
         {
           title: "Email Setup",
           url: "/settings/email-setup/domains",
+        },
+        {
+          title: "Import Date",
+          url: "/settings/data-importer",
         },
       ],
     },

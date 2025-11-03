@@ -3,9 +3,10 @@
 import Uppy, { type UploadResult } from "@uppy/core";
 import Dashboard from "@uppy/react/dashboard";
 import Tus from "@uppy/tus";
-import { useEffect, useMemo } from "react";
+import { useTheme } from "next-themes";
 import "@uppy/core/css/style.min.css";
 import "@uppy/dashboard/css/style.min.css";
+import { useEffect, useMemo } from "react";
 
 import { env } from "@/env/client";
 
@@ -40,6 +41,7 @@ export function FileUpload<Meta extends Record<string, string>>({
   width = "100%",
   onComplete,
 }: FileUploadProps<Meta>) {
+  const { theme } = useTheme();
   const allowedFileTypesKey = useMemo(
     () => JSON.stringify(allowedFileTypes ?? null),
     [allowedFileTypes],
@@ -109,7 +111,7 @@ export function FileUpload<Meta extends Record<string, string>>({
       height={height}
       note={note}
       proudlyDisplayPoweredByUppy={proudlyDisplayPoweredByUppy}
-      theme={"auto"}
+      theme={theme === "system" ? "auto" : (theme as "dark" | "light")}
       uppy={uppy}
       width={width}
     />
