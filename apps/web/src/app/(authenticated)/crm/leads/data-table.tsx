@@ -3,20 +3,17 @@
 import { OrgLead } from "@repo/database/schema";
 import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
 import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@repo/shared-ui/components/common/toggle-group";
-import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
   DataTableSortList,
+  DataTableViewToggle,
 } from "@repo/shared-ui/components/data-table/index";
 import { useDataTable } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table";
+import { useDataTableViewMode } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table-view-mode";
 import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { LayoutGrid, List } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
@@ -73,7 +70,9 @@ const useDataLoad = (
 export function OrgDataTable(props: OrgDataTableProps) {
   const activeOrganization = authClient.useActiveOrganization();
 
-  const [viewMode, setViewMode] = React.useState<"table" | "grid">("table");
+  const [viewMode, setViewMode] = useDataTableViewMode({
+    key: `${model.plural}View`,
+  });
 
   const sp = useSearchParams();
   const qs = sp.toString();
@@ -135,24 +134,11 @@ export function OrgDataTable(props: OrgDataTableProps) {
               table={table}
               throttleMs={throttleMs}
             />
-            <ToggleGroup
-              onValueChange={(value) => {
-                if (value === "table" || value === "grid") {
-                  setViewMode(value);
-                }
-              }}
-              size="sm"
-              type="single"
-              value={viewMode}
-              variant="outline"
-            >
-              <ToggleGroupItem aria-label="Table view" value="table">
-                <List className="size-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem aria-label="Grid view" value="grid">
-                <LayoutGrid className="size-4" />
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <DataTableViewToggle
+              onViewModeChange={setViewMode}
+              paramKey={`${model.plural}View`}
+              viewMode={viewMode}
+            />
           </DataTableAdvancedToolbar>
         </div>
       </DataTable>

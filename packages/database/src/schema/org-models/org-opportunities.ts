@@ -1,4 +1,4 @@
-import { pgTable } from "drizzle-orm/pg-core";
+import { pgTable, varchar } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
@@ -8,6 +8,7 @@ export const orgOpportunitiesTable = pgTable("org_opportunities", {
   ...baseIdModel,
   ...baseTimestampModel,
   ...baseOrganizationModel,
+  name: varchar("name", { length: 1024 }),
 });
 
 export type NewOrgOpportunity = typeof orgOpportunitiesTable.$inferInsert;

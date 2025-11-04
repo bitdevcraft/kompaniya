@@ -41,16 +41,8 @@ export function DataTableCard({
         data-state={row.getIsSelected() ? "selected" : undefined}
       >
         <CardHeader className="">
-          <CardTitle className="flex gap-4 mt-2">
-            <Checkbox
-              aria-label="Select row"
-              checked={row.getIsSelected()}
-              className="translate-y-0.5"
-              onCheckedChange={(value) => row.toggleSelected(!!value)}
-            />
-            {row.original.name}
-          </CardTitle>
-          <CardAction className="">
+          <CardTitle className="flex gap-4 mt-2">{row.original.name}</CardTitle>
+          <CardAction className="flex gap-2 items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -82,6 +74,12 @@ export function DataTableCard({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <Checkbox
+              aria-label="Select row"
+              checked={row.getIsSelected()}
+              className="bg-muted size-6"
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+            />
           </CardAction>
         </CardHeader>
         <CardContent>{defaultItem}</CardContent>
