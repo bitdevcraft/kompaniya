@@ -163,8 +163,9 @@ export function DataTableFilterMenu<TData>({
         setSelectedColumn(null);
         setInputValue("");
       }, 100);
+      table.setPageIndex(0);
     },
-    [filters, debouncedSetFilters],
+    [debouncedSetFilters, filters, table],
   );
 
   const onFilterRemove = React.useCallback(
@@ -176,8 +177,9 @@ export function DataTableFilterMenu<TData>({
       requestAnimationFrame(() => {
         triggerRef.current?.focus();
       });
+      table.setPageIndex(0);
     },
-    [filters, debouncedSetFilters],
+    [filters, debouncedSetFilters, table],
   );
 
   const onFilterUpdate = React.useCallback(
@@ -194,8 +196,9 @@ export function DataTableFilterMenu<TData>({
         });
         return updatedFilters;
       });
+      table.setPageIndex(0);
     },
-    [debouncedSetFilters],
+    [debouncedSetFilters, table],
   );
 
   const onFiltersReset = React.useCallback(() => {

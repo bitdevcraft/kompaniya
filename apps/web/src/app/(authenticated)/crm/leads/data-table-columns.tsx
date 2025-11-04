@@ -17,18 +17,21 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 
+import { DataTableActionType } from "@/types/data-table-actions";
+
 export function useDataTableColumns(
   setRowAction: React.Dispatch<
     React.SetStateAction<DataTableRowAction<OrgLead> | null>
   >,
 ) {
-  const onDelete = makeRowAction(setRowAction, "delete");
-  const onUpdate = makeRowAction(setRowAction, "update");
-  const onView = makeRowAction(setRowAction, "view");
+  const onDelete = makeRowAction(setRowAction, DataTableActionType.DELETE);
+  const onUpdate = makeRowAction(setRowAction, DataTableActionType.UPDATE);
+  const onView = makeRowAction(setRowAction, DataTableActionType.VIEW);
 
   const columns: ColumnDef<OrgLead>[] = [
     {
-      id: "select",
+      id: "id",
+      accessorKey: "id",
       header: ({ table }) => (
         <Checkbox
           aria-label="Select all"
@@ -82,6 +85,19 @@ export function useDataTableColumns(
         variant: "text",
       }),
       cell: ({ row }) => row.original.email,
+      enableColumnFilter: true,
+    },
+    {
+      id: "phone",
+      accessorKey: "phone",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Phone" />
+      ),
+      meta: defineMeta({
+        label: "Phone",
+        variant: "text",
+      }),
+      cell: ({ row }) => row.original.phone,
       enableColumnFilter: true,
     },
     {

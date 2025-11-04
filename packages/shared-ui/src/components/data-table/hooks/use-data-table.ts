@@ -163,8 +163,9 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
       } else {
         setSorting(updaterOrValue as ExtendedColumnSort<TData>[]);
       }
+      void setPage(1);
     },
-    [sorting, setSorting],
+    [sorting, setSorting, setPage],
   );
 
   const filterableColumns = React.useMemo(() => {
@@ -230,6 +231,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const onColumnFiltersChange = React.useCallback(
     (updaterOrValue: Updater<ColumnFiltersState>) => {
+      void setPage(1);
       if (enableAdvancedFilter) return;
 
       setColumnFilters((prev) => {
@@ -257,7 +259,12 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
         return next;
       });
     },
-    [debouncedSetFilterValues, filterableColumns, enableAdvancedFilter],
+    [
+      setPage,
+      enableAdvancedFilter,
+      debouncedSetFilterValues,
+      filterableColumns,
+    ],
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library

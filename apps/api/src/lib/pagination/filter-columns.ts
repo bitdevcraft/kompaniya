@@ -45,7 +45,11 @@ export function filterColumns<T extends Table>({
     switch (filter.operator) {
       case 'iLike':
         return filter.variant === 'text' && typeof filter.value === 'string'
-          ? ilike(column, `%${filter.value}%`)
+          ? or(
+              ilike(column, `%${filter.value}%`),
+              ilike(column, `${filter.value}%`),
+              ilike(column, `%${filter.value}`),
+            )
           : undefined;
 
       case 'notILike':

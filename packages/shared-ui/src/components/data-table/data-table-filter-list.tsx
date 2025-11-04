@@ -155,7 +155,8 @@ export function DataTableFilterList<TData>({
         filterId: generateId({ length: 8 }),
       },
     ]);
-  }, [columns, filters, debouncedSetFilters]);
+    table.setPageIndex(0);
+  }, [columns, debouncedSetFilters, filters, table]);
 
   const onFilterUpdate = React.useCallback(
     (
@@ -171,8 +172,9 @@ export function DataTableFilterList<TData>({
         });
         return updatedFilters;
       });
+      table.setPageIndex(0);
     },
-    [debouncedSetFilters],
+    [debouncedSetFilters, table],
   );
 
   const onFilterRemove = React.useCallback(
@@ -184,14 +186,16 @@ export function DataTableFilterList<TData>({
       requestAnimationFrame(() => {
         addButtonRef.current?.focus();
       });
+      table.setPageIndex(0);
     },
-    [filters, setFilters],
+    [filters, setFilters, table],
   );
 
   const onFiltersReset = React.useCallback(() => {
     void setFilters(null);
     void setJoinOperator("and");
-  }, [setFilters, setJoinOperator]);
+    table.setPageIndex(0);
+  }, [setFilters, setJoinOperator, table]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
