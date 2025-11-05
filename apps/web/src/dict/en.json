@@ -193,6 +193,22 @@
           "submit": "Submit"
         }
       }
+    },
+    "emailTestReceiver": {
+      "form": {
+        "new": {
+          "title": "Create New Email Test Receiver",
+          "submit": "Submit"
+        }
+      }
+    },
+    "emailTemplate": {
+      "form": {
+        "new": {
+          "title": "Create New Email Template",
+          "submit": "Submit"
+        }
+      }
     }
   }
 }

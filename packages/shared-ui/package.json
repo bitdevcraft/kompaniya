@@ -33,6 +33,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "catalog:",
+    "@monaco-editor/react": "4.8.0-rc.2",
     "@radix-ui/react-accordion": "catalog:",
     "@radix-ui/react-alert-dialog": "catalog:",
     "@radix-ui/react-aspect-ratio": "catalog:",

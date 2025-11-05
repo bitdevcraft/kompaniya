@@ -13,6 +13,11 @@ export function NavigationTabs() {
       text: "Password",
       active: pathname === "/settings/security/password",
     },
+    {
+      to: "/settings/security/account",
+      text: "Account",
+      active: pathname === "/settings/security/account",
+    },
   ];
 
   return <TabList links={links} />;

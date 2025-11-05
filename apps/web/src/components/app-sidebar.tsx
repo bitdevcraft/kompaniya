@@ -32,7 +32,7 @@ const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "",
   },
   teams: [
     {
@@ -117,11 +117,11 @@ const data = {
         },
         {
           title: "Template",
-          url: "/marketing/email-campaigns",
+          url: "/marketing/email-templates",
         },
         {
           title: "Test Receivers",
-          url: "/marketing/email-campaigns",
+          url: "/marketing/email-test-receivers",
         },
       ],
     },

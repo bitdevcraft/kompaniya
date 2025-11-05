@@ -47,65 +47,182 @@ export const Keys = {
     paginated(userId: string, organizationId: string) {
       return `account:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `account:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `account:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `account:id:${id}-${organizationId}`;
+    },
   },
   Activity: {
     paginated(userId: string, organizationId: string) {
       return `account:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `account:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `account:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `account:id:${id}-${organizationId}`;
+    },
   },
   Category: {
     paginated(userId: string, organizationId: string) {
-      return `account:paginated:${userId}:${organizationId}`;
+      return `category:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `category:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `category:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `category:id:${id}-${organizationId}`;
     },
   },
   Contact: {
     paginated(userId: string, organizationId: string) {
       return `contact:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `category:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `category:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `category:id:${id}-${organizationId}`;
+    },
   },
   EmailCampaign: {
     paginated(userId: string, organizationId: string) {
       return `email-campaign:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `email-campaign:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `email-campaign:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `email-campaign:id:${id}-${organizationId}`;
     },
   },
   EmailTemplate: {
     paginated(userId: string, organizationId: string) {
       return `email-template:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `email-template:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `email-template:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `email-template:id:${id}-${organizationId}`;
+    },
   },
   EmailTestReceiver: {
     paginated(userId: string, organizationId: string) {
       return `email-test-receiver:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `email-test-receiver:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `email-test-receiver:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `email-test-receiver:id:${id}-${organizationId}`;
     },
   },
   Lead: {
     paginated(userId: string, organizationId: string) {
       return `lead:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `lead:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `lead:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `lead:id:${id}-${organizationId}`;
+    },
   },
   Opportunity: {
     paginated(userId: string, organizationId: string) {
       return `opportunity:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `opportunity:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `opportunity:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `opportunity:id:${id}-${organizationId}`;
     },
   },
   RealEstateProject: {
     paginated(userId: string, organizationId: string) {
       return `real-estate-project:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `real-estate-project:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `real-estate-project:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `real-estate-project:id:${id}-${organizationId}`;
+    },
   },
   RealEstateProperty: {
     paginated(userId: string, organizationId: string) {
       return `real-estate-property:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `real-estate-property:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `real-estate-property:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `real-estate-property:id:${id}-${organizationId}`;
     },
   },
   RealEstateBooking: {
     paginated(userId: string, organizationId: string) {
       return `real-estate-booking:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `real-estate-booking:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `real-estate-booking:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `real-estate-booking:id:${id}-${organizationId}`;
+    },
   },
   RealEstatePaymentPlan: {
     paginated(userId: string, organizationId: string) {
       return `real-estate-payment-plan:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `real-estate-payment-plan:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `real-estate-payment-plan:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `real-estate-payment-plan:id:${id}-${organizationId}`;
     },
   },
 };

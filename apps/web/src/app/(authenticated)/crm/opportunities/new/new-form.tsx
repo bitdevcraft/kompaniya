@@ -19,10 +19,9 @@ import { useTranslations } from "next-intl";
 import { SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 
-import { env } from "@/env/client";
 import { authClient } from "@/lib/auth/client";
 
-import { dictTranslation, model } from "../config";
+import { dictTranslation, model, modelEndpoint } from "../config";
 
 interface NewRecordFormProps {
   onFinish?: () => void;
@@ -37,11 +36,9 @@ type FormValue = z.infer<typeof FormSchema>;
 const useSubmit = () => {
   return useMutation({
     mutationFn: async (payload: FormValue) => {
-      const res = await axios.post(
-        `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain`,
-        payload,
-        { withCredentials: true },
-      );
+      const res = await axios.post(`${modelEndpoint}`, payload, {
+        withCredentials: true,
+      });
 
       return res.data;
     },
