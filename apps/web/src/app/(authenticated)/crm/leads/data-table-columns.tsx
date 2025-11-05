@@ -1,4 +1,3 @@
-import { OrgLead } from "@repo/database/schema";
 import { Button } from "@repo/shared-ui/components/common/button";
 import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
 import {
@@ -19,16 +18,18 @@ import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 
 import { DataTableActionType } from "@/types/data-table-actions";
 
+import { tableType } from "./config";
+
 export function useDataTableColumns(
   setRowAction: React.Dispatch<
-    React.SetStateAction<DataTableRowAction<OrgLead> | null>
+    React.SetStateAction<DataTableRowAction<tableType> | null>
   >,
 ) {
   const onDelete = makeRowAction(setRowAction, DataTableActionType.DELETE);
   const onUpdate = makeRowAction(setRowAction, DataTableActionType.UPDATE);
   const onView = makeRowAction(setRowAction, DataTableActionType.VIEW);
 
-  const columns: ColumnDef<OrgLead>[] = [
+  const columns: ColumnDef<tableType>[] = [
     {
       id: "id",
       accessorKey: "id",
@@ -75,32 +76,6 @@ export function useDataTableColumns(
       enableColumnFilter: true,
     },
     {
-      id: "email",
-      accessorKey: "email",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Email" />
-      ),
-      meta: defineMeta({
-        label: "Email",
-        variant: "text",
-      }),
-      cell: ({ row }) => row.original.email,
-      enableColumnFilter: true,
-    },
-    {
-      id: "phone",
-      accessorKey: "phone",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Phone" />
-      ),
-      meta: defineMeta({
-        label: "Phone",
-        variant: "text",
-      }),
-      cell: ({ row }) => row.original.phone,
-      enableColumnFilter: true,
-    },
-    {
       id: "actions",
       meta: defineMeta({
         label: "Actions",
@@ -137,5 +112,5 @@ export function useDataTableColumns(
   ];
 
   // nothing added/removed/modified—just pass through
-  return getTableColumns<OrgLead>({ setRowAction, columns });
+  return getTableColumns<tableType>({ setRowAction, columns });
 }

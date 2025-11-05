@@ -1,4 +1,3 @@
-import { OrgEmailDomain } from "@repo/database/schema";
 import { Button } from "@repo/shared-ui/components/common/button";
 import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
 import {
@@ -17,18 +16,23 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 
+import { DataTableActionType } from "@/types/data-table-actions";
+
+import { tableType } from "./config";
+
 export function useDataTableColumns(
   setRowAction: React.Dispatch<
-    React.SetStateAction<DataTableRowAction<OrgEmailDomain> | null>
+    React.SetStateAction<DataTableRowAction<tableType> | null>
   >,
 ) {
-  const onDelete = makeRowAction(setRowAction, "delete");
-  const onUpdate = makeRowAction(setRowAction, "update");
-  const onView = makeRowAction(setRowAction, "view");
+  const onDelete = makeRowAction(setRowAction, DataTableActionType.DELETE);
+  const onUpdate = makeRowAction(setRowAction, DataTableActionType.UPDATE);
+  const onView = makeRowAction(setRowAction, DataTableActionType.VIEW);
 
-  const columns: ColumnDef<OrgEmailDomain>[] = [
+  const columns: ColumnDef<tableType>[] = [
     {
-      id: "select",
+      id: "id",
+      accessorKey: "id",
       header: ({ table }) => (
         <Checkbox
           aria-label="Select all"
@@ -77,25 +81,28 @@ export function useDataTableColumns(
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Email" />
       ),
-      meta: defineMeta({
+      cell: ({ row }) => <>{row.original.email}</>,
+      meta: {
         label: "Email",
+        placeholder: "Search emails...",
         variant: "text",
-      }),
-      cell: ({ row }) => row.original.email,
+        icon: Text,
+      },
       enableColumnFilter: true,
     },
-
     {
-      id: "verified",
-      accessorKey: "verified",
+      id: "status",
+      accessorKey: "status",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Verified" />
+        <DataTableColumnHeader column={column} title="Status" />
       ),
-      meta: defineMeta({
-        label: "Verified",
-        variant: "boolean",
-      }),
-      cell: ({ row }) => row.original.verified,
+      cell: ({ row }) => <>{row.original.status}</>,
+      meta: {
+        label: "Status",
+        placeholder: "Search status...",
+        variant: "text",
+        icon: Text,
+      },
       enableColumnFilter: true,
     },
     {
@@ -135,5 +142,5 @@ export function useDataTableColumns(
   ];
 
   // nothing added/removed/modified—just pass through
-  return getTableColumns<OrgEmailDomain>({ setRowAction, columns });
+  return getTableColumns<tableType>({ setRowAction, columns });
 }

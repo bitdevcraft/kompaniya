@@ -1,4 +1,3 @@
-import { OrgActivity } from "@repo/database/schema";
 import { Button } from "@repo/shared-ui/components/common/button";
 import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
 import {
@@ -7,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@repo/shared-ui/components/common/dropdown-menu";
+import { DataTableColumnHeader } from "@repo/shared-ui/components/data-table/data-table-column-header";
 import {
   DataTableRowAction,
   defineMeta,
@@ -14,19 +14,25 @@ import {
   makeRowAction,
 } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit, Ellipsis, Trash2 } from "lucide-react";
+import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
+
+import { DataTableActionType } from "@/types/data-table-actions";
+
+import { tableType } from "./config";
 
 export function useDataTableColumns(
   setRowAction: React.Dispatch<
-    React.SetStateAction<DataTableRowAction<OrgActivity> | null>
+    React.SetStateAction<DataTableRowAction<tableType> | null>
   >,
 ) {
-  const onDelete = makeRowAction(setRowAction, "delete");
-  const onUpdate = makeRowAction(setRowAction, "update");
+  const onDelete = makeRowAction(setRowAction, DataTableActionType.DELETE);
+  const onUpdate = makeRowAction(setRowAction, DataTableActionType.UPDATE);
+  const onView = makeRowAction(setRowAction, DataTableActionType.VIEW);
 
-  const columns: ColumnDef<OrgActivity>[] = [
+  const columns: ColumnDef<tableType>[] = [
     {
-      id: "select",
+      id: "id",
+      accessorKey: "id",
       header: ({ table }) => (
         <Checkbox
           aria-label="Select all"
@@ -50,7 +56,25 @@ export function useDataTableColumns(
       enableHiding: false,
       size: 40,
     },
-
+    {
+      id: "name",
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Name" />
+      ),
+      cell: ({ row }) => (
+        <Button onClick={() => onView(row)} size={"sm"} variant={"link"}>
+          {row.original.name}
+        </Button>
+      ),
+      meta: {
+        label: "Name",
+        placeholder: "Search names...",
+        variant: "text",
+        icon: Text,
+      },
+      enableColumnFilter: true,
+    },
     {
       id: "actions",
       meta: defineMeta({
@@ -88,5 +112,5 @@ export function useDataTableColumns(
   ];
 
   // nothing added/removed/modified—just pass through
-  return getTableColumns<OrgActivity>({ setRowAction, columns });
+  return getTableColumns<tableType>({ setRowAction, columns });
 }

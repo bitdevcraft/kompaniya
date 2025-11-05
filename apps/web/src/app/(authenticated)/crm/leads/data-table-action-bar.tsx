@@ -1,7 +1,6 @@
 "use client";
 
 import { Separator } from "@radix-ui/react-separator";
-import { OrgLead } from "@repo/database/schema";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
@@ -13,13 +12,15 @@ import { Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import { tableType } from "./config";
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = ["export", "delete"] as const;
 
 type Action = (typeof actions)[number];
 
 interface OrgDataTableActionBarProps {
-  table: Table<OrgLead>;
+  table: Table<tableType>;
 }
 
 export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {

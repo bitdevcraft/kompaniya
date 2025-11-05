@@ -33,6 +33,6 @@ import { AwsSesVerificationService } from './aws-ses-verification/aws-ses-verifi
     AwsSesIdentityService,
     AwsSesVerificationService,
   ],
-  exports: [AwsSesVerificationService],
+  exports: [AwsSesVerificationService, AwsSesIdentityService],
 })
 export class EmailModule {}

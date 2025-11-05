@@ -21,6 +21,27 @@ export const Keys = {
     paginated(userId: string, organizationId: string) {
       return `domain:paginated:${userId}:${organizationId}`;
     },
+    paginatedList(userId: string, organizationId: string) {
+      return `domain:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `domain:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `domain:id:${id}-${organizationId}`;
+    },
+    name(name: string) {
+      return `domain:name:${name}`;
+    },
+    emailAttributes(email: string) {
+      return `domain:email-attributes:${email}`;
+    },
+    secretKey(secretKey: string) {
+      return `domain:name:${secretKey}`;
+    },
+    publicKey(publicKey: string) {
+      return `domain:name:${publicKey}`;
+    },
   },
   Account: {
     paginated(userId: string, organizationId: string) {

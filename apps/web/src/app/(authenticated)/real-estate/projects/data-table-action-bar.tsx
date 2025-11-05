@@ -1,7 +1,6 @@
 "use client";
 
 import { Separator } from "@radix-ui/react-separator";
-import { OrgRealEstateProject } from "@repo/database/schema";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
@@ -13,13 +12,15 @@ import { Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import { tableType } from "./config";
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = ["export", "delete"] as const;
 
 type Action = (typeof actions)[number];
 
 interface OrgDataTableActionBarProps {
-  table: Table<OrgRealEstateProject>;
+  table: Table<tableType>;
 }
 
 export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {
@@ -41,7 +42,7 @@ export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {
     setCurrentAction("export");
     startTransition(() => {
       exportTableToCSV(table, {
-        excludeColumns: ["select", "actions"],
+        excludeColumns: ["actions"],
         onlySelected: true,
       });
     });
@@ -64,7 +65,6 @@ export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {
         />
         <div className="flex items-center gap-1.5">
           <DataTableActionBarAction
-            disabled
             isPending={getIsActionPending("export")}
             onClick={onDataRowExport}
             size="icon"

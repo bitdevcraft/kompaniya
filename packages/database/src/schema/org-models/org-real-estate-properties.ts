@@ -14,7 +14,7 @@ export const orgRealEstatePropertiesTable = pgTable(
   },
 );
 
-export type NewOrgRealEstateProperties =
+export type NewOrgRealEstateProperty =
   typeof orgRealEstatePropertiesTable.$inferInsert;
-export type OrgRealEstateProperties =
+export type OrgRealEstateProperty =
   typeof orgRealEstatePropertiesTable.$inferSelect;

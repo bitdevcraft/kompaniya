@@ -11,7 +11,7 @@ export const orgRealEstateBookingsTable = pgTable("org_real_estate_bookings", {
   name: varchar("name", { length: 255 }),
 });
 
-export type NewOrgRealEstateBookings =
+export type NewOrgRealEstateBooking =
   typeof orgRealEstateBookingsTable.$inferInsert;
-export type OrgRealEstateBookings =
+export type OrgRealEstateBooking =
   typeof orgRealEstateBookingsTable.$inferSelect;

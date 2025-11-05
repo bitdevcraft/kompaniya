@@ -6,8 +6,11 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
 
+import { dictTranslation } from "../config";
+import { NewRecordForm } from "./new-form";
+
 export function NewButton() {
-  const t = useTranslations("realEstate.project");
+  const t = useTranslations(dictTranslation);
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
@@ -29,7 +32,9 @@ export function NewButton() {
         setIsOpen={setIsOpen}
         title={t("form.new.title")}
       >
-        <div></div>
+        <div>
+          <NewRecordForm onFinish={() => setIsOpen(false)} />
+        </div>
       </ResponsiveDialog>
     </>
   );

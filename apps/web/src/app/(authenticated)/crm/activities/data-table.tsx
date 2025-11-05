@@ -1,40 +1,47 @@
 "use client";
 
-import { OrgActivity } from "@repo/database/schema";
 import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
+import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
+import { Label } from "@repo/shared-ui/components/common/label";
 import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
   DataTableSortList,
+  DataTableViewToggle,
 } from "@repo/shared-ui/components/data-table/index";
 import { useDataTable } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table";
+import { useDataTableViewMode } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table-view-mode";
 import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
-import { env } from "@/env/client";
+import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog";
 import { authClient } from "@/lib/auth/client";
+import { DataTableActionType } from "@/types/data-table-actions";
 import { SearchParamsSchema } from "@/types/validations";
 
+import { model, modelEndpoint, OrganizationModel, tableType } from "./config";
+import { OrgDataTableActionBar } from "./data-table-action-bar";
+import { DataTableCard } from "./data-table-card";
 import { useDataTableColumns } from "./data-table-columns";
+import { ImportButton } from "./new/import-button";
 import { NewButton } from "./new/new-button";
 
 interface OrgDataTableProps {
   search: SearchParamsSchema;
 }
 
-export function OrgDataTable(props: OrgDataTableProps) {
-  const { data: activeOrganization } = authClient.useActiveOrganization();
-
-  const sp = useSearchParams();
-  const qs = sp.toString();
-
-  const { data } = useQuery({
+const useDataLoad = (
+  activeOrganization: OrganizationModel,
+  props: OrgDataTableProps,
+  qs?: string,
+) => {
+  return useQuery({
     queryKey: [
-      `activities-${activeOrganization?.id}`,
+      `${model.plural}-${activeOrganization?.data?.id}`,
       props.search.page,
       props.search.perPage,
       JSON.stringify(props.search.filters),
@@ -43,20 +50,30 @@ export function OrgDataTable(props: OrgDataTableProps) {
     ],
     queryFn: async () => {
       const response = await axios.get<{
-        data: OrgActivity[];
+        data: tableType[];
         pageCount: number;
-      }>(
-        `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/activity/paginated${qs ? "?" : ""}${qs}`,
-        {
-          withCredentials: true,
-        },
-      );
+      }>(`${modelEndpoint}/paginated${qs ? "?" : ""}${qs}`, {
+        withCredentials: true,
+      });
       return response.data;
     },
   });
+};
 
-  const [_rowAction, setRowAction] =
-    React.useState<DataTableRowAction<OrgActivity> | null>(null);
+export function OrgDataTable(props: OrgDataTableProps) {
+  const activeOrganization = authClient.useActiveOrganization();
+
+  const [viewMode, setViewMode] = useDataTableViewMode({
+    key: `${model.plural}View`,
+  });
+
+  const sp = useSearchParams();
+  const qs = sp.toString();
+
+  const { data, refetch } = useDataLoad(activeOrganization, props, qs);
+
+  const [rowAction, setRowAction] =
+    React.useState<DataTableRowAction<tableType> | null>(null);
 
   const columns = useDataTableColumns(setRowAction);
 
@@ -74,24 +91,85 @@ export function OrgDataTable(props: OrgDataTableProps) {
 
   return (
     <>
-      <DataTable pageSizeOptions={[10, 20, 50, 100, 200]} table={table}>
-        <div className="flex items-center">
-          <div className="text-xl  pl-4"></div>
-          <DataTableAdvancedToolbar hideViewColumns table={table}>
-            <ButtonGroup>
-              <NewButton />
-            </ButtonGroup>
-            <DataTableSortList align="start" table={table} />
-            <DataTableFilterList
-              align="end"
-              debounceMs={debounceMs}
-              shallow={shallow}
-              table={table}
-              throttleMs={throttleMs}
+      <DataTable
+        actionBar={<OrgDataTableActionBar table={table} />}
+        enableGrid
+        gridOptions={{
+          columns: ["email", "status"],
+          containerClassName: "",
+          itemClassName: "",
+          emptyState: <div>No Result</div>,
+
+          renderItem: ({ defaultItem, row }) => (
+            <DataTableCard
+              defaultItem={defaultItem}
+              row={row}
+              setRowAction={setRowAction}
             />
-          </DataTableAdvancedToolbar>
+          ),
+        }}
+        pageSizeOptions={[10, 20, 50, 100, 200]}
+        table={table}
+        viewMode={viewMode}
+      >
+        <div className="flex flex-col items-end gap-4">
+          <div className="flex items-center w-full">
+            <div className="text-xl pl-4 text-nowrap">Email Domains</div>
+            <DataTableAdvancedToolbar hideViewColumns table={table}>
+              <div className="flex gap-4">
+                <ButtonGroup>
+                  <NewButton />
+                  <ImportButton />
+                </ButtonGroup>
+                <DataTableSortList align="start" table={table} />
+                <DataTableFilterList
+                  align="end"
+                  debounceMs={debounceMs}
+                  shallow={shallow}
+                  table={table}
+                  throttleMs={throttleMs}
+                />
+                <DataTableViewToggle
+                  onViewModeChange={setViewMode}
+                  paramKey={`${model.plural}View`}
+                  viewMode={viewMode}
+                />
+              </div>
+            </DataTableAdvancedToolbar>
+          </div>
+          {viewMode === "grid" && (
+            <Label>
+              Select All
+              <Checkbox
+                aria-label="Select all"
+                checked={
+                  table.getIsAllPageRowsSelected() ||
+                  (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                className="size-6"
+                onCheckedChange={(value) =>
+                  table.toggleAllPageRowsSelected(!!value)
+                }
+              />
+            </Label>
+          )}
         </div>
       </DataTable>
+
+      {rowAction?.variant === DataTableActionType.DELETE && (
+        <ConfirmDeleteDialog
+          endpoint={`${modelEndpoint}/r/${rowAction.row.original.id}`}
+          open={rowAction?.variant === DataTableActionType.DELETE}
+          queryKey={[`${model.plural}-${activeOrganization?.data?.id}`]}
+          setIsOpen={(open) => {
+            console.log("Update");
+            if (!open) {
+              setRowAction(null);
+              refetch();
+            }
+          }}
+        />
+      )}
     </>
   );
 }
