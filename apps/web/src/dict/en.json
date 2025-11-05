@@ -199,6 +199,16 @@
         "new": {
           "title": "Create New Email Test Receiver",
           "submit": "Submit"
+        },
+        "name": {
+          "label": "Template Name",
+          "description": ""
+        },
+        "email": {
+          "label": "Email List",
+          "description": "",
+          "add": "Add",
+          "remove": "Remove"
         }
       }
     },

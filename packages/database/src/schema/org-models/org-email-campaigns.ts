@@ -5,6 +5,7 @@ import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
 import { orgEmailDomainsTable } from "./org-email-domains";
 import { orgEmailTemplatesTable } from "./org-email-templates";
+import { orgEmailTestReceiversTable } from "./org-email-test-receivers";
 
 export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
   ...baseIdModel,
@@ -24,6 +25,10 @@ export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
     {
       onDelete: "restrict",
     },
+  ),
+  orgEmailTestReceiverId: uuid("org_email_test_receiver_id").references(
+    () => orgEmailTestReceiversTable.id,
+    { onDelete: "set null" },
   ),
   targetCategories: text("target_categories").array(),
 

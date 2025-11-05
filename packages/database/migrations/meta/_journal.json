@@ -36,6 +36,13 @@
       "when": 1762243745828,
       "tag": "0004_overconfident_demogoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1762373890157,
+      "tag": "0005_clever_metal_master",
+      "breakpoints": true
     }
   ]
 }
