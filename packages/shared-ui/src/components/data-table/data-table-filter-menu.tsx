@@ -216,9 +216,9 @@ export function DataTableFilterMenu<TData>({
 
       if (
         event.key.toLowerCase() === OPEN_MENU_SHORTCUT &&
-        !event.ctrlKey &&
+        event.ctrlKey &&
         !event.metaKey &&
-        !event.shiftKey
+        event.shiftKey
       ) {
         event.preventDefault();
         setOpen(true);

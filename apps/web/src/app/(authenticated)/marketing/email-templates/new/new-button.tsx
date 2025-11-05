@@ -28,6 +28,7 @@ export function NewButton() {
       </Button>
 
       <ResponsiveDialog
+        className="md:max-w-[90vw]"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         title={t("form.new.title")}

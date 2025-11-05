@@ -1,3 +1,4 @@
+import { cn } from "@repo/shared-ui/lib/utils";
 import * as React from "react";
 
 import { useMediaQuery } from "../../hooks/use-media-query";
@@ -24,19 +25,21 @@ export function ResponsiveDialog({
   setIsOpen,
   title,
   description,
+  className,
 }: {
   children: React.ReactNode;
   isOpen: boolean;
   setIsOpen?(open: boolean): void;
   title: string;
   description?: string;
+  className?: string;
 }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   if (isDesktop) {
     return (
       <Dialog onOpenChange={setIsOpen} open={isOpen}>
-        <DialogContent className="max-w-[425px] md:max-w-3xl">
+        <DialogContent className={cn("max-w-[425px] md:max-w-3xl", className)}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description && (

@@ -65,6 +65,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
 
   const [viewMode, setViewMode] = useDataTableViewMode({
     key: `${model.plural}View`,
+    defaultValue: "grid",
   });
 
   const sp = useSearchParams();
@@ -95,7 +96,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
         actionBar={<OrgDataTableActionBar table={table} />}
         enableGrid
         gridOptions={{
-          columns: ["email", "status"],
+          columns: ["email", "subject"],
           containerClassName: "",
           itemClassName: "",
           emptyState: <div>No Result</div>,

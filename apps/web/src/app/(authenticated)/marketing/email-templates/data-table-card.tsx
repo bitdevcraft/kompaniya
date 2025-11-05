@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@repo/shared-ui/components/common/dropdown-menu";
+import { HtmlLivePreview } from "@repo/shared-ui/components/monaco-editor/html-live-preview";
 import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { Row } from "@tanstack/react-table";
 import { Edit, Ellipsis, Trash2 } from "lucide-react";
@@ -83,7 +84,15 @@ export function DataTableCard({
             />
           </CardAction>
         </CardHeader>
-        <CardContent>{defaultItem}</CardContent>
+        <CardContent className="grid gap-2">
+          {defaultItem}
+          <div>
+            <HtmlLivePreview
+              className="flex-1"
+              html={row.original.body ?? ""}
+            />
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

@@ -207,6 +207,18 @@
         "new": {
           "title": "Create New Email Template",
           "submit": "Submit"
+        },
+        "name": {
+          "label": "Template Name",
+          "description": ""
+        },
+        "subject": {
+          "label": "Subject",
+          "description": ""
+        },
+        "body": {
+          "label": "HTML Body",
+          "description": "Template's HTML Body"
         }
       }
     }
