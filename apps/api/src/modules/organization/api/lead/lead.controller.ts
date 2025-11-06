@@ -1,9 +1,11 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   NotFoundException,
   Param,
+  Patch,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -18,6 +20,7 @@ import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
+import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadService } from './lead.service';
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/lead')
@@ -70,5 +73,20 @@ export class LeadController {
       organization.id,
       query,
     );
+  }
+
+  @Patch('r/:id')
+  async updateRecord(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+    @Body() updateLeadDto: UpdateLeadDto,
+  ) {
+    const record = await this.leadService.getRecordById(id, organization.id);
+
+    if (!record) {
+      throw new NotFoundException("Contact doesn't exist");
+    }
+
+    return await this.leadService.updateRecordById(id, updateLeadDto);
   }
 }

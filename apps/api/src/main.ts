@@ -10,7 +10,11 @@ async function bootstrap() {
     bodyParser: false,
   });
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
 
   app.enableCors({
     origin: corsOrigin, // DO NOT use "*" with credentials

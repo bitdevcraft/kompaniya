@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
-import { orgLeadsTable } from '@repo/database/schema';
+import { NewOrgLead, orgLeadsTable } from '@repo/database/schema';
 import { and, eq } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
@@ -77,5 +77,13 @@ export class LeadService {
           ),
         }),
     });
+  }
+
+  async updateRecordById(id: string, record: NewOrgLead) {
+    return await this.db
+      .update(orgLeadsTable)
+      .set(record)
+      .where(eq(orgLeadsTable.id, id))
+      .returning();
   }
 }
