@@ -1,6 +1,12 @@
-import type { RecordPageLayout } from "@/components/record-page";
+import type { RecordFieldOption, RecordPageLayout } from "@/components/record-page";
 
 import type { ContactRecordFormValues } from "./contact-record-schema";
+
+const DEFAULT_SEGMENTATION_OPTIONS: RecordFieldOption[] = [
+  { label: "item 1", value: "item 1" },
+  { label: "item 2", value: "item 2" },
+  { label: "item 3", value: "item 3" },
+];
 
 export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
   header: {
@@ -62,6 +68,7 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
       fieldId: "name",
     },
   },
+  layoutStyle: "headerWithSidebar",
   sections: [
     {
       description:
@@ -80,7 +87,7 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
           id: "phone",
           label: "Phone",
           placeholder: "+1 (555) 000-0000",
-          type: "text",
+          type: "phone",
         },
         {
           id: "websiteUrl",
@@ -120,8 +127,7 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
             "Internal notes that stay with the team—customers never see these.",
           id: "notes",
           label: "Internal notes",
-          multiline: true,
-          type: "text",
+          type: "textarea",
         },
       ],
       id: "activity",
@@ -138,6 +144,7 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
           id: "tags",
           label: "Tags",
           placeholder: "Add tags…",
+          options: DEFAULT_SEGMENTATION_OPTIONS,
           type: "multipicklist",
         },
         {
@@ -146,6 +153,7 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
           id: "categories",
           label: "Categories",
           placeholder: "Add categories…",
+          options: DEFAULT_SEGMENTATION_OPTIONS,
           type: "multipicklist",
         },
         { id: "industry", label: "Industry", type: "text" },

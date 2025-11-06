@@ -2,12 +2,19 @@ import type { FieldValues, Path } from "react-hook-form";
 
 export type RecordFieldDataType =
   | "text"
+  | "textarea"
   | "number"
   | "date"
   | "datetime"
   | "boolean"
   | "picklist"
-  | "multipicklist";
+  | "multipicklist"
+  | "phone";
+
+export interface RecordFieldOption {
+  label: string;
+  value: string;
+}
 
 export interface RecordLayoutField<
   TFieldValues extends FieldValues = FieldValues,
@@ -16,8 +23,7 @@ export interface RecordLayoutField<
   description?: string;
   id: Path<TFieldValues>;
   label: string;
-  multiline?: boolean;
-  options?: Array<{ label: string; value: string }>;
+  options?: RecordFieldOption[];
   placeholder?: string;
   readOnly?: boolean;
   type: RecordFieldDataType;
@@ -84,6 +90,11 @@ export interface RecordPageHeaderConfig<
 export interface RecordPageLayout<
   TFieldValues extends FieldValues = FieldValues,
 > {
+  layoutStyle?:
+    | "singleColumn"
+    | "twoColumns"
+    | "headerWithTwoColumns"
+    | "headerWithSidebar";
   header: RecordPageHeaderConfig<TFieldValues>;
   sections: RecordLayoutSection<TFieldValues>[];
   supplementalFields?: RecordLayoutField<TFieldValues>[];

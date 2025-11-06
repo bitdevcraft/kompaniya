@@ -1,6 +1,12 @@
-import type { RecordPageLayout } from "@/components/record-page";
+import type { RecordFieldOption, RecordPageLayout } from "@/components/record-page";
 
 import type { LeadRecordFormValues } from "./lead-record-schema";
+
+const DEFAULT_SEGMENTATION_OPTIONS: RecordFieldOption[] = [
+  { label: "item 1", value: "item 1" },
+  { label: "item 2", value: "item 2" },
+  { label: "item 3", value: "item 3" },
+];
 
 export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
   header: {
@@ -34,6 +40,7 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
       fieldId: "name",
     },
   },
+  layoutStyle: "headerWithTwoColumns",
   sections: [
     {
       description:
@@ -47,7 +54,7 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
           placeholder: "name@example.com",
           type: "text",
         },
-        { id: "phone", label: "Phone", type: "text" },
+        { id: "phone", label: "Phone", type: "phone" },
         { id: "nationality", label: "Region", type: "text" },
         { id: "score", label: "Lead score", type: "number" },
       ],
@@ -74,8 +81,7 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
             "Notes, objections, and context gathered during discovery.",
           id: "notes",
           label: "Notes",
-          multiline: true,
-          type: "text",
+          type: "textarea",
         },
       ],
       id: "lead-engagement",
@@ -90,6 +96,7 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
           id: "tags",
           label: "Tags",
           placeholder: "Add tags…",
+          options: DEFAULT_SEGMENTATION_OPTIONS,
           type: "multipicklist",
         },
         {
@@ -97,6 +104,7 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
           id: "categories",
           label: "Categories",
           placeholder: "Add categories…",
+          options: DEFAULT_SEGMENTATION_OPTIONS,
           type: "multipicklist",
         },
       ],

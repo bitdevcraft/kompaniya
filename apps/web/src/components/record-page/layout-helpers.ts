@@ -51,6 +51,8 @@ export function normalizeValueForForm(
       if (value === null || value === undefined) return "";
       return String(value);
     }
+    case "phone":
+    case "textarea":
     default: {
       if (value === null || value === undefined) return "";
       return String(value);
@@ -100,7 +102,9 @@ export function normalizeValueForSubmission(
       return [];
     }
     case "picklist":
-    case "text": {
+    case "phone":
+    case "text":
+    case "textarea": {
       if (typeof value !== "string") return null;
       const trimmed = value.trim();
       return trimmed.length > 0 ? trimmed : null;

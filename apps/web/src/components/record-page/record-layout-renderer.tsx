@@ -16,25 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/shared-ui/components/common/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@repo/shared-ui/components/common/form";
-import { Input } from "@repo/shared-ui/components/common/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/shared-ui/components/common/select";
-import { Switch } from "@repo/shared-ui/components/common/switch";
-import { Textarea } from "@repo/shared-ui/components/common/textarea";
+import { Form, FormField } from "@repo/shared-ui/components/common/form";
 import { cn } from "@repo/shared-ui/lib/utils";
 import {
   Building2,
@@ -49,6 +31,7 @@ import {
 } from "lucide-react";
 
 import type {
+  RecordFieldOption,
   RecordLayoutField,
   RecordLayoutHeaderChip,
   RecordLayoutHeaderIcon,
@@ -57,13 +40,26 @@ import type {
   RecordPageLayout,
 } from "./layout";
 
+import { BooleanRecordField } from "./boolean-record-field";
+import { DateRecordField } from "./date-record-field";
+import { DatetimeRecordField } from "./datetime-record-field";
 import { InfoChip } from "./info-chip";
 import {
   getAllLayoutFields,
   normalizeValueForSubmission,
 } from "./layout-helpers";
-import { RecordField } from "./record-field";
-import { formatDateTime, formatScore, getInitials } from "./utils";
+import { MultipicklistRecordField } from "./multipicklist-record-field";
+import { NumberRecordField } from "./number-record-field";
+import { PhoneRecordField } from "./phone-record-field";
+import { PicklistRecordField } from "./picklist-record-field";
+import { TextRecordField } from "./text-record-field";
+import { TextareaRecordField } from "./textarea-record-field";
+import {
+  formatDateTime,
+  formatScore,
+  getInitials,
+  renderLink,
+} from "./utils";
 
 const HEADER_ICONS: Record<
   RecordLayoutHeaderIcon,
@@ -147,6 +143,12 @@ export function RecordLayoutRenderer<
     fields.map((field) => [field.id, field]),
   );
 
+  const sectionsContent = renderLayoutSections(layout, {
+    form,
+    isEditing,
+    record,
+  });
+
   return (
     <Form {...form}>
       <div className="space-y-8">
@@ -157,16 +159,7 @@ export function RecordLayoutRenderer<
           header={layout.header}
           record={record}
         />
-
-        {layout.sections.map((section) => (
-          <Section
-            form={form}
-            isEditing={isEditing}
-            key={section.id}
-            record={record}
-            section={section}
-          />
-        ))}
+        {sectionsContent}
       </div>
     </Form>
   );
@@ -211,38 +204,142 @@ function buildHeaderChip<TFieldValues extends FieldValues>(
   };
 }
 
-function EditableField<TFieldValues extends FieldValues>({
+type FieldComponent = (props: {
+  description?: string;
+  editing: boolean;
+  fallback?: string;
+  label: string;
+  name?: string;
+  onBlur?: () => void;
+  onChange?: (value: unknown) => void;
+  placeholder?: string;
+  options?: RecordFieldOption[];
+  value?: unknown;
+}) => JSX.Element | null;
+
+const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
+  boolean: BooleanRecordField as FieldComponent,
+  date: DateRecordField as FieldComponent,
+  datetime: DatetimeRecordField as FieldComponent,
+  multipicklist: MultipicklistRecordField as FieldComponent,
+  number: NumberRecordField as FieldComponent,
+  phone: PhoneRecordField as FieldComponent,
+  picklist: PicklistRecordField as FieldComponent,
+  text: TextRecordField as FieldComponent,
+  textarea: TextareaRecordField as FieldComponent,
+};
+
+function FieldRenderer<TFieldValues extends FieldValues>({
   field,
   form,
+  isEditing,
+  record,
 }: {
   field: RecordLayoutField<TFieldValues>;
   form: UseFormReturn<TFieldValues>;
+  isEditing: boolean;
+  record: Record<string, unknown>;
 }) {
+  const Component = FIELD_COMPONENTS[field.type];
+
+  if (!Component) {
+    return null;
+  }
+
+  if (isEditing && !field.readOnly) {
+    return (
+      <FormField
+        control={form.control}
+        name={field.id}
+        render={({ field: controllerField }) => (
+          <Component
+            description={field.description}
+            editing
+            label={field.label}
+            name={field.id as string}
+            onBlur={controllerField.onBlur}
+            onChange={(value) => controllerField.onChange(value)}
+            placeholder={field.placeholder}
+            options={field.options}
+            value={controllerField.value}
+          />
+        )}
+      />
+    );
+  }
+
   return (
-    <FormField
-      control={form.control}
-      name={field.id}
-      render={({ field: controllerField }) => (
-        <FormItem className="space-y-2">
-          <FormLabel>{field.label}</FormLabel>
-          <FormControl>
-            {renderInput(
-              field,
-              controllerField.value,
-              controllerField.onChange,
-              controllerField.onBlur,
-            )}
-          </FormControl>
-          {field.description ? (
-            <FormDescription className="text-xs text-muted-foreground">
-              {field.description}
-            </FormDescription>
-          ) : null}
-          <FormMessage />
-        </FormItem>
-      )}
+    <Component
+      description={field.description}
+      editing={false}
+      label={field.label}
+      options={field.options}
+      value={record[field.id as string]}
     />
   );
+}
+
+type SectionRenderContext<TFieldValues extends FieldValues> = {
+  form: UseFormReturn<TFieldValues>;
+  isEditing: boolean;
+  record: Record<string, unknown>;
+};
+
+function renderLayoutSections<TFieldValues extends FieldValues>(
+  layout: RecordPageLayout<TFieldValues>,
+  context: SectionRenderContext<TFieldValues>,
+) {
+  if (!layout.sections || layout.sections.length === 0) {
+    return null;
+  }
+
+  const { form, isEditing, record } = context;
+  const renderSection = (section: RecordLayoutSection<TFieldValues>) => (
+    <Section
+      form={form}
+      isEditing={isEditing}
+      key={section.id}
+      record={record}
+      section={section}
+    />
+  );
+
+  switch (layout.layoutStyle) {
+    case "twoColumns":
+      return (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {layout.sections.map(renderSection)}
+        </div>
+      );
+    case "headerWithTwoColumns": {
+      const [first, ...rest] = layout.sections;
+      return (
+        <div className="space-y-6">
+          {first ? renderSection(first) : null}
+          {rest.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {rest.map(renderSection)}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+    case "headerWithSidebar": {
+      const [first, ...rest] = layout.sections;
+      return (
+        <div className="space-y-6">
+          {first ? renderSection(first) : null}
+          {rest.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:[grid-template-columns:2fr_1fr]">
+              {rest.map(renderSection)}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+    default:
+      return layout.sections.map(renderSection);
+  }
 }
 
 function fallbackFormat(
@@ -321,17 +418,31 @@ function formatValue(field: RecordLayoutField, rawValue: unknown): ReactNode {
     case "datetime": {
       return formatDateTime(rawValue);
     }
+    case "phone": {
+      if (typeof rawValue === "string" && rawValue.trim().length > 0) {
+        return renderLink(rawValue, `tel:${rawValue}`);
+      }
+      return rawValue ?? null;
+    }
     case "picklist": {
-      if (typeof rawValue === "string" && field.options) {
-        const match = field.options.find((option) => option.value === rawValue);
-        return match?.label ?? rawValue;
+      if (typeof rawValue === "string") {
+        const items = field.options;
+        if (items && items.length > 0) {
+          const match = items.find((option) => option.value === rawValue);
+          if (match) {
+            return match.label;
+          }
+        }
+        return rawValue;
       }
       return rawValue ?? null;
     }
     case "multipicklist": {
-      if (!rawValue) return null;
-      const values = Array.isArray(rawValue) ? rawValue : [rawValue];
+      const values = normalizeMultipicklistValue(rawValue);
       if (values.length === 0) return null;
+      const labelMap = field.options
+        ? new Map(field.options.map((option) => [option.value, option.label]))
+        : undefined;
       return (
         <div className="flex flex-wrap gap-2">
           {values.map((value, index) => (
@@ -339,7 +450,7 @@ function formatValue(field: RecordLayoutField, rawValue: unknown): ReactNode {
               key={`${field.id as string}-${value}-${index}`}
               variant="secondary"
             >
-              {String(value)}
+              {labelMap?.get(String(value)) ?? String(value)}
             </Badge>
           ))}
         </div>
@@ -350,6 +461,25 @@ function formatValue(field: RecordLayoutField, rawValue: unknown): ReactNode {
       return String(rawValue);
     }
   }
+}
+
+function normalizeMultipicklistValue(value: unknown) {
+  if (!value) return [] as string[];
+
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => (typeof entry === "string" ? entry : String(entry)))
+      .filter((entry) => entry.trim().length > 0);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/\n|,/)
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+  }
+
+  return [String(value)];
 }
 
 function getColumnSpanClass(colSpan?: number) {
@@ -473,141 +603,6 @@ function Header<TFieldValues extends FieldValues>({
   );
 }
 
-function ReadOnlyField({
-  field,
-  record,
-}: {
-  field: RecordLayoutField;
-  record: Record<string, unknown>;
-}) {
-  const value = formatValue(field, record[field.id as string]);
-
-  return (
-    <div className="space-y-2">
-      <RecordField label={field.label} value={value} />
-      {field.description ? (
-        <p className="text-xs text-muted-foreground">{field.description}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function renderInput(
-  field: RecordLayoutField,
-  value: unknown,
-  onChange: (value: unknown) => void,
-  onBlur: () => void,
-) {
-  switch (field.type) {
-    case "boolean": {
-      return (
-        <Switch
-          checked={Boolean(value)}
-          onCheckedChange={(checked) => {
-            onChange(checked);
-            onBlur();
-          }}
-        />
-      );
-    }
-    case "number": {
-      return (
-        <Input
-          inputMode="decimal"
-          onBlur={onBlur}
-          onChange={(event) => onChange(event.target.value)}
-          type="number"
-          value={
-            typeof value === "string" || typeof value === "number"
-              ? String(value)
-              : ""
-          }
-        />
-      );
-    }
-    case "date": {
-      return (
-        <Input
-          onBlur={onBlur}
-          onChange={(event) => onChange(event.target.value)}
-          type="date"
-          value={typeof value === "string" ? value : ""}
-        />
-      );
-    }
-    case "datetime": {
-      return (
-        <Input
-          onBlur={onBlur}
-          onChange={(event) => onChange(event.target.value)}
-          type="datetime-local"
-          value={typeof value === "string" ? value : ""}
-        />
-      );
-    }
-    case "picklist": {
-      return (
-        <Select
-          onValueChange={onChange}
-          value={typeof value === "string" ? value : undefined}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={field.placeholder ?? "Select an option"}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {(field.options ?? []).map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    }
-    case "multipicklist": {
-      return (
-        <Textarea
-          onBlur={onBlur}
-          onChange={(event) => {
-            const next = event.target.value
-              .split(/\n|,/)
-              .map((entry) => entry.trim())
-              .filter(Boolean);
-            onChange(next);
-          }}
-          placeholder={field.placeholder ?? "Enter one value per line"}
-          rows={4}
-          value={Array.isArray(value) ? value.join("\n") : ""}
-        />
-      );
-    }
-    default: {
-      if (field.multiline) {
-        return (
-          <Textarea
-            onBlur={onBlur}
-            onChange={(event) => onChange(event.target.value)}
-            placeholder={field.placeholder}
-            rows={5}
-            value={typeof value === "string" ? value : ""}
-          />
-        );
-      }
-
-      return (
-        <Input
-          onBlur={onBlur}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={field.placeholder}
-          value={typeof value === "string" ? value : ""}
-        />
-      );
-    }
-  }
-}
-
 function resolveFieldValue<TFieldValues extends FieldValues>(
   record: Record<string, unknown>,
   form: UseFormReturn<TFieldValues> | undefined,
@@ -653,11 +648,12 @@ function Section<TFieldValues extends FieldValues>({
               className={getColumnSpanClass(field.colSpan)}
               key={field.id as string}
             >
-              {isEditing && !field.readOnly ? (
-                <EditableField field={field} form={form} />
-              ) : (
-                <ReadOnlyField field={field} record={record} />
-              )}
+              <FieldRenderer
+                field={field}
+                form={form}
+                isEditing={isEditing}
+                record={record}
+              />
             </div>
           ))}
         </div>
