@@ -15,6 +15,7 @@ import {
 } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 import { DataTableActionType } from "@/types/data-table-actions";
 
@@ -27,7 +28,6 @@ export function useDataTableColumns(
 ) {
   const onDelete = makeRowAction(setRowAction, DataTableActionType.DELETE);
   const onUpdate = makeRowAction(setRowAction, DataTableActionType.UPDATE);
-  const onView = makeRowAction(setRowAction, DataTableActionType.VIEW);
 
   const columns: ColumnDef<tableType>[] = [
     {
@@ -63,8 +63,10 @@ export function useDataTableColumns(
         <DataTableColumnHeader column={column} title="Name" />
       ),
       cell: ({ row }) => (
-        <Button onClick={() => onView(row)} size={"sm"} variant={"link"}>
-          {row.original.name}
+        <Button asChild size={"sm"} variant={"link"}>
+          <Link href={`/crm/contacts/r/${row.original.id}`}>
+            {row.original.name}
+          </Link>
         </Button>
       ),
       meta: {
