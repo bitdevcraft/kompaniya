@@ -6,6 +6,59 @@ import type {
   RecordPageLayout,
 } from "./layout";
 
+export function createDefaultValuesForLayout<
+  TFieldValues extends FieldValues = FieldValues,
+>(layout: RecordPageLayout<TFieldValues>) {
+  const defaults: Partial<TFieldValues> = {};
+  const fields = getAllLayoutFields(layout);
+
+  for (const field of fields) {
+    if (field.availableOnCreate === false || field.readOnly) {
+      continue;
+    }
+
+    switch (field.type) {
+      case "boolean": {
+        defaults[field.id] = false as TFieldValues[typeof field.id];
+        break;
+      }
+      case "multipicklist": {
+        defaults[field.id] = [] as TFieldValues[typeof field.id];
+        break;
+      }
+      case "number":
+      case "date":
+      case "datetime":
+      case "picklist":
+      case "phone":
+      case "text":
+      case "textarea":
+      case "html":
+      default: {
+        defaults[field.id] = "" as TFieldValues[typeof field.id];
+        break;
+      }
+    }
+  }
+
+  return defaults as TFieldValues;
+}
+
+export function extractCreateValues<TFieldValues extends FieldValues>(
+  values: TFieldValues,
+  layout: RecordPageLayout<TFieldValues>,
+) {
+  const fields = getCreateLayoutFields(layout);
+  const data: Record<string, unknown> = {};
+
+  for (const field of fields) {
+    const rawValue = values[field.id];
+    data[field.id as string] = normalizeValueForSubmission(field, rawValue);
+  }
+
+  return data;
+}
+
 export function getAllLayoutFields<TFieldValues extends FieldValues>(
   layout: RecordPageLayout<TFieldValues>,
 ): RecordLayoutField<TFieldValues>[] {
@@ -14,6 +67,14 @@ export function getAllLayoutFields<TFieldValues extends FieldValues>(
   const sectionFields = sections.flatMap((section) => section.fields);
 
   return [...sectionFields, ...supplemental];
+}
+
+export function getCreateLayoutFields<TFieldValues extends FieldValues>(
+  layout: RecordPageLayout<TFieldValues>,
+): RecordLayoutField<TFieldValues>[] {
+  return getAllLayoutFields(layout).filter(
+    (field) => field.availableOnCreate !== false && !field.readOnly,
+  );
 }
 
 export function getEditableLayoutFields<TFieldValues extends FieldValues>(
@@ -57,6 +118,7 @@ export function normalizeValueForForm(
       return String(value);
     }
     case "phone":
+    case "html":
     case "textarea":
     default: {
       if (value === null || value === undefined) return "";
@@ -107,6 +169,7 @@ export function normalizeValueForSubmission(
       return [];
     }
     case "picklist":
+    case "html":
     case "phone":
     case "text":
     case "textarea": {

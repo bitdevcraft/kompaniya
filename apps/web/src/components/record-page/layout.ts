@@ -9,7 +9,8 @@ export type RecordFieldDataType =
   | "boolean"
   | "picklist"
   | "multipicklist"
-  | "phone";
+  | "phone"
+  | "html";
 
 export interface RecordFieldOption {
   label: string;
@@ -20,6 +21,10 @@ export interface RecordLayoutField<
   TFieldValues extends FieldValues = FieldValues,
 > {
   colSpan?: number;
+  /**
+   * Whether the field should appear on create/new forms. Defaults to true.
+   */
+  availableOnCreate?: boolean;
   description?: string;
   id: Path<TFieldValues>;
   label: string;

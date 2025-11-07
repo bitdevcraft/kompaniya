@@ -22,18 +22,21 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
         fieldId: "createdAt",
         id: "lead-created",
         label: "Created",
+        availableOnCreate: false,
         type: "datetime",
       },
       {
         fieldId: "updatedAt",
         id: "lead-updated",
         label: "Updated",
+        availableOnCreate: false,
         type: "datetime",
       },
       {
         fieldId: "nextActivityAt",
         id: "lead-next",
         label: "Next activity",
+        availableOnCreate: false,
         type: "datetime",
       },
     ],
@@ -76,11 +79,13 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
             {
               id: "lastActivityAt",
               label: "Last activity",
+              availableOnCreate: false,
               type: "datetime",
             },
             {
               id: "nextActivityAt",
               label: "Next activity",
+              availableOnCreate: false,
               type: "datetime",
             },
             {
@@ -100,7 +105,8 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
     secondColumn: {
       sections: [
         {
-          description: "Tags and categories help route and prioritize this lead.",
+          description:
+            "Tags and categories help route and prioritize this lead.",
           fields: [
             {
               description:

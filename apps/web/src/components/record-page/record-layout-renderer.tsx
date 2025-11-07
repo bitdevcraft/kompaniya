@@ -43,6 +43,7 @@ import type {
 import { BooleanRecordField } from "./boolean-record-field";
 import { DateRecordField } from "./date-record-field";
 import { DatetimeRecordField } from "./datetime-record-field";
+import { HtmlRecordField } from "./html-record-field";
 import { InfoChip } from "./info-chip";
 import {
   getAllLayoutFields,
@@ -216,6 +217,7 @@ const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
   boolean: BooleanRecordField as FieldComponent,
   date: DateRecordField as FieldComponent,
   datetime: DatetimeRecordField as FieldComponent,
+  html: HtmlRecordField as FieldComponent,
   multipicklist: MultipicklistRecordField as FieldComponent,
   number: NumberRecordField as FieldComponent,
   phone: PhoneRecordField as FieldComponent,

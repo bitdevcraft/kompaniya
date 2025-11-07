@@ -42,18 +42,21 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
         fieldId: "createdAt",
         id: "created-at",
         label: "Created",
+        availableOnCreate: false,
         type: "datetime",
       },
       {
         fieldId: "updatedAt",
         id: "updated-at",
         label: "Updated",
+        availableOnCreate: false,
         type: "datetime",
       },
       {
         fieldId: "lastActivityAt",
         id: "last-activity",
         label: "Last activity",
+        availableOnCreate: false,
         type: "datetime",
       },
     ],
@@ -129,7 +132,8 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
             },
             {
               colSpan: 2,
-              description: "Group contacts into consistent buckets for reporting.",
+              description:
+                "Group contacts into consistent buckets for reporting.",
               id: "categories",
               label: "Categories",
               placeholder: "Add categories…",
@@ -152,10 +156,16 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
             { id: "phoneOptIn", label: "Phone opt-in", type: "boolean" },
             { id: "doNotContact", label: "Do not contact", type: "boolean" },
             { id: "doNotSell", label: "Do not sell", type: "boolean" },
-            { id: "emailConfirmedAt", label: "Email confirmed", type: "datetime" },
+            {
+              id: "emailConfirmedAt",
+              label: "Email confirmed",
+              availableOnCreate: false,
+              type: "datetime",
+            },
             {
               id: "consentCapturedAt",
               label: "Consent captured",
+              availableOnCreate: false,
               type: "datetime",
             },
             { id: "consentSource", label: "Consent source", type: "text" },
@@ -167,10 +177,19 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
         },
         {
           columns: 2,
-          description: "Shipping details used for fulfillment and customer care.",
+          description:
+            "Shipping details used for fulfillment and customer care.",
           fields: [
-            { id: "shippingAddressLine1", label: "Address line 1", type: "text" },
-            { id: "shippingAddressLine2", label: "Address line 2", type: "text" },
+            {
+              id: "shippingAddressLine1",
+              label: "Address line 1",
+              type: "text",
+            },
+            {
+              id: "shippingAddressLine2",
+              label: "Address line 2",
+              type: "text",
+            },
             { id: "shippingCity", label: "City", type: "text" },
             { id: "shippingRegion", label: "State / region", type: "text" },
             { id: "shippingPostalCode", label: "Postal code", type: "text" },
@@ -186,8 +205,16 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
           description:
             "Billing information that syncs with invoices and payment records.",
           fields: [
-            { id: "billingAddressLine1", label: "Address line 1", type: "text" },
-            { id: "billingAddressLine2", label: "Address line 2", type: "text" },
+            {
+              id: "billingAddressLine1",
+              label: "Address line 1",
+              type: "text",
+            },
+            {
+              id: "billingAddressLine2",
+              label: "Address line 2",
+              type: "text",
+            },
             { id: "billingCity", label: "City", type: "text" },
             { id: "billingRegion", label: "State / region", type: "text" },
             { id: "billingPostalCode", label: "Postal code", type: "text" },
@@ -207,7 +234,8 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
             "Track the last touchpoint and upcoming follow-up for this contact.",
           fields: [
             {
-              description: "When we last heard from or engaged with this contact.",
+              description:
+                "When we last heard from or engaged with this contact.",
               id: "lastActivityAt",
               label: "Last activity",
               type: "datetime",
