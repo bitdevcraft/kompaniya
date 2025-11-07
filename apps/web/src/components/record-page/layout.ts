@@ -74,6 +74,21 @@ export interface RecordLayoutSection<
   title?: string;
 }
 
+export interface RecordLayoutSectionColumns<
+  TFieldValues extends FieldValues = FieldValues,
+> {
+  firstColumn?: RecordLayoutSectionGroup<TFieldValues>;
+  header?: RecordLayoutSectionGroup<TFieldValues>;
+  secondColumn?: RecordLayoutSectionGroup<TFieldValues>;
+  sidebar?: "firstColumn" | "secondColumn" | null;
+}
+
+export interface RecordLayoutSectionGroup<
+  TFieldValues extends FieldValues = FieldValues,
+> {
+  sections: RecordLayoutSection<TFieldValues>[];
+}
+
 export interface RecordPageHeaderConfig<
   TFieldValues extends FieldValues = FieldValues,
 > {
@@ -90,12 +105,8 @@ export interface RecordPageHeaderConfig<
 export interface RecordPageLayout<
   TFieldValues extends FieldValues = FieldValues,
 > {
-  layoutStyle?:
-    | "singleColumn"
-    | "twoColumns"
-    | "headerWithTwoColumns"
-    | "headerWithSidebar";
   header: RecordPageHeaderConfig<TFieldValues>;
-  sections: RecordLayoutSection<TFieldValues>[];
+  sectionColumns?: RecordLayoutSectionColumns<TFieldValues>;
+  sections?: RecordLayoutSection<TFieldValues>[];
   supplementalFields?: RecordLayoutField<TFieldValues>[];
 }
