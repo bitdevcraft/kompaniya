@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 
-import type { RecordFieldOption } from "./layout";
+import type { LookupFieldConfig, RecordFieldOption } from "./layout";
 
 export interface BaseRecordFieldProps<TValue> {
   description?: string;
   editing: boolean;
   fallback?: string;
+  lookup?: LookupFieldConfig;
   label: string;
   name?: string;
   onBlur?: () => void;
