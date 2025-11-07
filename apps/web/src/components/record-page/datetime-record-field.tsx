@@ -1,17 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-
 import { Button } from "@repo/shared-ui/components/common/button";
 import { Calendar } from "@repo/shared-ui/components/common/calendar";
 import { Input } from "@repo/shared-ui/components/common/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/shared-ui/components/common/popover";
 import { cn } from "@repo/shared-ui/lib/utils";
 import { CalendarClockIcon, XIcon } from "lucide-react";
+import { useMemo } from "react";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 import { formatDateTime } from "./utils";
 
@@ -29,13 +28,7 @@ export function DatetimeRecordField({
   value,
 }: DatetimeRecordFieldProps) {
   const parsedDate = useMemo(() => parseDate(value), [value]);
-  const [timeInput, setTimeInput] = useState(() =>
-    parsedDate ? formatTimeInput(parsedDate) : "",
-  );
-
-  useEffect(() => {
-    setTimeInput(parsedDate ? formatTimeInput(parsedDate) : "");
-  }, [parsedDate]);
+  const timeValue = parsedDate ? formatTimeInput(parsedDate) : "";
 
   if (!editing) {
     const displayValue = parsedDate ? formatDateTime(parsedDate) : value;
@@ -76,14 +69,13 @@ export function DatetimeRecordField({
               mode="single"
               onSelect={(nextDate) => {
                 if (!nextDate) {
-                  setTimeInput("");
                   onChange?.(null);
                   onBlur?.();
                   return;
                 }
 
                 const nextValue = formatDateInput(nextDate);
-                const nextTime = timeInput && timeInput.length > 0 ? timeInput : "00:00";
+                const nextTime = timeValue && timeValue.length > 0 ? timeValue : "00:00";
                 onChange?.(`${nextValue}T${nextTime}`);
                 onBlur?.();
               }}
@@ -93,27 +85,27 @@ export function DatetimeRecordField({
         </Popover>
         <Input
           aria-label="Select time"
+          disabled={!parsedDate}
           onBlur={onBlur}
           onChange={(event) => {
             const next = event.target.value;
-            setTimeInput(next);
-            if (parsedDate && next) {
+            if (!parsedDate) return;
+
+            if (next) {
               onChange?.(`${formatDateInput(parsedDate)}T${next}`);
-              onBlur?.();
-            } else if (parsedDate && !next) {
+            } else {
               onChange?.(`${formatDateInput(parsedDate)}T00:00`);
-              onBlur?.();
             }
+            onBlur?.();
           }}
           placeholder="HH:MM"
           type="time"
-          value={timeInput}
+          value={timeValue}
         />
         {parsedDate ? (
           <Button
             aria-label="Clear date and time"
             onClick={() => {
-              setTimeInput("");
               onChange?.(null);
               onBlur?.();
             }}
@@ -131,13 +123,6 @@ export function DatetimeRecordField({
   );
 }
 
-function parseDate(value?: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date;
-}
-
 function formatDateInput(date: Date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -149,4 +134,11 @@ function formatTimeInput(date: Date) {
   const hours = `${date.getHours()}`.padStart(2, "0");
   const minutes = `${date.getMinutes()}`.padStart(2, "0");
   return `${hours}:${minutes}`;
+}
+
+function parseDate(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
 }

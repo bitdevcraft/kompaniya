@@ -1,14 +1,14 @@
-import { useMemo } from "react";
-
 import { Badge } from "@repo/shared-ui/components/common/badge";
 import { MultiSelect } from "@repo/shared-ui/components/common/multi-select";
+import { useMemo } from "react";
 
 import type { RecordFieldOption } from "./layout";
+
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 
 const DEFAULT_OPTIONS: RecordFieldOption[] = [

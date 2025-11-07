@@ -6,12 +6,13 @@ import {
   SelectValue,
 } from "@repo/shared-ui/components/common/select";
 
-import { RecordField } from "./record-field";
 import type { RecordFieldOption } from "./layout";
+
+import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 
 const DEFAULT_OPTIONS: RecordFieldOption[] = [

@@ -61,6 +61,31 @@ import {
   renderLink,
 } from "./utils";
 
+type FieldComponent = (props: {
+  description?: string;
+  editing: boolean;
+  fallback?: string;
+  label: string;
+  name?: string;
+  onBlur?: () => void;
+  onChange?: (value: unknown) => void;
+  options?: RecordFieldOption[];
+  placeholder?: string;
+  value?: unknown;
+}) => JSX.Element | null;
+
+const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
+  boolean: BooleanRecordField as FieldComponent,
+  date: DateRecordField as FieldComponent,
+  datetime: DatetimeRecordField as FieldComponent,
+  multipicklist: MultipicklistRecordField as FieldComponent,
+  number: NumberRecordField as FieldComponent,
+  phone: PhoneRecordField as FieldComponent,
+  picklist: PicklistRecordField as FieldComponent,
+  text: TextRecordField as FieldComponent,
+  textarea: TextareaRecordField as FieldComponent,
+};
+
 const HEADER_ICONS: Record<
   RecordLayoutHeaderIcon,
   React.ComponentType<{ className?: string }>
@@ -110,6 +135,12 @@ interface SectionProps<TFieldValues extends FieldValues> {
   record: Record<string, unknown>;
   section: RecordLayoutSection<TFieldValues>;
 }
+
+type SectionRenderContext<TFieldValues extends FieldValues> = {
+  form: UseFormReturn<TFieldValues>;
+  isEditing: boolean;
+  record: Record<string, unknown>;
+};
 
 export function extractEditableValues<TFieldValues extends FieldValues>(
   values: TFieldValues,
@@ -204,30 +235,31 @@ function buildHeaderChip<TFieldValues extends FieldValues>(
   };
 }
 
-type FieldComponent = (props: {
-  description?: string;
-  editing: boolean;
-  fallback?: string;
-  label: string;
-  name?: string;
-  onBlur?: () => void;
-  onChange?: (value: unknown) => void;
-  placeholder?: string;
-  options?: RecordFieldOption[];
-  value?: unknown;
-}) => JSX.Element | null;
+function fallbackFormat(
+  value: unknown,
+  type?: "text" | "number" | "date" | "datetime",
+) {
+  if (value === null || value === undefined) {
+    return "";
+  }
 
-const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
-  boolean: BooleanRecordField as FieldComponent,
-  date: DateRecordField as FieldComponent,
-  datetime: DatetimeRecordField as FieldComponent,
-  multipicklist: MultipicklistRecordField as FieldComponent,
-  number: NumberRecordField as FieldComponent,
-  phone: PhoneRecordField as FieldComponent,
-  picklist: PicklistRecordField as FieldComponent,
-  text: TextRecordField as FieldComponent,
-  textarea: TextareaRecordField as FieldComponent,
-};
+  switch (type) {
+    case "date":
+      return formatDateTime(value, {
+        dateStyle: "medium",
+        timeStyle: undefined,
+      });
+    case "datetime":
+      return formatDateTime(value);
+    case "number": {
+      if (typeof value === "number") return formatScore(value);
+      if (typeof value === "string") return value;
+      return "";
+    }
+    default:
+      return String(value);
+  }
+}
 
 function FieldRenderer<TFieldValues extends FieldValues>({
   field,
@@ -259,8 +291,8 @@ function FieldRenderer<TFieldValues extends FieldValues>({
             name={field.id as string}
             onBlur={controllerField.onBlur}
             onChange={(value) => controllerField.onChange(value)}
-            placeholder={field.placeholder}
             options={field.options}
+            placeholder={field.placeholder}
             value={controllerField.value}
           />
         )}
@@ -277,95 +309,6 @@ function FieldRenderer<TFieldValues extends FieldValues>({
       value={record[field.id as string]}
     />
   );
-}
-
-type SectionRenderContext<TFieldValues extends FieldValues> = {
-  form: UseFormReturn<TFieldValues>;
-  isEditing: boolean;
-  record: Record<string, unknown>;
-};
-
-function renderLayoutSections<TFieldValues extends FieldValues>(
-  layout: RecordPageLayout<TFieldValues>,
-  context: SectionRenderContext<TFieldValues>,
-) {
-  if (!layout.sections || layout.sections.length === 0) {
-    return null;
-  }
-
-  const { form, isEditing, record } = context;
-  const renderSection = (section: RecordLayoutSection<TFieldValues>) => (
-    <Section
-      form={form}
-      isEditing={isEditing}
-      key={section.id}
-      record={record}
-      section={section}
-    />
-  );
-
-  switch (layout.layoutStyle) {
-    case "twoColumns":
-      return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {layout.sections.map(renderSection)}
-        </div>
-      );
-    case "headerWithTwoColumns": {
-      const [first, ...rest] = layout.sections;
-      return (
-        <div className="space-y-6">
-          {first ? renderSection(first) : null}
-          {rest.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {rest.map(renderSection)}
-            </div>
-          ) : null}
-        </div>
-      );
-    }
-    case "headerWithSidebar": {
-      const [first, ...rest] = layout.sections;
-      return (
-        <div className="space-y-6">
-          {first ? renderSection(first) : null}
-          {rest.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:[grid-template-columns:2fr_1fr]">
-              {rest.map(renderSection)}
-            </div>
-          ) : null}
-        </div>
-      );
-    }
-    default:
-      return layout.sections.map(renderSection);
-  }
-}
-
-function fallbackFormat(
-  value: unknown,
-  type?: "text" | "number" | "date" | "datetime",
-) {
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  switch (type) {
-    case "date":
-      return formatDateTime(value, {
-        dateStyle: "medium",
-        timeStyle: undefined,
-      });
-    case "datetime":
-      return formatDateTime(value);
-    case "number": {
-      if (typeof value === "number") return formatScore(value);
-      if (typeof value === "string") return value;
-      return "";
-    }
-    default:
-      return String(value);
-  }
 }
 
 function formatHeaderText<TFieldValues extends FieldValues>(
@@ -461,25 +404,6 @@ function formatValue(field: RecordLayoutField, rawValue: unknown): ReactNode {
       return String(rawValue);
     }
   }
-}
-
-function normalizeMultipicklistValue(value: unknown) {
-  if (!value) return [] as string[];
-
-  if (Array.isArray(value)) {
-    return value
-      .map((entry) => (typeof entry === "string" ? entry : String(entry)))
-      .filter((entry) => entry.trim().length > 0);
-  }
-
-  if (typeof value === "string") {
-    return value
-      .split(/\n|,/)
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-  }
-
-  return [String(value)];
 }
 
 function getColumnSpanClass(colSpan?: number) {
@@ -601,6 +525,82 @@ function Header<TFieldValues extends FieldValues>({
       </CardContent>
     </Card>
   );
+}
+
+function normalizeMultipicklistValue(value: unknown) {
+  if (!value) return [] as string[];
+
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => (typeof entry === "string" ? entry : String(entry)))
+      .filter((entry) => entry.trim().length > 0);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/\n|,/)
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+  }
+
+  return [String(value)];
+}
+
+function renderLayoutSections<TFieldValues extends FieldValues>(
+  layout: RecordPageLayout<TFieldValues>,
+  context: SectionRenderContext<TFieldValues>,
+) {
+  if (!layout.sections || layout.sections.length === 0) {
+    return null;
+  }
+
+  const { form, isEditing, record } = context;
+  const renderSection = (section: RecordLayoutSection<TFieldValues>) => (
+    <Section
+      form={form}
+      isEditing={isEditing}
+      key={section.id}
+      record={record}
+      section={section}
+    />
+  );
+
+  switch (layout.layoutStyle) {
+    case "twoColumns":
+      return (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {layout.sections.map(renderSection)}
+        </div>
+      );
+    case "headerWithTwoColumns": {
+      const [first, ...rest] = layout.sections;
+      return (
+        <div className="space-y-6">
+          {first ? renderSection(first) : null}
+          {rest.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {rest.map(renderSection)}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+    case "headerWithSidebar": {
+      const [first, ...rest] = layout.sections;
+      return (
+        <div className="space-y-6">
+          {first ? renderSection(first) : null}
+          {rest.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:[grid-template-columns:2fr_1fr]">
+              {rest.map(renderSection)}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+    default:
+      return layout.sections.map(renderSection);
+  }
 }
 
 function resolveFieldValue<TFieldValues extends FieldValues>(

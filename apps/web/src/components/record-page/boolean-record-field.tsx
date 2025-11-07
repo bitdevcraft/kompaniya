@@ -2,9 +2,9 @@ import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 
 export type BooleanRecordFieldProps = BaseRecordFieldProps<boolean | null | undefined>;
@@ -35,15 +35,15 @@ export function BooleanRecordField({
       <FieldLabel htmlFor={name}>{label}</FieldLabel>
       <div className="flex items-center gap-2">
         <Checkbox
-          checked={Boolean(value)}
+          checked={value === true}
           id={name}
           onCheckedChange={(checked) => {
-            onChange?.(Boolean(checked));
+            onChange?.(checked === true);
             onBlur?.();
           }}
         />
         <span className="text-sm text-muted-foreground">
-          {Boolean(value) ? "Enabled" : "Disabled"}
+          {value === true ? "Enabled" : "Disabled"}
         </span>
       </div>
       <FieldDescription description={description} />

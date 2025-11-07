@@ -2,9 +2,9 @@ import { Textarea } from "@repo/shared-ui/components/common/textarea";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 
 export type TextareaRecordFieldProps = BaseRecordFieldProps<string | null | undefined>;

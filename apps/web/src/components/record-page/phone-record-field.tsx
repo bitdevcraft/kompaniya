@@ -2,9 +2,9 @@ import { PhoneInput } from "@repo/shared-ui/components/common/phone-input";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 import { renderLink } from "./utils";
 
