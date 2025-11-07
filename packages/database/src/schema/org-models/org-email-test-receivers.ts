@@ -2,12 +2,15 @@ import { pgTable, text, varchar } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
+import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
 
 export const orgEmailTestReceiversTable = pgTable("org_email_test_receivers", {
   ...baseIdModel,
   ...baseTimestampModel,
   ...baseOrganizationModel,
+  ...baseOwnerModel,
+
   name: varchar("name", { length: 255 }),
   emails: text("emails").array(),
 });

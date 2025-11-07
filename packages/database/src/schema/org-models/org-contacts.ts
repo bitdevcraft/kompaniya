@@ -12,12 +12,15 @@ import {
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
+import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
 
 export const orgContactsTable = pgTable("org_contacts", {
   ...baseIdModel,
   ...baseTimestampModel,
   ...baseOrganizationModel,
+  ...baseOwnerModel,
+
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
   salutation: varchar("salutation", { length: 255 }),

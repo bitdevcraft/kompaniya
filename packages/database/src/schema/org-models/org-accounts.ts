@@ -9,12 +9,14 @@ import {
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
+import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
 
 export const orgAccountsTable = pgTable("org_accounts", {
   ...baseIdModel,
   ...baseTimestampModel,
   ...baseOrganizationModel,
+  ...baseOwnerModel,
   name: varchar("name", { length: 1024 }),
   phone: varchar("phone", { length: 50 }),
   phoneE164: varchar("phone_e164", { length: 50 }),

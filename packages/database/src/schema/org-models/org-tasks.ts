@@ -2,12 +2,14 @@ import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
+import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
 
 export const orgTasksTable = pgTable("org_tasks", {
   ...baseIdModel,
   ...baseTimestampModel,
   ...baseOrganizationModel,
+  ...baseOwnerModel,
 
   runBy: timestamp("run_by", { withTimezone: true, mode: "date" })
     .defaultNow()

@@ -2,6 +2,7 @@ import { pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
+import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
 import { orgEmailDomainsTable } from "./org-email-domains";
 import { orgEmailTemplatesTable } from "./org-email-templates";
@@ -11,6 +12,8 @@ export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
   ...baseIdModel,
   ...baseTimestampModel,
   ...baseOrganizationModel,
+  ...baseOwnerModel,
+
   name: varchar("name", { length: 255 }),
   subject: varchar("subject", { length: 998 }),
   body: text("body"),
