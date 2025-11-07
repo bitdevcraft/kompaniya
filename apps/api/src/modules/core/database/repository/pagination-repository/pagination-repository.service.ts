@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
-import { and, asc, count, desc, eq, isNull, Table } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, isNull, Table } from 'drizzle-orm';
 import { AnyPgColumn } from 'drizzle-orm/pg-core';
 import { AnyPgTable } from 'drizzle-orm/pg-core';
 
@@ -20,6 +20,7 @@ export class PaginationRepositoryService {
     T extends AnyPgTable & {
       deletedAt: AnyPgColumn;
       createdAt: AnyPgColumn;
+      name: AnyPgColumn;
       organizationId?: AnyPgColumn;
     },
   >({
@@ -65,6 +66,7 @@ export class PaginationRepositoryService {
               organizationId && table.organizationId
                 ? eq(table.organizationId, organizationId)
                 : undefined,
+              query.name ? ilike(table.name, `%${query.name}%`) : undefined,
             ),
           )
           .limit(query.perPage)
@@ -83,6 +85,7 @@ export class PaginationRepositoryService {
               organizationId && table.organizationId
                 ? eq(table.organizationId, organizationId)
                 : undefined,
+              query.name ? ilike(table.name, `%${query.name}%`) : undefined,
             ),
           )
           .execute()

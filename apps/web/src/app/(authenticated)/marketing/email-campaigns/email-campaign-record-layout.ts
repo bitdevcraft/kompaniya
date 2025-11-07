@@ -2,6 +2,7 @@ import {
   type RecordFieldOption,
   type RecordPageLayout,
 } from "@/components/record-page/layout";
+import { env } from "@/env/client";
 
 import type { EmailCampaignRecordFormValues } from "./email-campaign-record-schema";
 
@@ -70,7 +71,11 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
                 id: "orgEmailDomainId",
                 label: "Sending domain ID",
                 placeholder: "Domain identifier",
-                type: "text",
+                type: "lookup",
+                lookup: {
+                  searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/lead/paginated`,
+                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/lead/r`,
+                },
               },
               {
                 id: "orgEmailTemplateId",

@@ -28,7 +28,7 @@ interface NormalizedLookupRecord {
 
 const DEFAULT_LABEL_KEY = "name";
 const DEFAULT_VALUE_KEY = "id";
-const DEFAULT_QUERY_PARAM = "q";
+const DEFAULT_QUERY_PARAM = "name";
 const DEFAULT_ID_PARAM = "id";
 
 export function LookupRecordField({
@@ -177,7 +177,7 @@ export function LookupRecordField({
   const fetchJson = useCallback(
     async (url?: string, signal?: AbortSignal): Promise<unknown | null> => {
       if (!url) return null;
-      const response = await fetch(url, { signal });
+      const response = await fetch(url, { signal, credentials: "include" });
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }

@@ -1,8 +1,8 @@
-import { useDebounce } from "@repo/shared-ui/hooks/use-debounce";
-import { cn } from "@repo/shared-ui/lib/utils";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useDebounce } from "../../hooks/use-debounce";
+import { cn } from "../../lib/utils";
 import { Button } from "./button";
 import {
   Command,
@@ -51,6 +51,13 @@ export interface AsyncSelectProps<T> {
   noResultsMessage?: string;
   /** Allow clearing the selection */
   clearable?: boolean;
+
+  /** New: only fetch when popover is open (default true) */
+  fetchOnOpen?: boolean;
+  /** New: minimum characters before fetching when not preloading (default 0) */
+  minQueryLength?: number;
+  /** New: enable in-memory cache per query (default true) */
+  enableCache?: boolean;
 }
 
 export interface Option {
@@ -63,7 +70,7 @@ export interface Option {
 
 export function AsyncSelect<T>({
   fetcher,
-  preload,
+  preload = false,
   filterFn,
   renderOption,
   getOptionValue,
@@ -80,96 +87,130 @@ export function AsyncSelect<T>({
   triggerClassName,
   noResultsMessage,
   clearable = true,
+  fetchOnOpen = true,
+  minQueryLength = 0,
+  enableCache = true,
 }: AsyncSelectProps<T>) {
-  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<T[]>([]);
+  const [rawOptions, setRawOptions] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedValue, setSelectedValue] = useState(value);
   const [selectedOption, setSelectedOption] = useState<T | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, preload ? 0 : 300);
-  const [originalOptions, setOriginalOptions] = useState<T[]>([]);
+  const debouncedSearchTerm = useDebounce(searchTerm, preload ? 0 : 500);
 
+  // Stable refs prevent effect churn when parent re-creates functions
+  const fetcherRef = useRef(fetcher);
+  const filterFnRef = useRef(filterFn);
   useEffect(() => {
-    setMounted(true);
+    fetcherRef.current = fetcher;
+  }, [fetcher]);
+  useEffect(() => {
+    filterFnRef.current = filterFn;
+  }, [filterFn]);
+
+  // Query cache
+  const cacheRef = useRef<Map<string, T[]>>(new Map());
+  const requestIdRef = useRef(0);
+  const mountedRef = useRef(false);
+
+  // Keep local selected value in sync
+  useEffect(() => {
     setSelectedValue(value);
   }, [value]);
 
-  // Initialize selectedOption when options are loaded and value exists
-  useEffect(() => {
-    if (value && options.length > 0) {
-      const option = options.find((opt) => getOptionValue(opt) === value);
-      if (option) {
-        setSelectedOption(option);
-      }
-    }
-  }, [value, options, getOptionValue]);
+  // Compute display options
+  const options = useMemo(() => {
+    if (!preload) return rawOptions;
+    const q = debouncedSearchTerm.trim();
+    if (!q) return rawOptions;
+    const f = filterFnRef.current;
+    return f ? rawOptions.filter((o) => f(o, q)) : rawOptions;
+  }, [rawOptions, preload, debouncedSearchTerm]);
 
-  // Effect for initial fetch
+  // Keep selectedOption resolved from current options
   useEffect(() => {
-    const initializeOptions = async () => {
-      try {
-        setLoading(true);
+    if (!selectedValue) {
+      setSelectedOption(null);
+      return;
+    }
+    const found =
+      options.find((o) => getOptionValue(o) === selectedValue) ?? null;
+    setSelectedOption(found);
+  }, [options, selectedValue, getOptionValue]);
+
+  const normalize = (q?: string) => (q ?? "").trim();
+
+  const load = useCallback(
+    async (query: string) => {
+      const key = normalize(query);
+
+      if (enableCache && cacheRef.current.has(key)) {
         setError(null);
-        // If we have a value, use it for the initial search
-        const data = await fetcher(value);
-        setOriginalOptions(data);
-        setOptions(data);
+        setRawOptions(cacheRef.current.get(key) as T[]);
+        return;
+      }
+
+      const currentId = ++requestIdRef.current;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await fetcherRef.current(key);
+        if (currentId !== requestIdRef.current) return; // drop stale
+        if (enableCache) cacheRef.current.set(key, data);
+        setRawOptions(data);
       } catch (err) {
+        if (currentId !== requestIdRef.current) return;
         setError(
           err instanceof Error ? err.message : "Failed to fetch options",
         );
+        setRawOptions([]);
       } finally {
-        setLoading(false);
+        if (currentId === requestIdRef.current) setLoading(false);
       }
-    };
+    },
+    [enableCache],
+  );
 
-    if (!mounted) {
-      initializeOptions();
-    }
-  }, [mounted, fetcher, value]);
-
+  // Initial preload or initial value resolution
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetcher(debouncedSearchTerm);
-        setOriginalOptions(data);
-        setOptions(data);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch options",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (mountedRef.current) return;
+    mountedRef.current = true;
 
-    if (!mounted) {
-      fetchOptions();
-    } else if (!preload) {
-      fetchOptions();
-    } else if (preload) {
-      if (debouncedSearchTerm) {
-        setOptions(
-          originalOptions.filter((option) =>
-            filterFn ? filterFn(option, debouncedSearchTerm) : true,
-          ),
-        );
-      } else {
-        setOptions(originalOptions);
-      }
+    if (preload) {
+      // Preload once
+      load("");
+    } else if (value) {
+      // Resolve display of an existing value without opening
+      load(value);
+    }
+  }, [preload, value, load]);
+
+  // Fetch-on-open and on debounced search (when not preloading)
+  useEffect(() => {
+    if (preload) return; // handled by initial load + local filtering not used
+    if (fetchOnOpen && !open) return;
+
+    const q = debouncedSearchTerm.trim();
+    if (q.length >= minQueryLength) {
+      load(q);
+    } else if (!q && value) {
+      // Ensure selected value is resolvable in list
+      load(value);
+    } else if (!q) {
+      setRawOptions([]);
+      setError(null);
     }
   }, [
-    fetcher,
-    debouncedSearchTerm,
-    mounted,
     preload,
-    filterFn,
-    originalOptions,
+    open,
+    fetchOnOpen,
+    debouncedSearchTerm,
+    minQueryLength,
+    value,
+    load,
   ]);
 
   const handleSelect = useCallback(
@@ -177,9 +218,8 @@ export function AsyncSelect<T>({
       const newValue =
         clearable && currentValue === selectedValue ? "" : currentValue;
       setSelectedValue(newValue);
-      setSelectedOption(
-        options.find((option) => getOptionValue(option) === newValue) || null,
-      );
+      const found = options.find((o) => getOptionValue(o) === newValue) ?? null;
+      setSelectedOption(found);
       onChange(newValue);
       setOpen(false);
     },
@@ -198,25 +238,23 @@ export function AsyncSelect<T>({
           )}
           disabled={disabled}
           role="combobox"
-          style={{ width: width }}
+          style={{ width }}
           variant="outline"
         >
           {selectedOption ? getDisplayValue(selectedOption) : placeholder}
           <ChevronsUpDown className="opacity-50" size={10} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn("p-0", className)} style={{ width: width }}>
+      <PopoverContent className={cn("p-0", className)} style={{ width }}>
         <Command shouldFilter={false}>
           <div className="relative border-b w-full">
             <CommandInput
-              onValueChange={(value) => {
-                setSearchTerm(value);
-              }}
+              onValueChange={setSearchTerm}
               placeholder={`Search ${label.toLowerCase()}...`}
               value={searchTerm}
             />
             {loading && options.length > 0 && (
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
                 <Loader2 className="h-4 w-4 animate-spin" />
               </div>
             )}
@@ -225,9 +263,11 @@ export function AsyncSelect<T>({
             {error && (
               <div className="p-4 text-destructive text-center">{error}</div>
             )}
+
             {loading &&
               options.length === 0 &&
               (loadingSkeleton || <DefaultLoadingSkeleton />)}
+
             {!loading &&
               !error &&
               options.length === 0 &&
@@ -236,24 +276,22 @@ export function AsyncSelect<T>({
                   {noResultsMessage ?? `No ${label.toLowerCase()} found.`}
                 </CommandEmpty>
               ))}
+
             <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={getOptionValue(option)}
-                  onSelect={handleSelect}
-                  value={getOptionValue(option)}
-                >
-                  {renderOption(option)}
-                  <Check
-                    className={cn(
-                      "ml-auto h-3 w-3",
-                      selectedValue === getOptionValue(option)
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
+              {options.map((option) => {
+                const ov = getOptionValue(option);
+                return (
+                  <CommandItem key={ov} onSelect={handleSelect} value={ov}>
+                    {renderOption(option)}
+                    <Check
+                      className={cn(
+                        "ml-auto h-3 w-3",
+                        selectedValue === ov ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
