@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@repo/shared-ui/components/common/card";
 import { Form, FormField } from "@repo/shared-ui/components/common/form";
+import { ScrollArea } from "@repo/shared-ui/components/common/scroll-area";
 import { cn } from "@repo/shared-ui/lib/utils";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
@@ -158,7 +159,8 @@ export function RecordCreateForm<TFieldValues extends FieldValues>({
         {showStepControls ? (
           <StepIndicator activeStep={activeStep} steps={steps} />
         ) : null}
-        {renderSections()}
+
+        <ScrollArea className="h-[70vh] px-4">{renderSections()}</ScrollArea>
 
         <div className="flex w-full flex-wrap justify-end gap-2">
           {onCancel ? (
