@@ -2,12 +2,14 @@ import { Input } from "@repo/shared-ui/components/common/input";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 
-export type TextRecordFieldProps = BaseRecordFieldProps<string | null | undefined>;
+export type TextRecordFieldProps = BaseRecordFieldProps<
+  string | null | undefined
+>;
 
 export function TextRecordField({
   description,

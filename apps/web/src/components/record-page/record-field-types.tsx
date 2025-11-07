@@ -19,7 +19,10 @@ export function FieldDescription({ description }: { description?: string }) {
   if (!description) return null;
 
   return (
-    <p className="text-xs text-muted-foreground" data-slot="record-field-description">
+    <p
+      className="text-xs text-muted-foreground"
+      data-slot="record-field-description"
+    >
       {description}
     </p>
   );

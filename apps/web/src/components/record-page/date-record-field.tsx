@@ -1,20 +1,25 @@
-import { useMemo } from "react";
-
 import { Button } from "@repo/shared-ui/components/common/button";
 import { Calendar } from "@repo/shared-ui/components/common/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@repo/shared-ui/components/common/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@repo/shared-ui/components/common/popover";
 import { cn } from "@repo/shared-ui/lib/utils";
 import { CalendarIcon, XIcon } from "lucide-react";
+import { useMemo } from "react";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 import { formatDateTime } from "./utils";
 
-export type DateRecordFieldProps = BaseRecordFieldProps<string | null | undefined>;
+export type DateRecordFieldProps = BaseRecordFieldProps<
+  string | null | undefined
+>;
 
 export function DateRecordField({
   description,
@@ -44,7 +49,7 @@ export function DateRecordField({
 
   const buttonLabel = parsedDate
     ? formatDateTime(parsedDate, { dateStyle: "long", timeStyle: undefined })
-    : placeholder ?? "Select a date";
+    : (placeholder ?? "Select a date");
 
   return (
     <div className="space-y-2">
@@ -103,17 +108,17 @@ export function DateRecordField({
   );
 }
 
+function formatDateInput(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function parseDate(value?: string | null) {
   if (!value) return null;
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   return date;
-}
-
-function formatDateInput(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}-${month}-${day}`;
 }

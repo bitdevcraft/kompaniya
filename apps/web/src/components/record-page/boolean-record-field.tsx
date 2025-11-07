@@ -2,12 +2,14 @@ import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 
-export type BooleanRecordFieldProps = BaseRecordFieldProps<boolean | null | undefined>;
+export type BooleanRecordFieldProps = BaseRecordFieldProps<
+  boolean | null | undefined
+>;
 
 export function BooleanRecordField({
   description,
@@ -20,7 +22,8 @@ export function BooleanRecordField({
   value,
 }: BooleanRecordFieldProps) {
   if (!editing) {
-    const displayValue = typeof value === "boolean" ? (value ? "Yes" : "No") : value;
+    const displayValue =
+      typeof value === "boolean" ? (value ? "Yes" : "No") : value;
 
     return (
       <div className="space-y-2">
@@ -43,7 +46,7 @@ export function BooleanRecordField({
           }}
         />
         <span className="text-sm text-muted-foreground">
-          {Boolean(value) ? "Enabled" : "Disabled"}
+          {value ? "Enabled" : "Disabled"}
         </span>
       </div>
       <FieldDescription description={description} />

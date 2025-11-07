@@ -2,13 +2,13 @@ import type { OrgLead } from "@repo/database/schema";
 
 import { z } from "zod";
 
+import { type RecordPageLayout } from "@/components/record-page/layout";
 import {
   getAllLayoutFields,
   getEditableLayoutFields,
   normalizeValueForForm,
   normalizeValueForSubmission,
-  type RecordPageLayout,
-} from "@/components/record-page";
+} from "@/components/record-page/layout-helpers";
 
 export const leadRecordSchema = z.object({
   categories: z.array(z.string()).optional().default([]),

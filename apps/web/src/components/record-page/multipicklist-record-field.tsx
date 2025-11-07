@@ -1,14 +1,14 @@
-import { useMemo } from "react";
-
 import { Badge } from "@repo/shared-ui/components/common/badge";
 import { MultiSelect } from "@repo/shared-ui/components/common/multi-select";
+import { useMemo } from "react";
 
 import type { RecordFieldOption } from "./layout";
+
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 
 const DEFAULT_OPTIONS: RecordFieldOption[] = [
@@ -17,7 +17,9 @@ const DEFAULT_OPTIONS: RecordFieldOption[] = [
   { label: "item 3", value: "item 3" },
 ];
 
-export type MultipicklistRecordFieldProps = BaseRecordFieldProps<string[] | string | null | undefined>;
+export type MultipicklistRecordFieldProps = BaseRecordFieldProps<
+  string[] | string | null | undefined
+>;
 
 export function MultipicklistRecordField({
   description,
@@ -33,10 +35,14 @@ export function MultipicklistRecordField({
 }: MultipicklistRecordFieldProps) {
   const values = useMemo(() => normalizeValues(value), [value]);
   const normalizedOptions = useMemo(() => {
-    return optionsProp && optionsProp.length > 0 ? optionsProp : DEFAULT_OPTIONS;
+    return optionsProp && optionsProp.length > 0
+      ? optionsProp
+      : DEFAULT_OPTIONS;
   }, [optionsProp]);
   const valueToLabel = useMemo(() => {
-    return new Map(normalizedOptions.map((option) => [option.value, option.label]));
+    return new Map(
+      normalizedOptions.map((option) => [option.value, option.label]),
+    );
   }, [normalizedOptions]);
 
   if (!editing) {

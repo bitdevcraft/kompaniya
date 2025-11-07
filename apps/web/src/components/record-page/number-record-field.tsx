@@ -2,13 +2,15 @@ import { Input } from "@repo/shared-ui/components/common/input";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 import { formatScore } from "./utils";
 
-export type NumberRecordFieldProps = BaseRecordFieldProps<string | number | null | undefined>;
+export type NumberRecordFieldProps = BaseRecordFieldProps<
+  string | number | null | undefined
+>;
 
 export function NumberRecordField({
   description,

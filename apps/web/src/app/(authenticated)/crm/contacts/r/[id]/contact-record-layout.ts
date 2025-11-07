@@ -1,4 +1,7 @@
-import type { RecordFieldOption, RecordPageLayout } from "@/components/record-page";
+import {
+  RecordFieldOption,
+  RecordPageLayout,
+} from "@/components/record-page/layout";
 
 import type { ContactRecordFormValues } from "./contact-record-schema";
 

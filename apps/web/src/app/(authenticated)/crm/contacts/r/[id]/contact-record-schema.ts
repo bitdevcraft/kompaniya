@@ -2,13 +2,13 @@ import type { OrgContact } from "@repo/database/schema";
 
 import { z } from "zod";
 
+import { RecordPageLayout } from "@/components/record-page/layout";
 import {
   getAllLayoutFields,
   getEditableLayoutFields,
   normalizeValueForForm,
   normalizeValueForSubmission,
-  type RecordPageLayout,
-} from "@/components/record-page";
+} from "@/components/record-page/layout-helpers";
 
 export const contactRecordSchema = z.object({
   annualRevenueBand: z.string().optional(),

@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { RecordLayoutRenderer } from "@/components/record-page";
+import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
 
 import type { LeadRecordFormValues } from "./lead-record-schema";
 

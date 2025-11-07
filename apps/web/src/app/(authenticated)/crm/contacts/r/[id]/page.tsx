@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { api } from "@/lib/api";
 
+import { modelEndpoint } from "../../config";
 import { RecordViewPage } from "./record-view-page";
 
 interface ContactRecordPageProps {
@@ -17,7 +18,10 @@ export default async function Page(props: ContactRecordPageProps) {
 
   try {
     const { data } = await client.get<OrgContact>(
-      `/api/organization/contact/r/${params.id}`,
+      `${modelEndpoint}/r/${params.id}`,
+      {
+        withCredentials: true,
+      },
     );
     record = data;
   } catch (error) {

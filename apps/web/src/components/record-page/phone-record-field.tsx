@@ -2,13 +2,15 @@ import { PhoneInput } from "@repo/shared-ui/components/common/phone-input";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 import { renderLink } from "./utils";
 
-export type PhoneRecordFieldProps = BaseRecordFieldProps<string | null | undefined>;
+export type PhoneRecordFieldProps = BaseRecordFieldProps<
+  string | null | undefined
+>;
 
 export function PhoneRecordField({
   description,
@@ -22,9 +24,10 @@ export function PhoneRecordField({
   value,
 }: PhoneRecordFieldProps) {
   if (!editing) {
-    const displayValue = typeof value === "string" && value.trim().length > 0
-      ? renderLink(value, `tel:${value}`)
-      : value;
+    const displayValue =
+      typeof value === "string" && value.trim().length > 0
+        ? renderLink(value, `tel:${value}`)
+        : value;
 
     return (
       <div className="space-y-2">

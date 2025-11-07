@@ -1,21 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
-
 import { Button } from "@repo/shared-ui/components/common/button";
 import { Calendar } from "@repo/shared-ui/components/common/calendar";
 import { Input } from "@repo/shared-ui/components/common/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@repo/shared-ui/components/common/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@repo/shared-ui/components/common/popover";
 import { cn } from "@repo/shared-ui/lib/utils";
 import { CalendarClockIcon, XIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { RecordField } from "./record-field";
 import {
+  type BaseRecordFieldProps,
   FieldDescription,
   FieldLabel,
-  type BaseRecordFieldProps,
 } from "./record-field-types";
 import { formatDateTime } from "./utils";
 
-export type DatetimeRecordFieldProps = BaseRecordFieldProps<string | null | undefined>;
+export type DatetimeRecordFieldProps = BaseRecordFieldProps<
+  string | null | undefined
+>;
 
 export function DatetimeRecordField({
   description,
@@ -29,13 +34,12 @@ export function DatetimeRecordField({
   value,
 }: DatetimeRecordFieldProps) {
   const parsedDate = useMemo(() => parseDate(value), [value]);
-  const [timeInput, setTimeInput] = useState(() =>
-    parsedDate ? formatTimeInput(parsedDate) : "",
-  );
 
-  useEffect(() => {
-    setTimeInput(parsedDate ? formatTimeInput(parsedDate) : "");
-  }, [parsedDate]);
+  // Local override only when the user types; null means "derive from parsedDate"
+  const [timeInput, setTimeInput] = useState<string | null>(null);
+
+  const displayTime =
+    timeInput ?? (parsedDate ? formatTimeInput(parsedDate) : "");
 
   if (!editing) {
     const displayValue = parsedDate ? formatDateTime(parsedDate) : value;
@@ -50,7 +54,7 @@ export function DatetimeRecordField({
 
   const buttonLabel = parsedDate
     ? formatDateTime(parsedDate)
-    : placeholder ?? "Select date and time";
+    : (placeholder ?? "Select date and time");
 
   return (
     <div className="space-y-2">
@@ -76,15 +80,19 @@ export function DatetimeRecordField({
               mode="single"
               onSelect={(nextDate) => {
                 if (!nextDate) {
-                  setTimeInput("");
+                  setTimeInput(null);
                   onChange?.(null);
                   onBlur?.();
                   return;
                 }
 
                 const nextValue = formatDateInput(nextDate);
-                const nextTime = timeInput && timeInput.length > 0 ? timeInput : "00:00";
+                const nextTime =
+                  displayTime && displayTime.length > 0 ? displayTime : "00:00";
                 onChange?.(`${nextValue}T${nextTime}`);
+
+                // Return to derived mode so UI reflects parent-controlled value
+                setTimeInput(null);
                 onBlur?.();
               }}
               selected={parsedDate ?? undefined}
@@ -107,13 +115,13 @@ export function DatetimeRecordField({
           }}
           placeholder="HH:MM"
           type="time"
-          value={timeInput}
+          value={displayTime}
         />
         {parsedDate ? (
           <Button
             aria-label="Clear date and time"
             onClick={() => {
-              setTimeInput("");
+              setTimeInput(null);
               onChange?.(null);
               onBlur?.();
             }}
@@ -131,13 +139,6 @@ export function DatetimeRecordField({
   );
 }
 
-function parseDate(value?: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return date;
-}
-
 function formatDateInput(date: Date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
@@ -149,4 +150,11 @@ function formatTimeInput(date: Date) {
   const hours = `${date.getHours()}`.padStart(2, "0");
   const minutes = `${date.getMinutes()}`.padStart(2, "0");
   return `${hours}:${minutes}`;
+}
+
+function parseDate(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date;
 }
