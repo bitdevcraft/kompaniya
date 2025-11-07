@@ -433,6 +433,19 @@ function getGridClass(columns: number) {
   }
 }
 
+function getSectionColumnsGridClass(
+  sidebar: "firstColumn" | "secondColumn" | null | undefined,
+) {
+  switch (sidebar) {
+    case "firstColumn":
+      return "md:[grid-template-columns:1fr_2fr]";
+    case "secondColumn":
+      return "md:[grid-template-columns:2fr_1fr]";
+    default:
+      return "md:grid-cols-2";
+  }
+}
+
 function Header<TFieldValues extends FieldValues>({
   actionButtons,
   fieldMap,
@@ -556,10 +569,6 @@ function renderLayoutSections<TFieldValues extends FieldValues>(
   layout: RecordPageLayout<TFieldValues>,
   context: SectionRenderContext<TFieldValues>,
 ) {
-  if (!layout.sections || layout.sections.length === 0) {
-    return null;
-  }
-
   const { form, isEditing, record } = context;
   const renderSection = (section: RecordLayoutSection<TFieldValues>) => (
     <Section
@@ -571,42 +580,60 @@ function renderLayoutSections<TFieldValues extends FieldValues>(
     />
   );
 
-  switch (layout.layoutStyle) {
-    case "twoColumns":
-      return (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {layout.sections.map(renderSection)}
-        </div>
-      );
-    case "headerWithTwoColumns": {
-      const [first, ...rest] = layout.sections;
-      return (
-        <div className="space-y-6">
-          {first ? renderSection(first) : null}
-          {rest.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {rest.map(renderSection)}
-            </div>
-          ) : null}
-        </div>
+  const sectionColumns = layout.sectionColumns;
+  if (sectionColumns) {
+    const headerSections = sectionColumns.header?.sections ?? [];
+    const firstColumnSections = sectionColumns.firstColumn?.sections ?? [];
+    const secondColumnSections = sectionColumns.secondColumn?.sections ?? [];
+
+    const blocks: ReactNode[] = [];
+
+    if (headerSections.length > 0) {
+      blocks.push(
+        <div className="space-y-6" key="header">
+          {headerSections.map(renderSection)}
+        </div>,
       );
     }
-    case "headerWithSidebar": {
-      const [first, ...rest] = layout.sections;
-      return (
-        <div className="space-y-6">
-          {first ? renderSection(first) : null}
-          {rest.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:[grid-template-columns:2fr_1fr]">
-              {rest.map(renderSection)}
-            </div>
-          ) : null}
-        </div>
+
+    if (secondColumnSections.length > 0) {
+      blocks.push(
+        <div
+          className={cn(
+            "grid grid-cols-1 gap-6",
+            getSectionColumnsGridClass(sectionColumns.sidebar),
+          )}
+          key="columns"
+        >
+          <div className="space-y-6">
+            {firstColumnSections.map(renderSection)}
+          </div>
+          <div className="space-y-6">
+            {secondColumnSections.map(renderSection)}
+          </div>
+        </div>,
+      );
+    } else if (firstColumnSections.length > 0) {
+      blocks.push(
+        <div className="space-y-6" key="first-column">
+          {firstColumnSections.map(renderSection)}
+        </div>,
       );
     }
-    default:
-      return layout.sections.map(renderSection);
+
+    if (blocks.length === 0) {
+      return null;
+    }
+
+    return <div className="space-y-6">{blocks}</div>;
   }
+
+  const sections = layout.sections ?? [];
+  if (sections.length === 0) {
+    return null;
+  }
+
+  return sections.map(renderSection);
 }
 
 function resolveFieldValue<TFieldValues extends FieldValues>(

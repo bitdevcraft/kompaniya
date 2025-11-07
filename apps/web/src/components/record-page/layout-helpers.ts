@@ -1,12 +1,17 @@
 import type { FieldValues } from "react-hook-form";
 
-import type { RecordLayoutField, RecordPageLayout } from "./layout";
+import type {
+  RecordLayoutField,
+  RecordLayoutSection,
+  RecordPageLayout,
+} from "./layout";
 
 export function getAllLayoutFields<TFieldValues extends FieldValues>(
   layout: RecordPageLayout<TFieldValues>,
 ): RecordLayoutField<TFieldValues>[] {
   const supplemental = layout.supplementalFields ?? [];
-  const sectionFields = layout.sections.flatMap((section) => section.fields);
+  const sections = collectAllSections(layout);
+  const sectionFields = sections.flatMap((section) => section.fields);
 
   return [...sectionFields, ...supplemental];
 }
@@ -145,6 +150,29 @@ export function toDateTimeInputValue(value: unknown) {
   const minutes = `${date.getMinutes()}`.padStart(2, "0");
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function collectAllSections<TFieldValues extends FieldValues>(
+  layout: RecordPageLayout<TFieldValues>,
+): RecordLayoutSection<TFieldValues>[] {
+  const sections: RecordLayoutSection<TFieldValues>[] = [];
+
+  if (layout.sections) {
+    sections.push(...layout.sections);
+  }
+
+  const columns = layout.sectionColumns;
+  if (columns?.header?.sections) {
+    sections.push(...columns.header.sections);
+  }
+  if (columns?.firstColumn?.sections) {
+    sections.push(...columns.firstColumn.sections);
+  }
+  if (columns?.secondColumn?.sections) {
+    sections.push(...columns.secondColumn.sections);
+  }
+
+  return sections;
 }
 
 function normalizeDate(value: unknown) {
