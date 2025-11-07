@@ -1,0 +1,41 @@
+import { z } from "zod";
+
+export const accountRecordSchema = z.object({
+  annualRevenueBand: z.string().optional(),
+  billingAddressLine1: z.string().optional(),
+  billingAddressLine2: z.string().optional(),
+  billingCity: z.string().optional(),
+  billingCountryCode: z.string().optional(),
+  billingLatitude: z.string().optional(),
+  billingLongitude: z.string().optional(),
+  billingPostalCode: z.string().optional(),
+  billingRegion: z.string().optional(),
+  categories: z.array(z.string()).optional().default([]),
+  companyName: z.string().optional(),
+  createdAt: z.string().optional(),
+  email: z.string().optional(),
+  employeeCountBand: z.string().optional(),
+  industry: z.string().optional(),
+  lastActivityAt: z.string().optional(),
+  linkedinUrl: z.string().optional(),
+  name: z.string().optional(),
+  nextActivityAt: z.string().optional(),
+  notes: z.string().optional(),
+  phone: z.string().optional(),
+  score: z.string().optional(),
+  shippingAddressLine1: z.string().optional(),
+  shippingAddressLine2: z.string().optional(),
+  shippingCity: z.string().optional(),
+  shippingCountryCode: z.string().optional(),
+  shippingLatitude: z.string().optional(),
+  shippingLongitude: z.string().optional(),
+  shippingPostalCode: z.string().optional(),
+  shippingRegion: z.string().optional(),
+  tags: z.array(z.string()).optional().default([]),
+  twitterHandle: z.string().optional(),
+  updatedAt: z.string().optional(),
+  websiteUrl: z.string().optional(),
+});
+
+export type AccountRecordFormValues = z.input<typeof accountRecordSchema>;
+export type AccountRecordSubmitValues = z.output<typeof accountRecordSchema>;

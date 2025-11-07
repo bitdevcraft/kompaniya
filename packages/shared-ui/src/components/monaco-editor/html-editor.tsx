@@ -14,19 +14,11 @@ import {
 export type HtmlEditorProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-> = {
-  /**
-   * The react-hook-form control instance.
-   */
-  control: Control<TFieldValues>;
-  /**
-   * The form field name that should be connected with the editor.
-   */
-  name: TName;
-  /**
-   * Optional default value used when the form field is uninitialized.
-   */
-  defaultValue?: string;
+> =
+  | ControlledHtmlEditorProps<TFieldValues, TName>
+  | UncontrolledHtmlEditorProps;
+
+type BaseHtmlEditorProps = {
   /**
    * Additional class name applied to the outer wrapper element.
    */
@@ -55,6 +47,10 @@ export type HtmlEditorProps<
    * Additional change handler that receives Monaco's native event payload.
    */
   onEditorChange?: EditorProps["onChange"];
+  /**
+   * Optional blur handler fired when the editor loses focus.
+   */
+  onBlur?: () => void;
 } & Omit<
   EditorProps,
   | "value"
@@ -68,25 +64,48 @@ export type HtmlEditorProps<
   | "onMount"
 >;
 
-/**
- * A reusable Monaco-based HTML editor that works seamlessly with react-hook-form.
- */
+type ControlledHtmlEditorProps<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+> = BaseHtmlEditorProps & {
+  /**
+   * The react-hook-form control instance.
+   */
+  control: Control<TFieldValues>;
+  /**
+   * The form field name that should be connected with the editor.
+   */
+  name: TName;
+  /**
+   * Optional default value used when the form field is uninitialized.
+   */
+  defaultValue?: string;
+  value?: never;
+};
+
+type UncontrolledHtmlEditorProps = BaseHtmlEditorProps & {
+  control?: undefined;
+  name?: undefined;
+  defaultValue?: string;
+  value?: string;
+};
+
 export function HtmlEditor<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({
-  control,
-  name,
-  defaultValue,
-  className,
-  editorClassName,
-  height = 320,
-  onValueChange,
-  options,
-  onMount,
-  onEditorChange,
-  ...editorProps
-}: HtmlEditorProps<TFieldValues, TName>) {
+>(props: HtmlEditorProps<TFieldValues, TName>) {
+  const {
+    className,
+    editorClassName,
+    height = 320,
+    onValueChange,
+    options,
+    onMount,
+    onEditorChange,
+    onBlur,
+    defaultValue,
+    ...editorProps
+  } = props;
   const mergedOptions = React.useMemo(() => {
     return {
       ...options,
@@ -99,54 +118,110 @@ export function HtmlEditor<
     } satisfies EditorProps["options"];
   }, [options]);
 
+  const handleMount: EditorProps["onMount"] = (editorInstance, monaco) => {
+    const blurDisposable = editorInstance.onDidBlurEditorText(() => {
+      onBlur?.();
+    });
+    const blurWidgetDisposable = editorInstance.onDidBlurEditorWidget(() => {
+      onBlur?.();
+    });
+    editorInstance.onDidDispose(() => {
+      blurDisposable.dispose();
+      blurWidgetDisposable.dispose();
+    });
+    onMount?.(editorInstance, monaco);
+  };
+
+  if (isControlledHtmlEditorProps(props)) {
+    return (
+      <div className={cn("flex w-full flex-col", className)}>
+        <Controller
+          control={props.control}
+          defaultValue={
+            (defaultValue ?? "") as ControllerProps<
+              TFieldValues,
+              TName
+            >["defaultValue"]
+          }
+          name={props.name}
+          render={({ field }) => (
+            <Editor
+              {...editorProps}
+              className={editorClassName}
+              height={height}
+              language="html"
+              onChange={(value, event) => {
+                const nextValue = value ?? "";
+                field.onChange(nextValue);
+                onValueChange?.(nextValue);
+                onEditorChange?.(value, event);
+              }}
+              onMount={(editorInstance, monaco) => {
+                const domNode = editorInstance.getDomNode();
+                if (domNode) {
+                  field.ref(domNode as unknown as HTMLTextAreaElement);
+                }
+                const blurDisposable = editorInstance.onDidBlurEditorText(
+                  () => {
+                    field.onBlur();
+                    onBlur?.();
+                  },
+                );
+                const blurWidgetDisposable =
+                  editorInstance.onDidBlurEditorWidget(() => {
+                    field.onBlur();
+                    onBlur?.();
+                  });
+                editorInstance.onDidDispose(() => {
+                  blurDisposable.dispose();
+                  blurWidgetDisposable.dispose();
+                });
+                onMount?.(editorInstance, monaco);
+              }}
+              options={mergedOptions}
+              theme={"vs-dark"}
+              value={(field.value as string | undefined) ?? ""}
+            />
+          )}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex w-full flex-col", className)}>
-      <Controller
-        control={control}
-        defaultValue={
-          (defaultValue ?? "") as ControllerProps<
-            TFieldValues,
-            TName
-          >["defaultValue"]
-        }
-        name={name}
-        render={({ field }) => (
-          <Editor
-            {...editorProps}
-            className={editorClassName}
-            height={height}
-            language="html"
-            onChange={(value, event) => {
-              const nextValue = value ?? "";
-              field.onChange(nextValue);
-              onValueChange?.(nextValue);
-              onEditorChange?.(value, event);
-            }}
-            onMount={(editorInstance, monaco) => {
-              const domNode = editorInstance.getDomNode();
-              if (domNode) {
-                field.ref(domNode as unknown as HTMLTextAreaElement);
-              }
-              const blurDisposable = editorInstance.onDidBlurEditorText(() => {
-                field.onBlur();
-              });
-              const blurWidgetDisposable = editorInstance.onDidBlurEditorWidget(
-                () => {
-                  field.onBlur();
-                },
-              );
-              editorInstance.onDidDispose(() => {
-                blurDisposable.dispose();
-                blurWidgetDisposable.dispose();
-              });
-              onMount?.(editorInstance, monaco);
-            }}
-            options={mergedOptions}
-            theme={"vs-dark"}
-            value={(field.value as string | undefined) ?? ""}
-          />
-        )}
+      <Editor
+        {...editorProps}
+        className={editorClassName}
+        height={height}
+        language="html"
+        onChange={(value, event) => {
+          const nextValue = value ?? "";
+          props.onValueChange?.(nextValue);
+          onEditorChange?.(value, event);
+        }}
+        onMount={(editorInstance, monaco) => {
+          handleMount(editorInstance, monaco);
+        }}
+        options={mergedOptions}
+        theme={"vs-dark"}
+        value={props.value ?? defaultValue ?? ""}
       />
     </div>
+  );
+}
+
+/**
+ * A reusable Monaco-based HTML editor that works seamlessly with react-hook-form.
+ */
+function isControlledHtmlEditorProps<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>,
+>(
+  props: HtmlEditorProps<TFieldValues, TName>,
+): props is ControlledHtmlEditorProps<TFieldValues, TName> {
+  return (
+    typeof (props as ControlledHtmlEditorProps<TFieldValues, TName>).control !==
+    "undefined"
   );
 }
