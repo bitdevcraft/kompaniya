@@ -49,6 +49,7 @@ import {
   getAllLayoutFields,
   normalizeValueForSubmission,
 } from "./layout-helpers";
+import { LookupRecordField } from "./lookup-record-field";
 import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
 import { PhoneRecordField } from "./phone-record-field";
@@ -77,6 +78,7 @@ type FieldComponent = (props: {
   editing: boolean;
   fallback?: string;
   label: string;
+  lookup?: RecordLayoutField["lookup"];
   name?: string;
   onBlur?: () => void;
   onChange?: (value: unknown) => void;
@@ -218,6 +220,7 @@ const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
   date: DateRecordField as FieldComponent,
   datetime: DatetimeRecordField as FieldComponent,
   html: HtmlRecordField as FieldComponent,
+  lookup: LookupRecordField as FieldComponent,
   multipicklist: MultipicklistRecordField as FieldComponent,
   number: NumberRecordField as FieldComponent,
   phone: PhoneRecordField as FieldComponent,
@@ -285,6 +288,7 @@ function FieldRenderer<TFieldValues extends FieldValues>({
             description={field.description}
             editing
             label={field.label}
+            lookup={field.lookup}
             name={field.id as string}
             onBlur={controllerField.onBlur}
             onChange={(value) => controllerField.onChange(value)}
@@ -302,6 +306,7 @@ function FieldRenderer<TFieldValues extends FieldValues>({
       description={field.description}
       editing={false}
       label={field.label}
+      lookup={field.lookup}
       options={field.options}
       value={record[field.id as string]}
     />

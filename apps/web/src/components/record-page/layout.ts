@@ -1,5 +1,24 @@
 import type { FieldValues, Path } from "react-hook-form";
 
+export interface LookupFieldConfig {
+  /** Endpoint used to fetch a specific record by ID. Supports `:id` or `{id}` placeholders. */
+  findByIdEndpoint: string;
+  /** Key in the response representing the display label. Defaults to `name`. */
+  labelKey?: string;
+  /** Key in the response representing the option description. */
+  descriptionKey?: string;
+  /** Key in the response representing the option value. Defaults to `id`. */
+  valueKey?: string;
+  /** Query parameter to use when searching. Defaults to `q`. */
+  queryParam?: string;
+  /** Query parameter to use when looking up by ID when no placeholder is provided. Defaults to `id`. */
+  idParam?: string;
+  /** Endpoint used to query for options. */
+  searchEndpoint: string;
+  /** Base URL for redirecting to the related record. Supports `:id` or `{id}` placeholders. */
+  redirectBaseUrl?: string | null;
+}
+
 export type RecordFieldDataType =
   | "text"
   | "textarea"
@@ -10,7 +29,8 @@ export type RecordFieldDataType =
   | "picklist"
   | "multipicklist"
   | "phone"
-  | "html";
+  | "html"
+  | "lookup";
 
 export interface RecordFieldOption {
   label: string;
@@ -28,6 +48,7 @@ export interface RecordLayoutField<
   description?: string;
   id: Path<TFieldValues>;
   label: string;
+  lookup?: LookupFieldConfig;
   options?: RecordFieldOption[];
   placeholder?: string;
   readOnly?: boolean;

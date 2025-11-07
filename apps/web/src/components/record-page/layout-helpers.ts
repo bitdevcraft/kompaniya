@@ -26,6 +26,7 @@ export function createDefaultValuesForLayout<
         defaults[field.id] = [] as TFieldValues[typeof field.id];
         break;
       }
+      case "lookup":
       case "number":
       case "date":
       case "datetime":
@@ -117,6 +118,10 @@ export function normalizeValueForForm(
       if (value === null || value === undefined) return "";
       return String(value);
     }
+    case "lookup": {
+      if (value === null || value === undefined) return "";
+      return String(value);
+    }
     case "phone":
     case "html":
     case "textarea":
@@ -171,6 +176,7 @@ export function normalizeValueForSubmission(
     case "picklist":
     case "html":
     case "phone":
+    case "lookup":
     case "text":
     case "textarea": {
       if (typeof value !== "string") return null;
