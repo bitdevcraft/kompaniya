@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
-import { orgContactsTable } from '@repo/database/schema';
+import {
+  NewOrgContact,
+  OrgContact,
+  orgContactsTable,
+} from '@repo/database/schema';
 import { and, eq } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
@@ -17,6 +21,14 @@ export class ContactService {
     private readonly cacheService: CacheService,
   ) {}
 
+  async createNewRecord(record: NewOrgContact): Promise<OrgContact[]> {
+    return await this.db.insert(orgContactsTable).values(record).returning();
+  }
+
+  async deleteCacheById(id: string, organizationId: string) {
+    await this.cacheService.delete(Keys.Contact.idByOrg(id, organizationId));
+  }
+
   async deletePaginatedCache(userId: string, organizationId: string) {
     const paginationCache = await this.cacheService.get<string[]>(
       Keys.Contact.paginatedList(userId, organizationId),
@@ -27,14 +39,26 @@ export class ContactService {
     paginationCache.forEach((key) => {
       void this.cacheService.delete(key);
     });
+
+    await this.cacheService.delete(
+      Keys.Contact.paginatedList(userId, organizationId),
+    );
   }
 
-  async deleteRecordById(id: string, organizationId: string) {
+  async deleteRecordById(
+    id: string,
+    organizationId: string,
+  ): Promise<OrgContact[]> {
     await this.cacheService.delete(Keys.Contact.idByOrg(id, organizationId));
 
     return await this.db
       .delete(orgContactsTable)
-      .where(eq(orgContactsTable.id, id))
+      .where(
+        and(
+          eq(orgContactsTable.id, id),
+          eq(orgContactsTable.organizationId, organizationId),
+        ),
+      )
       .returning();
   }
 
@@ -43,16 +67,34 @@ export class ContactService {
     organizationId: string,
     query: PaginationQueryParserType,
   ) {
+    const cacheKey = `${Keys.Contact.paginated(userId, organizationId)}-${JSON.stringify(query)}`;
+
+    let paginationCache = await this.cacheService.get<string[]>(
+      Keys.Contact.paginatedList(userId, organizationId),
+    );
+
+    paginationCache = paginationCache
+      ? [...paginationCache, cacheKey]
+      : [cacheKey];
+
+    await this.cacheService.set(
+      Keys.Contact.paginatedList(userId, organizationId),
+      paginationCache,
+    );
+
     return await this.paginationRepositoryService.getPaginatedDataTable({
       table: orgContactsTable,
-      cacheKey: `${Keys.Contact.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
+      cacheKey,
       query,
       organizationId,
     });
   }
 
-  async getRecordById(id: string, organizationId: string) {
-    return this.cacheService.wrapCache({
+  async getRecordById(
+    id: string,
+    organizationId: string,
+  ): Promise<OrgContact | undefined> {
+    return this.cacheService.wrapCache<OrgContact | undefined>({
       key: Keys.Contact.idByOrg(id, organizationId),
       fn: async () =>
         await this.db.query.orgContactsTable.findFirst({
@@ -62,5 +104,22 @@ export class ContactService {
           ),
         }),
     });
+  }
+
+  async updateRecordById(
+    id: string,
+    organizationId: string,
+    record: Partial<NewOrgContact>,
+  ): Promise<OrgContact[]> {
+    return await this.db
+      .update(orgContactsTable)
+      .set(record)
+      .where(
+        and(
+          eq(orgContactsTable.id, id),
+          eq(orgContactsTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
   }
 }

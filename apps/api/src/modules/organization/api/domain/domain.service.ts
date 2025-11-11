@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
-import { NewOrgEmailDomain, orgEmailDomainsTable } from '@repo/database/schema';
+import {
+  NewOrgEmailDomain,
+  OrgEmailDomain,
+  orgEmailDomainsTable,
+} from '@repo/database/schema';
 import { and, eq } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
@@ -20,7 +24,11 @@ export class DomainService {
     private readonly awsSesIdentityService: AwsSesIdentityService,
   ) {}
 
-  async createNewDomain(organizationId: string, name: string, email: string) {
+  async createNewDomain(
+    organizationId: string,
+    name: string,
+    email: string,
+  ): Promise<OrgEmailDomain[]> {
     // const _token = await this.awsSesIdentityService.verifyIdentity(email);
 
     let secretKey = '';
@@ -50,15 +58,16 @@ export class DomainService {
       status: 'PENDING',
     };
 
-    const res = await this.db
+    return await this.db
       .insert(orgEmailDomainsTable)
       .values(newDomain)
       .returning();
-
-    return res;
   }
 
-  async deleteDomain(domainId: string, organizationId: string) {
+  async deleteDomain(
+    domainId: string,
+    organizationId: string,
+  ): Promise<OrgEmailDomain[]> {
     return await this.db
       .delete(orgEmailDomainsTable)
       .where(
@@ -68,6 +77,30 @@ export class DomainService {
         ),
       )
       .returning();
+  }
+
+  async deleteDomainCache(domain: OrgEmailDomain) {
+    if (domain.organizationId) {
+      await this.cacheService.delete(
+        Keys.Domain.idByOrg(domain.id, domain.organizationId),
+      );
+    }
+
+    if (domain.name) {
+      await this.cacheService.delete(Keys.Domain.name(domain.name));
+    }
+
+    if (domain.email) {
+      await this.cacheService.delete(Keys.Domain.emailAttributes(domain.email));
+    }
+
+    if (domain.secret) {
+      await this.cacheService.delete(Keys.Domain.secretKey(domain.secret));
+    }
+
+    if (domain.public) {
+      await this.cacheService.delete(Keys.Domain.publicKey(domain.public));
+    }
   }
 
   async deletePaginatedCache(userId: string, organizationId: string) {
@@ -80,6 +113,10 @@ export class DomainService {
     paginationCache.forEach((key) => {
       void this.cacheService.delete(key);
     });
+
+    await this.cacheService.delete(
+      Keys.Domain.paginatedList(userId, organizationId),
+    );
   }
 
   async getDataTable(
@@ -110,8 +147,11 @@ export class DomainService {
     });
   }
 
-  async getDomainById(id: string, organizationId: string) {
-    return this.cacheService.wrapCache({
+  async getDomainById(
+    id: string,
+    organizationId: string,
+  ): Promise<OrgEmailDomain | undefined> {
+    return this.cacheService.wrapCache<OrgEmailDomain | undefined>({
       key: Keys.Domain.idByOrg(id, organizationId),
       fn: async () =>
         await this.db.query.orgEmailDomainsTable.findFirst({
@@ -148,7 +188,7 @@ export class DomainService {
       key: Keys.Domain.secretKey(secretKey),
       fn: async () =>
         await this.db.query.orgEmailDomainsTable.findFirst({
-          where: eq(orgEmailDomainsTable.name, secretKey),
+          where: eq(orgEmailDomainsTable.secret, secretKey),
         }),
     });
   }
@@ -161,5 +201,22 @@ export class DomainService {
           email,
         ),
     });
+  }
+
+  async updateDomain(
+    id: string,
+    organizationId: string,
+    record: Partial<NewOrgEmailDomain>,
+  ): Promise<OrgEmailDomain[]> {
+    return await this.db
+      .update(orgEmailDomainsTable)
+      .set(record)
+      .where(
+        and(
+          eq(orgEmailDomainsTable.id, id),
+          eq(orgEmailDomainsTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
   }
 }

@@ -6,6 +6,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -23,6 +24,7 @@ import { ActiveOrganization } from '../../decorator/active-organization/active-o
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { DomainService } from './domain.service';
 import { CreateDomainDto } from './dto/create-domain.dto';
+import { type UpdateDomainDto } from './dto/update-domain.dto';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/domain')
@@ -72,6 +74,8 @@ export class DomainController {
       throw new NotFoundException("Domain doesn't exist");
     }
 
+    await this.domainService.deleteDomainCache(domain);
+
     await this.domainService.deletePaginatedCache(
       session.user.id,
       organization.id,
@@ -112,6 +116,33 @@ export class DomainController {
       session.user.id,
       organization.id,
       query,
+    );
+  }
+
+  @Patch('r/:id')
+  async update(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+    @Body() updateDomainDto: UpdateDomainDto,
+  ) {
+    const domain = await this.domainService.getDomainById(id, organization.id);
+
+    if (!domain) {
+      throw new NotFoundException("Domain doesn't exist");
+    }
+
+    await this.domainService.deleteDomainCache(domain);
+
+    await this.domainService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    return await this.domainService.updateDomain(
+      id,
+      organization.id,
+      updateDomainDto,
     );
   }
 }

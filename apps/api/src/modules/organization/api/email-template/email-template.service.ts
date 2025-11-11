@@ -2,8 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
 import {
   NewOrgEmailTemplate,
+  OrgEmailTemplate,
   orgEmailTemplatesTable,
 } from '@repo/database/schema';
+import { and, eq } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -19,11 +21,19 @@ export class EmailTemplateService {
     private readonly cacheService: CacheService,
   ) {}
 
-  async createTemplate(template: NewOrgEmailTemplate) {
+  async createTemplate(
+    template: NewOrgEmailTemplate,
+  ): Promise<OrgEmailTemplate[]> {
     return await this.db
       .insert(orgEmailTemplatesTable)
       .values(template)
       .returning();
+  }
+
+  async deleteCacheById(id: string, organizationId: string) {
+    await this.cacheService.delete(
+      Keys.EmailTemplate.idByOrg(id, organizationId),
+    );
   }
 
   async deletePaginatedCache(userId: string, organizationId: string) {
@@ -36,6 +46,29 @@ export class EmailTemplateService {
     paginationCache.forEach((key) => {
       void this.cacheService.delete(key);
     });
+
+    await this.cacheService.delete(
+      Keys.EmailTemplate.paginatedList(userId, organizationId),
+    );
+  }
+
+  async deleteRecordById(
+    id: string,
+    organizationId: string,
+  ): Promise<OrgEmailTemplate[]> {
+    await this.cacheService.delete(
+      Keys.EmailTemplate.idByOrg(id, organizationId),
+    );
+
+    return await this.db
+      .delete(orgEmailTemplatesTable)
+      .where(
+        and(
+          eq(orgEmailTemplatesTable.id, id),
+          eq(orgEmailTemplatesTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
   }
 
   async getDataTable(
@@ -64,5 +97,38 @@ export class EmailTemplateService {
       query,
       organizationId,
     });
+  }
+
+  async getRecordById(
+    id: string,
+    organizationId: string,
+  ): Promise<OrgEmailTemplate | undefined> {
+    return this.cacheService.wrapCache<OrgEmailTemplate | undefined>({
+      key: Keys.EmailTemplate.idByOrg(id, organizationId),
+      fn: async () =>
+        await this.db.query.orgEmailTemplatesTable.findFirst({
+          where: and(
+            eq(orgEmailTemplatesTable.id, id),
+            eq(orgEmailTemplatesTable.organizationId, organizationId),
+          ),
+        }),
+    });
+  }
+
+  async updateRecordById(
+    id: string,
+    organizationId: string,
+    record: Partial<NewOrgEmailTemplate>,
+  ): Promise<OrgEmailTemplate[]> {
+    return await this.db
+      .update(orgEmailTemplatesTable)
+      .set(record)
+      .where(
+        and(
+          eq(orgEmailTemplatesTable.id, id),
+          eq(orgEmailTemplatesTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
   }
 }

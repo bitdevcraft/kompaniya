@@ -1,5 +1,16 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { type Organization } from '@repo/database/schema';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { type NewOrgCategory, type Organization } from '@repo/database/schema';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
 
 import {
@@ -11,11 +22,49 @@ import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { CategoryService } from './category.service';
+import { type CreateCategoryDto } from './dto/create-category.dto';
+import { type UpdateCategoryDto } from './dto/update-category.dto';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
+
+  @Post()
+  async create(
+    @ActiveOrganization() organization: Organization,
+    @Session() session: UserSession,
+    @Body() createCategoryDto: CreateCategoryDto,
+  ) {
+    const record: NewOrgCategory = {
+      ...createCategoryDto,
+      organizationId: organization.id,
+    };
+
+    await this.categoryService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    return await this.categoryService.createNewRecord(record);
+  }
+
+  @Get('r/:id')
+  async findOne(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.categoryService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Category doesn't exist");
+    }
+
+    return record;
+  }
 
   @Get('paginated')
   async paginatedData(
@@ -28,6 +77,59 @@ export class CategoryController {
       session.user.id,
       organization.id,
       query,
+    );
+  }
+
+  @Delete('r/:id')
+  async remove(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.categoryService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Category doesn't exist");
+    }
+
+    await this.categoryService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    return await this.categoryService.deleteRecordById(id, organization.id);
+  }
+
+  @Patch('r/:id')
+  async update(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    const record = await this.categoryService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Category doesn't exist");
+    }
+
+    await this.categoryService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    await this.categoryService.deleteCacheById(record.id, organization.id);
+
+    return await this.categoryService.updateRecordById(
+      id,
+      organization.id,
+      updateCategoryDto,
     );
   }
 }

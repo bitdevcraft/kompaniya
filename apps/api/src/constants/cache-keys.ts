@@ -37,10 +37,10 @@ export const Keys = {
       return `domain:email-attributes:${email}`;
     },
     secretKey(secretKey: string) {
-      return `domain:name:${secretKey}`;
+      return `domain:secret:${secretKey}`;
     },
     publicKey(publicKey: string) {
-      return `domain:name:${publicKey}`;
+      return `domain:public:${publicKey}`;
     },
   },
   Account: {
@@ -59,16 +59,16 @@ export const Keys = {
   },
   Activity: {
     paginated(userId: string, organizationId: string) {
-      return `account:paginated:${userId}:${organizationId}`;
+      return `activity:paginated:${userId}:${organizationId}`;
     },
     paginatedList(userId: string, organizationId: string) {
-      return `account:paginated-list:${userId}:${organizationId}`;
+      return `activity:paginated-list:${userId}:${organizationId}`;
     },
     id(id: string) {
-      return `account:id:${id}`;
+      return `activity:id:${id}`;
     },
     idByOrg(id: string, organizationId: string) {
-      return `account:id:${id}-${organizationId}`;
+      return `activity:id:${id}-${organizationId}`;
     },
   },
   Category: {
@@ -90,13 +90,13 @@ export const Keys = {
       return `contact:paginated:${userId}:${organizationId}`;
     },
     paginatedList(userId: string, organizationId: string) {
-      return `category:paginated-list:${userId}:${organizationId}`;
+      return `contact:paginated-list:${userId}:${organizationId}`;
     },
     id(id: string) {
-      return `category:id:${id}`;
+      return `contact:id:${id}`;
     },
     idByOrg(id: string, organizationId: string) {
-      return `category:id:${id}-${organizationId}`;
+      return `contact:id:${id}-${organizationId}`;
     },
   },
   EmailCampaign: {

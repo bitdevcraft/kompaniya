@@ -259,7 +259,9 @@ export function filterColumns<T extends Table>({
 
       case 'arrayIncludesAny':
         if (Array.isArray(filter.value)) {
-          return sql`${column} ?| ARRAY[${sql.join(
+          const columnSql = column as unknown as string;
+
+          return sql`${columnSql} ?| ARRAY[${sql.join(
             filter.value.map((v) => sql`${v}`),
             sql`, `,
           )}]`;
@@ -268,7 +270,9 @@ export function filterColumns<T extends Table>({
 
       case 'arrayIncludesNone':
         if (Array.isArray(filter.value)) {
-          return sql`NOT (${column} ?| ARRAY[${sql.join(
+          const columnSql = column as unknown as string;
+
+          return sql`NOT (${columnSql} ?| ARRAY[${sql.join(
             filter.value.map((v) => sql`${v}`),
             sql`, `,
           )}])`;
@@ -282,8 +286,7 @@ export function filterColumns<T extends Table>({
         return sql`jsonb_array_length(${column}) > 0`;
 
       default:
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`Unsupported operator: ${filter.operator}`);
+        throw new Error(`Unsupported operator: ${filter.operator as string}`);
     }
   });
 
@@ -517,7 +520,9 @@ export function filterQueries<T extends Table>({
 
       case 'arrayIncludesAny':
         if (Array.isArray(filter.value)) {
-          return sql`${column} ?| ARRAY[${sql.join(
+          const columnSql = column as unknown as string;
+
+          return sql`${columnSql} ?| ARRAY[${sql.join(
             filter.value.map((v) => sql`${v}`),
             sql`, `,
           )}]`;
@@ -526,7 +531,9 @@ export function filterQueries<T extends Table>({
 
       case 'arrayIncludesNone':
         if (Array.isArray(filter.value)) {
-          return sql`NOT (${column} ?| ARRAY[${sql.join(
+          const columnSql = column as unknown as string;
+
+          return sql`NOT (${columnSql} ?| ARRAY[${sql.join(
             filter.value.map((v) => sql`${v}`),
             sql`, `,
           )}])`;
@@ -540,8 +547,7 @@ export function filterQueries<T extends Table>({
         return sql`jsonb_array_length(${column}) > 0`;
 
       default:
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`Unsupported operator: ${filter.operator}`);
+        throw new Error(`Unsupported operator: ${filter.operator as string}`);
     }
   });
 
