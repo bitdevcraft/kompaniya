@@ -1,5 +1,19 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { type Organization } from '@repo/database/schema';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  type NewOrgEmailCampaign,
+  type Organization,
+} from '@repo/database/schema';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
 
 import {
@@ -10,12 +24,50 @@ import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
+import { type CreateEmailCampaignDto } from './dto/create-email-campaign.dto';
+import { type UpdateEmailCampaignDto } from './dto/update-email-campaign.dto';
 import { EmailCampaignService } from './email-campaign.service';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/email-campaign')
 export class EmailCampaignController {
   constructor(private readonly emailCampaignService: EmailCampaignService) {}
+
+  @Post()
+  async create(
+    @ActiveOrganization() organization: Organization,
+    @Session() session: UserSession,
+    @Body() createEmailCampaignDto: CreateEmailCampaignDto,
+  ) {
+    const record: NewOrgEmailCampaign = {
+      ...createEmailCampaignDto,
+      organizationId: organization.id,
+    };
+
+    await this.emailCampaignService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    return await this.emailCampaignService.createNewRecord(record);
+  }
+
+  @Get('r/:id')
+  async findOne(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    return record;
+  }
 
   @Get('paginated')
   async paginatedData(
@@ -28,6 +80,62 @@ export class EmailCampaignController {
       session.user.id,
       organization.id,
       query,
+    );
+  }
+
+  @Delete('r/:id')
+  async remove(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    await this.emailCampaignService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    return await this.emailCampaignService.deleteRecordById(
+      id,
+      organization.id,
+    );
+  }
+
+  @Patch('r/:id')
+  async update(
+    @Param('id') id: string,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+    @Body() updateEmailCampaignDto: UpdateEmailCampaignDto,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    await this.emailCampaignService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    await this.emailCampaignService.deleteCacheById(record.id, organization.id);
+
+    return await this.emailCampaignService.updateRecordById(
+      id,
+      organization.id,
+      updateEmailCampaignDto,
     );
   }
 }
