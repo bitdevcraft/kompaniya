@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ import { RecordLayoutRenderer } from "@/components/record-page/record-layout-ren
 
 import type { LeadRecordFormValues } from "./lead-record-schema";
 
+import { modelEndpoint } from "../../config";
 import { leadRecordLayout } from "./lead-record-layout";
 import {
   createLeadFormDefaults,
@@ -30,6 +32,7 @@ interface RecordViewPageProps {
 export function RecordViewPage({ record }: RecordViewPageProps) {
   const [currentRecord, setCurrentRecord] = useState(record);
   const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
 
   const form = useForm<LeadRecordFormValues>({
     defaultValues: createLeadFormDefaults(record, leadRecordLayout),
@@ -39,8 +42,11 @@ export function RecordViewPage({ record }: RecordViewPageProps) {
   const updateLead = useMutation({
     mutationFn: async (payload: Partial<OrgLead>) => {
       const { data } = await axios.patch<OrgLead>(
-        `/api/organization/lead/r/${currentRecord.id}`,
+        `${modelEndpoint}/r/${currentRecord.id}`,
         payload,
+        {
+          withCredentials: true,
+        },
       );
 
       return data;
@@ -58,7 +64,7 @@ export function RecordViewPage({ record }: RecordViewPageProps) {
     try {
       const updated = await updateLead.mutateAsync(payload);
       setCurrentRecord(updated);
-      form.reset(createLeadFormDefaults(updated, leadRecordLayout));
+      router.refresh();
       setIsEditing(false);
       toast.success("Lead updated");
     } catch (_error) {

@@ -17,6 +17,14 @@ export class LeadService {
     private readonly cacheService: CacheService,
   ) {}
 
+  async createNewRecord(record: NewOrgLead) {
+    return await this.db.insert(orgLeadsTable).values(record).returning();
+  }
+
+  async deleteCacheById(id: string, organizationId: string) {
+    await this.cacheService.delete(Keys.Contact.idByOrg(id, organizationId));
+  }
+
   async deletePaginatedCache(userId: string, organizationId: string) {
     const paginationCache = await this.cacheService.get<string[]>(
       Keys.Lead.paginatedList(userId, organizationId),
