@@ -29,15 +29,15 @@ interface RecordViewPageProps {
   recordId: string;
 }
 
+const leadRecordQueryKey = (recordId: string) =>
+  ["lead-record", recordId] as const;
+
 export function RecordViewPage({ recordId }: RecordViewPageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(
-    () => ["lead-record", recordId] as const,
-    [recordId],
-  );
+  const queryKey = useMemo(() => leadRecordQueryKey(recordId), [recordId]);
 
   const {
     data: record,
@@ -45,33 +45,29 @@ export function RecordViewPage({ recordId }: RecordViewPageProps) {
     isLoading,
   } = useQuery({
     queryKey,
-    queryFn: async () => {
-      const { data } = await axios.get<OrgLead>(
-        `${modelEndpoint}/r/${recordId}`,
-        {
-          withCredentials: true,
-        },
-      );
-
-      return data;
-    },
+    queryFn: () => fetchLeadRecord(recordId),
     retry: false,
   });
 
   useEffect(() => {
-    if (
+    const isNotFoundError =
       !isLoading &&
       axios.isAxiosError(error) &&
-      error?.response?.status === 404
-    ) {
+      error?.response?.status === 404;
+
+    if (isNotFoundError) {
       router.replace("/404");
     }
   }, [error, isLoading, router]);
 
+  const formDefaults = useMemo(
+    () =>
+      record ? createLeadFormDefaults(record, leadRecordLayout) : undefined,
+    [record],
+  );
+
   const form = useForm<LeadRecordFormValues>({
-    defaultValues: record
-      ? createLeadFormDefaults(record, leadRecordLayout)
-      : undefined,
+    defaultValues: formDefaults,
     resolver: zodResolver(leadRecordSchema),
   });
 
@@ -82,16 +78,19 @@ export function RecordViewPage({ recordId }: RecordViewPageProps) {
   }, [form, record]);
 
   const updateLead = useMutation({
-    mutationFn: async (payload: Partial<OrgLead>) => {
-      const { data } = await axios.patch<OrgLead>(
-        `${modelEndpoint}/r/${recordId}`,
-        payload,
-        {
-          withCredentials: true,
-        },
-      );
-
-      return data;
+    mutationFn: (payload: Partial<OrgLead>) =>
+      updateLeadRecord(recordId, payload),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(queryKey, updated);
+      form.reset(createLeadFormDefaults(updated, leadRecordLayout));
+      setIsEditing(false);
+      toast.success("Lead updated");
+    },
+    onError: () => {
+      toast.error("We couldn't save your changes. Please try again.");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -102,15 +101,9 @@ export function RecordViewPage({ recordId }: RecordViewPageProps) {
     const payload = createLeadUpdatePayload(record, parsed, leadRecordLayout);
 
     try {
-      const updated = await updateLead.mutateAsync(payload);
-      queryClient.setQueryData(queryKey, updated);
-      form.reset(createLeadFormDefaults(updated, leadRecordLayout));
-      setIsEditing(false);
-      toast.success("Lead updated");
+      await updateLead.mutateAsync(payload);
     } catch (_error) {
-      toast.error("We couldn't save your changes. Please try again.");
-    } finally {
-      queryClient.invalidateQueries({ queryKey });
+      // handled by mutation onError
     }
   });
 
@@ -180,4 +173,24 @@ export function RecordViewPage({ recordId }: RecordViewPageProps) {
       </form>
     </div>
   );
+}
+
+async function fetchLeadRecord(recordId: string) {
+  const { data } = await axios.get<OrgLead>(`${modelEndpoint}/r/${recordId}`, {
+    withCredentials: true,
+  });
+
+  return data;
+}
+
+async function updateLeadRecord(recordId: string, payload: Partial<OrgLead>) {
+  const { data } = await axios.patch<OrgLead>(
+    `${modelEndpoint}/r/${recordId}`,
+    payload,
+    {
+      withCredentials: true,
+    },
+  );
+
+  return data;
 }
