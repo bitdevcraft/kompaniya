@@ -78,7 +78,8 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
           description:
             "Key identifiers that appear across the CRM, email campaigns, and automation workflows.",
           fields: [
-            { id: "name", label: "Full name", type: "text" },
+            { id: "lastName", label: "First name", type: "text" },
+            { id: "firstName", label: "Last name", type: "text" },
             { id: "salutation", label: "Salutation", type: "text" },
             { id: "companyName", label: "Company", type: "text" },
             {

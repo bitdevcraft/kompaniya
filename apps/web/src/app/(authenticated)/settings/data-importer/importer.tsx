@@ -427,7 +427,7 @@ export default function CsvImporter() {
               {preview.fileName ?? "the uploaded file"}.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-w-6xl">
             <Table>
               <TableHeader>
                 <TableRow>

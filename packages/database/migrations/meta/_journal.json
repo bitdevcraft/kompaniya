@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1763722147318,
-      "tag": "0000_fluffy_roxanne_simpson",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1763722256814,
-      "tag": "0001_noisy_alice",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1763722910003,
-      "tag": "0002_peaceful_forge",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1763723004238,
-      "tag": "0003_pink_blackheart",
+      "when": 1763724339669,
+      "tag": "0000_tense_rocket_racer",
       "breakpoints": true
     }
   ]

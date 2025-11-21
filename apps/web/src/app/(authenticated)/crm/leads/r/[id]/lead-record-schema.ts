@@ -14,6 +14,8 @@ export const leadRecordSchema = z.object({
   categories: z.array(z.string()).optional().default([]),
   createdAt: z.string().optional(),
   lastActivityAt: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   name: z.string().optional(),
   nationality: z.string().optional(),
   nextActivityAt: z.string().optional(),

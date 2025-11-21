@@ -224,7 +224,10 @@ CREATE TABLE "org_contacts" (
 	"first_name" varchar(255),
 	"last_name" varchar(255),
 	"salutation" varchar(255),
-	"name" varchar(1024),
+	"name" varchar(1024) GENERATED ALWAYS AS (btrim(
+        coalesce("org_contacts"."salutation" || ' ', '') ||
+        "org_contacts"."first_name" || ' ' || "org_contacts"."last_name"
+      )) STORED,
 	"phone" varchar(50),
 	"phone_e164" varchar(50),
 	"email" varchar(255),
@@ -414,7 +417,10 @@ CREATE TABLE "org_leads" (
 	"first_name" varchar(255),
 	"last_name" varchar(255),
 	"salutation" varchar(255),
-	"name" varchar(1024),
+	"name" varchar(1024) GENERATED ALWAYS AS (btrim(
+        coalesce("org_leads"."salutation" || ' ', '') ||
+        "org_leads"."first_name" || ' ' || "org_leads"."last_name"
+      )) STORED,
 	"phone" varchar(50),
 	"phone_e164" varchar(50),
 	"email" varchar(255),
@@ -442,7 +448,7 @@ CREATE TABLE "org_opportunities" (
 	"description" text,
 	"owner_user_id" uuid,
 	"team_id" uuid,
-	"account_id" uuid NOT NULL,
+	"account_id" uuid,
 	"primary_contact_id" uuid,
 	"type" "opportunity_type" DEFAULT 'new_business' NOT NULL,
 	"status" "opportunity_status" DEFAULT 'open' NOT NULL,
@@ -460,7 +466,6 @@ CREATE TABLE "org_opportunities" (
 	"next_step" text,
 	"source" varchar(128),
 	"source_detail" varchar(256),
-	"campaign_id" varchar(36),
 	"utm_source" varchar(100),
 	"utm_medium" varchar(100),
 	"utm_campaign" varchar(100),
@@ -472,6 +477,22 @@ CREATE TABLE "org_opportunities" (
 	"tags" varchar(255)[],
 	"custom_fields" jsonb,
 	"is_archived" boolean DEFAULT false NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_real_estate_booking_buyers" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"owner_id" uuid,
+	"created_by" uuid,
+	"last_updated_by" uuid,
+	"deleted_by" uuid,
+	"bookingId" uuid,
+	"contactId" uuid,
+	"is_primary_buyer" boolean DEFAULT false,
+	CONSTRAINT "buyers" UNIQUE("bookingId","contactId")
 );
 --> statement-breakpoint
 CREATE TABLE "org_real_estate_bookings" (
@@ -632,6 +653,13 @@ ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_owner_user_id_
 ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_account_id_org_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."org_accounts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_primary_contact_id_org_contacts_id_fk" FOREIGN KEY ("primary_contact_id") REFERENCES "public"."org_contacts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_bookingId_org_real_estate_bookings_id_fk" FOREIGN KEY ("bookingId") REFERENCES "public"."org_real_estate_bookings"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_contactId_org_contacts_id_fk" FOREIGN KEY ("contactId") REFERENCES "public"."org_contacts"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_bookings" ADD CONSTRAINT "org_real_estate_bookings_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_bookings" ADD CONSTRAINT "org_real_estate_bookings_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_bookings" ADD CONSTRAINT "org_real_estate_bookings_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint

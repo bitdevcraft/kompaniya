@@ -1,5 +1,5 @@
 {
-  "id": "3123885a-d88c-4095-afd3-1578a66ef323",
+  "id": "bbf8a80c-eece-4fe5-86fc-2630b614fdfd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1545,7 +1545,11 @@
           "name": "name",
           "type": "varchar(1024)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "generated": {
+            "as": "btrim(\n        coalesce(\"org_contacts\".\"salutation\" || ' ', '') ||\n        \"org_contacts\".\"first_name\" || ' ' || \"org_contacts\".\"last_name\"\n      )",
+            "type": "stored"
+          }
         },
         "phone": {
           "name": "phone",
@@ -3114,7 +3118,11 @@
           "name": "name",
           "type": "varchar(1024)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "generated": {
+            "as": "btrim(\n        coalesce(\"org_leads\".\"salutation\" || ' ', '') ||\n        \"org_leads\".\"first_name\" || ' ' || \"org_leads\".\"last_name\"\n      )",
+            "type": "stored"
+          }
         },
         "phone": {
           "name": "phone",
@@ -3326,7 +3334,7 @@
           "name": "account_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "primary_contact_id": {
           "name": "primary_contact_id",
@@ -3432,12 +3440,6 @@
         "source_detail": {
           "name": "source_detail",
           "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "campaign_id": {
-          "name": "campaign_id",
-          "type": "varchar(36)",
           "primaryKey": false,
           "notNull": false
         },
@@ -3596,6 +3598,165 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.org_real_estate_booking_buyers": {
+      "name": "org_real_estate_booking_buyers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bookingId": {
+          "name": "bookingId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contactId": {
+          "name": "contactId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_primary_buyer": {
+          "name": "is_primary_buyer",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "org_real_estate_booking_buyers_organization_id_organizations_id_fk": {
+          "name": "org_real_estate_booking_buyers_organization_id_organizations_id_fk",
+          "tableFrom": "org_real_estate_booking_buyers",
+          "tableTo": "organizations",
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_booking_buyers_owner_id_users_id_fk": {
+          "name": "org_real_estate_booking_buyers_owner_id_users_id_fk",
+          "tableFrom": "org_real_estate_booking_buyers",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_booking_buyers_created_by_users_id_fk": {
+          "name": "org_real_estate_booking_buyers_created_by_users_id_fk",
+          "tableFrom": "org_real_estate_booking_buyers",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_booking_buyers_last_updated_by_users_id_fk": {
+          "name": "org_real_estate_booking_buyers_last_updated_by_users_id_fk",
+          "tableFrom": "org_real_estate_booking_buyers",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_booking_buyers_deleted_by_users_id_fk": {
+          "name": "org_real_estate_booking_buyers_deleted_by_users_id_fk",
+          "tableFrom": "org_real_estate_booking_buyers",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_booking_buyers_bookingId_org_real_estate_bookings_id_fk": {
+          "name": "org_real_estate_booking_buyers_bookingId_org_real_estate_bookings_id_fk",
+          "tableFrom": "org_real_estate_booking_buyers",
+          "tableTo": "org_real_estate_bookings",
+          "columnsFrom": ["bookingId"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_booking_buyers_contactId_org_contacts_id_fk": {
+          "name": "org_real_estate_booking_buyers_contactId_org_contacts_id_fk",
+          "tableFrom": "org_real_estate_booking_buyers",
+          "tableTo": "org_contacts",
+          "columnsFrom": ["contactId"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "buyers": {
+          "name": "buyers",
+          "nullsNotDistinct": false,
+          "columns": ["bookingId", "contactId"]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

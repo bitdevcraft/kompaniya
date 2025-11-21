@@ -8,6 +8,7 @@ import {
   DataTableAdvancedToolbar,
   DataTableFilterList,
   DataTableSortList,
+  DataTableViewOptions,
   DataTableViewToggle,
 } from "@repo/shared-ui/components/data-table/index";
 import { useDataTable } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table";
@@ -84,6 +85,10 @@ export function OrgDataTable(props: OrgDataTableProps) {
     initialState: {
       sorting: [],
       columnPinning: { right: ["actions"] },
+      columnVisibility: {
+        name: true,
+        email: false,
+      },
     },
     getRowId: (row) => row.id,
     shallow: false,
@@ -129,6 +134,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
                   table={table}
                   throttleMs={throttleMs}
                 />
+                <DataTableViewOptions table={table} />
                 <DataTableViewToggle
                   onViewModeChange={setViewMode}
                   paramKey={`${model.plural}View`}

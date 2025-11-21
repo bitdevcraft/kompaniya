@@ -50,7 +50,8 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
           description:
             "Primary lead information used by the sales and marketing teams.",
           fields: [
-            { id: "name", label: "Full name", type: "text" },
+            { id: "lastName", label: "First name", type: "text" },
+            { id: "firstName", label: "Last name", type: "text" },
             { id: "salutation", label: "Salutation", type: "text" },
             {
               id: "email",

@@ -22,7 +22,7 @@ export class CreateLeadDto {
 
   lastActivityAt!: Date | null;
 
-  lastName!: string | null;
+  lastName!: string;
 
   name!: string | null;
 

@@ -78,6 +78,21 @@ export function useDataTableColumns(
       enableColumnFilter: true,
     },
     {
+      id: "email",
+      accessorKey: "email",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Email" />
+      ),
+      cell: ({ row }) => <p>{row.original.email}</p>,
+      meta: {
+        label: "Email",
+        placeholder: "Search emails...",
+        variant: "text",
+        icon: Text,
+      },
+      enableColumnFilter: true,
+    },
+    {
       id: "actions",
       meta: defineMeta({
         label: "Actions",

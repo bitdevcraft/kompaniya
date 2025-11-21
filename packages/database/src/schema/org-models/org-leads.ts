@@ -1,3 +1,4 @@
+import { sql, SQL } from "drizzle-orm";
 import {
   numeric,
   pgTable,
@@ -20,7 +21,13 @@ export const orgLeadsTable = pgTable("org_leads", {
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
   salutation: varchar("salutation", { length: 255 }),
-  name: varchar("name", { length: 1024 }),
+  name: varchar("name", { length: 1024 }).generatedAlwaysAs(
+    (): SQL =>
+      sql`btrim(
+        coalesce(${orgLeadsTable.salutation} || ' ', '') ||
+        ${orgLeadsTable.firstName} || ' ' || ${orgLeadsTable.lastName}
+      )`,
+  ),
   phone: varchar("phone", { length: 50 }),
   phoneE164: varchar("phone_e164", { length: 50 }),
 

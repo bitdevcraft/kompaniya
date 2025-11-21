@@ -41,6 +41,8 @@ export const contactRecordSchema = z.object({
   lastActivityAt: z.string().optional(),
   linkedinUrl: z.string().optional(),
   name: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   nationality: z.string().optional(),
   nextActivityAt: z.string().optional(),
   notes: z.string().optional(),
