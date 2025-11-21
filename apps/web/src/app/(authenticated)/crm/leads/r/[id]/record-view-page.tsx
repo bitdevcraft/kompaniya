@@ -4,12 +4,12 @@ import type { OrgLead } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/shared-ui/components/common/button";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -26,51 +26,106 @@ import {
 } from "./lead-record-schema";
 
 interface RecordViewPageProps {
-  record: OrgLead;
+  initialRecord?: OrgLead;
+
+  recordId: string;
 }
 
-export function RecordViewPage({ record }: RecordViewPageProps) {
-  const [currentRecord, setCurrentRecord] = useState(record);
+const leadRecordQueryKey = (recordId: string) =>
+  ["lead-record", recordId] as const;
+
+export function RecordViewPage({
+  initialRecord,
+  recordId,
+}: RecordViewPageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const queryKey = useMemo(() => leadRecordQueryKey(recordId), [recordId]);
+
+  const {
+    data: record,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey,
+    queryFn: () => fetchLeadRecord(recordId),
+    initialData: initialRecord,
+    retry: false,
+  });
+
+  useEffect(() => {
+    const isNotFoundError =
+      !isLoading &&
+      axios.isAxiosError(error) &&
+      error?.response?.status === 404;
+
+    if (isNotFoundError) {
+      router.replace("/404");
+    }
+  }, [error, isLoading, router]);
+
+  const formDefaults = useMemo(
+    () =>
+      record ? createLeadFormDefaults(record, leadRecordLayout) : undefined,
+    [record],
+  );
 
   const form = useForm<LeadRecordFormValues>({
-    defaultValues: createLeadFormDefaults(record, leadRecordLayout),
+    defaultValues: formDefaults,
     resolver: zodResolver(leadRecordSchema),
   });
 
-  const updateLead = useMutation({
-    mutationFn: async (payload: Partial<OrgLead>) => {
-      const { data } = await axios.patch<OrgLead>(
-        `${modelEndpoint}/r/${currentRecord.id}`,
-        payload,
-        {
-          withCredentials: true,
-        },
-      );
+  useEffect(() => {
+    if (record) {
+      form.reset(createLeadFormDefaults(record, leadRecordLayout));
+    }
+  }, [form, record]);
 
-      return data;
+  const updateLead = useMutation({
+    mutationFn: (payload: Partial<OrgLead>) =>
+      updateLeadRecord(recordId, payload),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(queryKey, updated);
+      form.reset(createLeadFormDefaults(updated, leadRecordLayout));
+      setIsEditing(false);
+      toast.success("Lead updated");
+    },
+    onError: () => {
+      toast.error("We couldn't save your changes. Please try again.");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
   const handleSubmit = form.handleSubmit(async (values) => {
+    if (!record) return;
+
     const parsed = leadRecordSchema.parse(values);
-    const payload = createLeadUpdatePayload(
-      currentRecord,
-      parsed,
-      leadRecordLayout,
-    );
+    const payload = createLeadUpdatePayload(record, parsed, leadRecordLayout);
 
     try {
-      const updated = await updateLead.mutateAsync(payload);
-      setCurrentRecord(updated);
-      router.refresh();
-      setIsEditing(false);
-      toast.success("Lead updated");
+      await updateLead.mutateAsync(payload);
     } catch (_error) {
-      toast.error("We couldn't save your changes. Please try again.");
+      // handled by mutation onError
     }
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="size-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!record) {
+    return (
+      <div className="text-destructive">Unable to load this lead record.</div>
+    );
+  }
 
   const actionButtons = (
     <div className="flex flex-wrap justify-end gap-2">
@@ -79,9 +134,7 @@ export function RecordViewPage({ record }: RecordViewPageProps) {
           <Button
             disabled={updateLead.isPending}
             onClick={() => {
-              form.reset(
-                createLeadFormDefaults(currentRecord, leadRecordLayout),
-              );
+              form.reset(createLeadFormDefaults(record, leadRecordLayout));
               setIsEditing(false);
             }}
             type="button"
@@ -121,9 +174,29 @@ export function RecordViewPage({ record }: RecordViewPageProps) {
           form={form}
           isEditing={isEditing}
           layout={leadRecordLayout}
-          record={currentRecord as Record<string, unknown>}
+          record={record as Record<string, unknown>}
         />
       </form>
     </div>
   );
+}
+
+async function fetchLeadRecord(recordId: string) {
+  const { data } = await axios.get<OrgLead>(`${modelEndpoint}/r/${recordId}`, {
+    withCredentials: true,
+  });
+
+  return data;
+}
+
+async function updateLeadRecord(recordId: string, payload: Partial<OrgLead>) {
+  const { data } = await axios.patch<OrgLead>(
+    `${modelEndpoint}/r/${recordId}`,
+    payload,
+    {
+      withCredentials: true,
+    },
+  );
+
+  return data;
 }

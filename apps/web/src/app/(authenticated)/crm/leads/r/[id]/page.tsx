@@ -4,21 +4,22 @@ import { notFound } from "next/navigation";
 
 import { api } from "@/lib/api";
 
+import { modelEndpoint } from "../../config";
 import { RecordViewPage } from "./record-view-page";
 
 interface LeadRecordPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function Page(props: LeadRecordPageProps) {
-  const params = await props.params;
+export default async function Page({ params }: LeadRecordPageProps) {
+  const { id } = await params;
   const client = await api();
   let record: OrgLead;
 
   try {
-    const { data } = await client.get<OrgLead>(
-      `/api/organization/lead/r/${params.id}`,
-    );
+    const { data } = await client.get<OrgLead>(`${modelEndpoint}/r/${id}`, {
+      withCredentials: true,
+    });
     record = data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 404) {
@@ -28,5 +29,5 @@ export default async function Page(props: LeadRecordPageProps) {
     throw error;
   }
 
-  return <RecordViewPage record={record} />;
+  return <RecordViewPage initialRecord={record} recordId={id} />;
 }
