@@ -1,5 +1,4 @@
 import type { Db } from '@repo/database';
-import type { AnyPgColumn, AnyPgTable } from 'drizzle-orm/pg-core';
 
 import {
   BadRequestException,
@@ -8,7 +7,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { orgLeadsTable } from '@repo/database/schema';
 import { parse } from 'csv-parse';
 import { and, eq } from 'drizzle-orm';
 import { constants as fsConstants } from 'node:fs';
@@ -17,29 +15,20 @@ import { access } from 'node:fs/promises';
 
 import { DRIZZLE_DB } from '~/constants/provider';
 
+import type {
+  ColumnMapping,
+  CsvImportColumn,
+  CsvImportColumnType,
+  CsvImportTableConfig,
+  SupportedTable,
+} from './csv-import.types';
+
 import { FileUploadService } from '../core/file-upload/file-upload.service';
 import {
   type CsvImportJobData,
   CsvImportQueueService,
 } from './csv-import.queue';
-
-export type ColumnMapping = Record<string, string | null>;
-
-type CsvImportColumn = {
-  key: string;
-  label: string;
-  type: CsvImportColumnType;
-  description?: string;
-};
-
-type CsvImportColumnType = 'string' | 'number' | 'date' | 'string[]';
-type CsvImportTableConfig = {
-  id: string;
-  label: string;
-  description?: string;
-  table: SupportedTable;
-  columns: CsvImportColumn[];
-};
+import { CSV_IMPORT_TABLES } from './tables';
 
 type CsvPreview = {
   fileId: string;
@@ -49,50 +38,6 @@ type CsvPreview = {
 };
 
 type MappedRow = { id?: string; values: Record<string, unknown> };
-
-type SupportedTable = AnyPgTable & {
-  organizationId: AnyPgColumn;
-  id: AnyPgColumn;
-};
-
-const ORG_LEADS_COLUMNS: CsvImportColumn[] = [
-  {
-    key: 'id',
-    label: 'ID',
-    type: 'string',
-    description:
-      'Provide an existing ID to update a record. Leave empty to create a new record.',
-  },
-  { key: 'firstName', label: 'First Name', type: 'string' },
-  { key: 'lastName', label: 'Last Name', type: 'string' },
-  { key: 'salutation', label: 'Salutation', type: 'string' },
-  { key: 'name', label: 'Full Name', type: 'string' },
-  { key: 'phone', label: 'Phone', type: 'string' },
-  { key: 'email', label: 'Email', type: 'string' },
-  { key: 'nationality', label: 'Nationality', type: 'string' },
-  {
-    key: 'tags',
-    label: 'Tags',
-    type: 'string[]',
-    description: 'Comma separated values will be stored as tags array.',
-  },
-  {
-    key: 'categories',
-    label: 'Categories',
-    type: 'string[]',
-    description: 'Comma separated values will be stored as categories array.',
-  },
-];
-
-const CSV_IMPORT_TABLES: Record<string, CsvImportTableConfig> = {
-  orgLeads: {
-    id: 'orgLeads',
-    label: 'Organization Leads',
-    description: 'Import CSV data into the organization leads table.',
-    table: orgLeadsTable,
-    columns: ORG_LEADS_COLUMNS,
-  },
-};
 
 @Injectable()
 export class CsvImportService {
@@ -263,6 +208,24 @@ export class CsvImportService {
           .filter((item) => item.length > 0);
         return parts.length > 0 ? parts : undefined;
       }
+      case 'boolean': {
+        const normalized = value.trim().toLowerCase();
+        if (['1', 'true', 'y', 'yes'].includes(normalized)) {
+          return true;
+        }
+        if (['0', 'false', 'n', 'no'].includes(normalized)) {
+          return false;
+        }
+        return null;
+      }
+      case 'json': {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return JSON.parse(value);
+        } catch (_error) {
+          return null;
+        }
+      }
       default:
         return value;
     }
@@ -302,6 +265,7 @@ export class CsvImportService {
       }
 
       const rawValue = row[index] ?? '';
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const converted = this.convertValue(rawValue, column.type);
 
       if (column.key === 'id') {
