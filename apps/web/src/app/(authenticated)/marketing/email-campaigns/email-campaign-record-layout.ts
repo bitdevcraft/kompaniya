@@ -73,8 +73,8 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
                 placeholder: "Domain identifier",
                 type: "lookup",
                 lookup: {
-                  searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/lead/paginated`,
-                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/lead/r`,
+                  searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/paginated`,
+                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/r`,
                 },
               },
               {

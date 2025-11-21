@@ -1,4 +1,5 @@
 import { type RecordPageLayout } from "@/components/record-page/layout";
+import { env } from "@/env/client";
 
 import type { OpportunityRecordFormValues } from "./opportunity-record-schema";
 
@@ -150,7 +151,15 @@ export const opportunityRecordLayout: RecordPageLayout<OpportunityRecordFormValu
             description:
               "Primary associations that link this opportunity to other records.",
             fields: [
-              { id: "accountId", label: "Account ID", type: "text" },
+              {
+                id: "accountId",
+                label: "Account ID",
+                type: "lookup",
+                lookup: {
+                  searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/account/paginated`,
+                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/account/r/:id`,
+                },
+              },
               {
                 id: "primaryContactId",
                 label: "Primary contact ID",

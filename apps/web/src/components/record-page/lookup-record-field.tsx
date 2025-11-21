@@ -158,6 +158,7 @@ export function LookupRecordField({
       const replaced = lookup.findByIdEndpoint
         .replace(":id", encodeURIComponent(id))
         .replace("{id}", encodeURIComponent(id));
+
       if (replaced !== lookup.findByIdEndpoint) {
         return buildUrl(replaced);
       }

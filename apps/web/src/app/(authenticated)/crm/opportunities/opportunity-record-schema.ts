@@ -64,6 +64,7 @@ export function createOpportunityFormDefaults(
 
     // @ts-expect-error todo fix-types
     defaults[field.id] =
+      // @ts-expect-error todo fix-types
       normalized as OpportunityRecordFormValues[typeof field.id];
   }
 

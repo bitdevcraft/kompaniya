@@ -13,6 +13,6 @@ export class TaskScheduleService {
   handleCron() {
     this.logger.debug('Called when the every 5 minutes');
 
-    this.awsSesVerification.updateIdentities();
+    // this.awsSesVerification.updateIdentities();
   }
 }
