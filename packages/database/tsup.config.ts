@@ -7,6 +7,7 @@ export default defineConfig({
     index: "src/index.ts",
     repositories: "src/repositories/index.ts",
     schema: "src/schema/index.ts",
+    seeds: "src/seeds/index.ts",
   },
   format: ["cjs", "esm"],
   sourcemap: true,

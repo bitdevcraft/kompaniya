@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "seed:org-models": "tsx src/seeds/orgModels.ts"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -51,6 +52,12 @@
       "import": "./dist/repositories.js",
       "require": "./dist/repositories.mjs",
       "default": "./dist/repositories.js"
+    },
+    "./seeds": {
+      "types": "./dist/seeds.d.ts",
+      "import": "./dist/seeds.js",
+      "require": "./dist/seeds.mjs",
+      "default": "./dist/seeds.js"
     },
     "./package.json": "./package.json"
   }
