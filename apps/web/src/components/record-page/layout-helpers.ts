@@ -132,8 +132,8 @@ export function normalizeValueForForm(
   }
 }
 
-export function normalizeValueForSubmission(
-  field: RecordLayoutField,
+export function normalizeValueForSubmission<TFieldValues extends FieldValues>(
+  field: RecordLayoutField<TFieldValues>,
   value: unknown,
 ): unknown {
   switch (field.type) {

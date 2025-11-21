@@ -47,7 +47,7 @@ type FieldComponent = (props: {
   placeholder?: string;
   options?: RecordLayoutField["options"];
   value?: unknown;
-}) => JSX.Element | null;
+}) => React.ReactNode | null;
 
 const CREATE_FIELD_COMPONENTS: Record<
   RecordLayoutField["type"],

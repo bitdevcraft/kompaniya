@@ -85,12 +85,12 @@ type FieldComponent = (props: {
   placeholder?: string;
   options?: RecordFieldOption[];
   value?: unknown;
-}) => JSX.Element | null;
+}) => React.ReactNode | null;
 
 interface HeaderChip {
   chip: {
     id: string;
-    label: string;
+    label: string | ReactNode;
     linkType?: "mailto" | "tel";
   };
   icon: React.ComponentType<{ className?: string }>;
@@ -245,12 +245,12 @@ function fallbackFormat(
 
   switch (type) {
     case "date":
-      return formatDateTime(value, {
+      return formatDateTime(value as string | Date | null | undefined, {
         dateStyle: "medium",
         timeStyle: undefined,
       });
     case "datetime":
-      return formatDateTime(value);
+      return formatDateTime(value as string | Date | null | undefined);
     case "number": {
       if (typeof value === "number") return formatScore(value);
       if (typeof value === "string") return value;
@@ -348,7 +348,10 @@ function formatHeaderText<TFieldValues extends FieldValues>(
   return formatted;
 }
 
-function formatValue(field: RecordLayoutField, rawValue: unknown): ReactNode {
+function formatValue<TFieldValues extends FieldValues>(
+  field: RecordLayoutField<TFieldValues>,
+  rawValue: unknown,
+): ReactNode {
   switch (field.type) {
     case "boolean": {
       if (typeof rawValue === "boolean") {
@@ -366,19 +369,19 @@ function formatValue(field: RecordLayoutField, rawValue: unknown): ReactNode {
       return null;
     }
     case "date": {
-      return formatDateTime(rawValue, {
+      return formatDateTime(rawValue as string | Date | null, {
         dateStyle: "long",
         timeStyle: undefined,
       });
     }
     case "datetime": {
-      return formatDateTime(rawValue);
+      return formatDateTime(rawValue as string | Date | null);
     }
     case "phone": {
       if (typeof rawValue === "string" && rawValue.trim().length > 0) {
         return renderLink(rawValue, `tel:${rawValue}`);
       }
-      return rawValue ?? null;
+      return (rawValue as ReactNode) ?? null;
     }
     case "picklist": {
       if (typeof rawValue === "string") {
@@ -391,7 +394,7 @@ function formatValue(field: RecordLayoutField, rawValue: unknown): ReactNode {
         }
         return rawValue;
       }
-      return rawValue ?? null;
+      return (rawValue as ReactNode) ?? null;
     }
     case "multipicklist": {
       const values = normalizeMultipicklistValue(rawValue);
@@ -523,7 +526,7 @@ function Header<TFieldValues extends FieldValues>({
                   <InfoChip
                     icon={icon}
                     key={chip.id}
-                    label={chip.label}
+                    label={chip.label as string}
                     linkType={chip.linkType}
                   />
                 ))}
