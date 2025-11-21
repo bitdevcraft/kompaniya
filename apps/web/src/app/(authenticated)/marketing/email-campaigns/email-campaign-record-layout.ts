@@ -74,20 +74,28 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
                 type: "lookup",
                 lookup: {
                   searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/paginated`,
-                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/r`,
+                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/r/:id`,
                 },
               },
               {
                 id: "orgEmailTemplateId",
                 label: "Template ID",
                 placeholder: "Template identifier",
-                type: "text",
+                type: "lookup",
+                lookup: {
+                  searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-template/paginated`,
+                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-template/r/:id`,
+                },
               },
               {
                 id: "orgEmailTestReceiverId",
                 label: "Test receiver ID",
                 placeholder: "Receiver identifier",
-                type: "text",
+                type: "lookup",
+                lookup: {
+                  searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-test-receiver/paginated`,
+                  findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-test-receiver/r/:id`,
+                },
               },
             ],
             id: "campaign-associations",

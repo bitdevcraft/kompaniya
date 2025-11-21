@@ -8,6 +8,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -15,6 +16,9 @@ import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
+import { teamsTable, usersTable } from "../auth";
+import { orgAccountsTable } from "./org-accounts";
+import { orgContactsTable } from "./org-contacts";
 
 export const opportunityStatusEnum = pgEnum("opportunity_status", [
   "open",
@@ -49,15 +53,17 @@ export const orgOpportunitiesTable = pgTable("org_opportunities", {
 
   description: text("description"),
 
-  ownerUserId: varchar("owner_user_id", { length: 36 }).notNull(),
-  teamId: varchar("team_id", { length: 36 }),
+  ownerUserId: uuid("owner_user_id").references(() => usersTable.id),
+  teamId: uuid("team_id").references(() => teamsTable.id, {
+    onDelete: "set null",
+  }),
 
-  accountId: varchar("account_id", { length: 36 }).notNull(),
-  primaryContactId: varchar("primary_contact_id", { length: 36 }),
+  accountId: uuid("account_id").references(() => orgAccountsTable.id),
+  primaryContactId: uuid("primary_contact_id").references(
+    () => orgContactsTable.id,
+  ),
 
   type: opportunityTypeEnum("type").default("new_business").notNull(),
-  pipelineId: varchar("pipeline_id", { length: 36 }).notNull(),
-  stageId: varchar("stage_id", { length: 36 }).notNull(),
   status: opportunityStatusEnum("status").default("open").notNull(),
   probability: integer("probability"),
   forecastCategory: opportunityForecastCategoryEnum("forecast_category"),
@@ -77,7 +83,6 @@ export const orgOpportunitiesTable = pgTable("org_opportunities", {
 
   source: varchar("source", { length: 128 }),
   sourceDetail: varchar("source_detail", { length: 256 }),
-  campaignId: varchar("campaign_id", { length: 36 }),
   utmSource: varchar("utm_source", { length: 100 }),
   utmMedium: varchar("utm_medium", { length: 100 }),
   utmCampaign: varchar("utm_campaign", { length: 100 }),

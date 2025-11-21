@@ -13,7 +13,6 @@ import {
 export const opportunityRecordSchema = z.object({
   accountId: z.string().optional(),
   amount: z.string().optional(),
-  campaignId: z.string().optional(),
   currencyCode: z.string().optional(),
   description: z.string().optional(),
   expectedCloseDate: z.string().optional(),
@@ -22,7 +21,6 @@ export const opportunityRecordSchema = z.object({
   name: z.string().optional(),
   nextActivityAt: z.string().optional(),
   nextStep: z.string().optional(),
-  pipelineId: z.string().optional(),
   primaryContactId: z.string().optional(),
   probability: z.string().optional(),
   stageId: z.string().optional(),

@@ -1,1 +1,0 @@
-ALTER TABLE "org_email_domains" ALTER COLUMN "verified" SET DEFAULT false;

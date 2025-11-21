@@ -1,6 +1,6 @@
 {
-  "id": "0e0b1809-9c02-4801-b75a-d24f65c9fd59",
-  "prevId": "535ef91f-7a10-4256-96df-022448e18776",
+  "id": "b240de59-d463-4c42-a482-ff405a9b0807",
+  "prevId": "3123885a-d88c-4095-afd3-1578a66ef323",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -917,6 +917,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(1024)",
@@ -1144,6 +1168,42 @@
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "org_accounts_owner_id_users_id_fk": {
+          "name": "org_accounts_owner_id_users_id_fk",
+          "tableFrom": "org_accounts",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_accounts_created_by_users_id_fk": {
+          "name": "org_accounts_created_by_users_id_fk",
+          "tableFrom": "org_accounts",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_accounts_last_updated_by_users_id_fk": {
+          "name": "org_accounts_last_updated_by_users_id_fk",
+          "tableFrom": "org_accounts",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_accounts_deleted_by_users_id_fk": {
+          "name": "org_accounts_deleted_by_users_id_fk",
+          "tableFrom": "org_accounts",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1188,6 +1248,36 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(1024)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1199,6 +1289,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_activities_owner_id_users_id_fk": {
+          "name": "org_activities_owner_id_users_id_fk",
+          "tableFrom": "org_activities",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_activities_created_by_users_id_fk": {
+          "name": "org_activities_created_by_users_id_fk",
+          "tableFrom": "org_activities",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_activities_last_updated_by_users_id_fk": {
+          "name": "org_activities_last_updated_by_users_id_fk",
+          "tableFrom": "org_activities",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_activities_deleted_by_users_id_fk": {
+          "name": "org_activities_deleted_by_users_id_fk",
+          "tableFrom": "org_activities",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -1245,6 +1371,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -1261,6 +1411,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_categories_owner_id_users_id_fk": {
+          "name": "org_categories_owner_id_users_id_fk",
+          "tableFrom": "org_categories",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_categories_created_by_users_id_fk": {
+          "name": "org_categories_created_by_users_id_fk",
+          "tableFrom": "org_categories",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_categories_last_updated_by_users_id_fk": {
+          "name": "org_categories_last_updated_by_users_id_fk",
+          "tableFrom": "org_categories",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_categories_deleted_by_users_id_fk": {
+          "name": "org_categories_deleted_by_users_id_fk",
+          "tableFrom": "org_categories",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -1309,6 +1495,30 @@
         },
         "organization_id": {
           "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -1659,6 +1869,42 @@
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "org_contacts_owner_id_users_id_fk": {
+          "name": "org_contacts_owner_id_users_id_fk",
+          "tableFrom": "org_contacts",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_contacts_created_by_users_id_fk": {
+          "name": "org_contacts_created_by_users_id_fk",
+          "tableFrom": "org_contacts",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_contacts_last_updated_by_users_id_fk": {
+          "name": "org_contacts_last_updated_by_users_id_fk",
+          "tableFrom": "org_contacts",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_contacts_deleted_by_users_id_fk": {
+          "name": "org_contacts_deleted_by_users_id_fk",
+          "tableFrom": "org_contacts",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1704,6 +1950,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -1734,6 +2004,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "org_email_test_receiver_id": {
+          "name": "org_email_test_receiver_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "target_categories": {
           "name": "target_categories",
           "type": "text[]",
@@ -1758,6 +2034,42 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
+        "org_email_campaigns_owner_id_users_id_fk": {
+          "name": "org_email_campaigns_owner_id_users_id_fk",
+          "tableFrom": "org_email_campaigns",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_campaigns_created_by_users_id_fk": {
+          "name": "org_email_campaigns_created_by_users_id_fk",
+          "tableFrom": "org_email_campaigns",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_campaigns_last_updated_by_users_id_fk": {
+          "name": "org_email_campaigns_last_updated_by_users_id_fk",
+          "tableFrom": "org_email_campaigns",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_campaigns_deleted_by_users_id_fk": {
+          "name": "org_email_campaigns_deleted_by_users_id_fk",
+          "tableFrom": "org_email_campaigns",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
         "org_email_campaigns_org_email_domain_id_org_email_domains_id_fk": {
           "name": "org_email_campaigns_org_email_domain_id_org_email_domains_id_fk",
           "tableFrom": "org_email_campaigns",
@@ -1774,6 +2086,15 @@
           "columnsFrom": ["org_email_template_id"],
           "columnsTo": ["id"],
           "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "org_email_campaigns_org_email_test_receiver_id_org_email_test_receivers_id_fk": {
+          "name": "org_email_campaigns_org_email_test_receiver_id_org_email_test_receivers_id_fk",
+          "tableFrom": "org_email_campaigns",
+          "tableTo": "org_email_test_receivers",
+          "columnsFrom": ["org_email_test_receiver_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -1820,6 +2141,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "link": {
           "name": "link",
           "type": "text",
@@ -1848,6 +2193,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_email_clicks_owner_id_users_id_fk": {
+          "name": "org_email_clicks_owner_id_users_id_fk",
+          "tableFrom": "org_email_clicks",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_clicks_created_by_users_id_fk": {
+          "name": "org_email_clicks_created_by_users_id_fk",
+          "tableFrom": "org_email_clicks",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_clicks_last_updated_by_users_id_fk": {
+          "name": "org_email_clicks_last_updated_by_users_id_fk",
+          "tableFrom": "org_email_clicks",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_clicks_deleted_by_users_id_fk": {
+          "name": "org_email_clicks_deleted_by_users_id_fk",
+          "tableFrom": "org_email_clicks",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "org_email_clicks_org_email_id_org_emails_id_fk": {
@@ -1912,6 +2293,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -1922,7 +2327,8 @@
           "name": "verified",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": false
         },
         "email": {
           "name": "email",
@@ -1964,6 +2370,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_email_domains_owner_id_users_id_fk": {
+          "name": "org_email_domains_owner_id_users_id_fk",
+          "tableFrom": "org_email_domains",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_domains_created_by_users_id_fk": {
+          "name": "org_email_domains_created_by_users_id_fk",
+          "tableFrom": "org_email_domains",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_domains_last_updated_by_users_id_fk": {
+          "name": "org_email_domains_last_updated_by_users_id_fk",
+          "tableFrom": "org_email_domains",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_domains_deleted_by_users_id_fk": {
+          "name": "org_email_domains_deleted_by_users_id_fk",
+          "tableFrom": "org_email_domains",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -2021,6 +2463,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -2049,6 +2515,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_email_templates_owner_id_users_id_fk": {
+          "name": "org_email_templates_owner_id_users_id_fk",
+          "tableFrom": "org_email_templates",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_templates_created_by_users_id_fk": {
+          "name": "org_email_templates_created_by_users_id_fk",
+          "tableFrom": "org_email_templates",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_templates_last_updated_by_users_id_fk": {
+          "name": "org_email_templates_last_updated_by_users_id_fk",
+          "tableFrom": "org_email_templates",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_templates_deleted_by_users_id_fk": {
+          "name": "org_email_templates_deleted_by_users_id_fk",
+          "tableFrom": "org_email_templates",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -2095,6 +2597,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -2117,6 +2643,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_email_test_receivers_owner_id_users_id_fk": {
+          "name": "org_email_test_receivers_owner_id_users_id_fk",
+          "tableFrom": "org_email_test_receivers",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_test_receivers_created_by_users_id_fk": {
+          "name": "org_email_test_receivers_created_by_users_id_fk",
+          "tableFrom": "org_email_test_receivers",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_test_receivers_last_updated_by_users_id_fk": {
+          "name": "org_email_test_receivers_last_updated_by_users_id_fk",
+          "tableFrom": "org_email_test_receivers",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_email_test_receivers_deleted_by_users_id_fk": {
+          "name": "org_email_test_receivers_deleted_by_users_id_fk",
+          "tableFrom": "org_email_test_receivers",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -2159,6 +2721,30 @@
         },
         "organization_id": {
           "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -2221,6 +2807,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_emails_owner_id_users_id_fk": {
+          "name": "org_emails_owner_id_users_id_fk",
+          "tableFrom": "org_emails",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_emails_created_by_users_id_fk": {
+          "name": "org_emails_created_by_users_id_fk",
+          "tableFrom": "org_emails",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_emails_last_updated_by_users_id_fk": {
+          "name": "org_emails_last_updated_by_users_id_fk",
+          "tableFrom": "org_emails",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_emails_deleted_by_users_id_fk": {
+          "name": "org_emails_deleted_by_users_id_fk",
+          "tableFrom": "org_emails",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "org_emails_email_campaign_id_org_email_campaigns_id_fk": {
@@ -2300,6 +2922,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -2340,6 +2986,42 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_events_owner_id_users_id_fk": {
+          "name": "org_events_owner_id_users_id_fk",
+          "tableFrom": "org_events",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_events_created_by_users_id_fk": {
+          "name": "org_events_created_by_users_id_fk",
+          "tableFrom": "org_events",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_events_last_updated_by_users_id_fk": {
+          "name": "org_events_last_updated_by_users_id_fk",
+          "tableFrom": "org_events",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_events_deleted_by_users_id_fk": {
+          "name": "org_events_deleted_by_users_id_fk",
+          "tableFrom": "org_events",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -2382,6 +3064,30 @@
         },
         "organization_id": {
           "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -2487,6 +3193,42 @@
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "org_leads_owner_id_users_id_fk": {
+          "name": "org_leads_owner_id_users_id_fk",
+          "tableFrom": "org_leads",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_leads_created_by_users_id_fk": {
+          "name": "org_leads_created_by_users_id_fk",
+          "tableFrom": "org_leads",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_leads_last_updated_by_users_id_fk": {
+          "name": "org_leads_last_updated_by_users_id_fk",
+          "tableFrom": "org_leads",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_leads_deleted_by_users_id_fk": {
+          "name": "org_leads_deleted_by_users_id_fk",
+          "tableFrom": "org_leads",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2531,6 +3273,235 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(1024)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_user_id": {
+          "name": "owner_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "team_id": {
+          "name": "team_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "primary_contact_id": {
+          "name": "primary_contact_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "opportunity_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new_business'"
+        },
+        "status": {
+          "name": "status",
+          "type": "opportunity_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'open'"
+        },
+        "probability": {
+          "name": "probability",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "forecast_category": {
+          "name": "forecast_category",
+          "type": "opportunity_forecast_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency_code": {
+          "name": "currency_code",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exchange_rate": {
+          "name": "exchange_rate",
+          "type": "numeric(12, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount_home": {
+          "name": "amount_home",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expected_close_date": {
+          "name": "expected_close_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_activity_at": {
+          "name": "last_activity_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_activity_at": {
+          "name": "next_activity_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closed_won_at": {
+          "name": "closed_won_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closed_lost_at": {
+          "name": "closed_lost_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_step": {
+          "name": "next_step",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_detail": {
+          "name": "source_detail",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "utm_source": {
+          "name": "utm_source",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "utm_medium": {
+          "name": "utm_medium",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "utm_campaign": {
+          "name": "utm_campaign",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "utm_term": {
+          "name": "utm_term",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "utm_content": {
+          "name": "utm_content",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lost_reason_id": {
+          "name": "lost_reason_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lost_reason_note": {
+          "name": "lost_reason_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "opportunity_priority",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tags": {
+          "name": "tags",
+          "type": "varchar(255)[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "custom_fields": {
+          "name": "custom_fields",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_archived": {
+          "name": "is_archived",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -2542,6 +3513,611 @@
           "columnsFrom": ["organization_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_owner_id_users_id_fk": {
+          "name": "org_opportunities_owner_id_users_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_created_by_users_id_fk": {
+          "name": "org_opportunities_created_by_users_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_last_updated_by_users_id_fk": {
+          "name": "org_opportunities_last_updated_by_users_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_deleted_by_users_id_fk": {
+          "name": "org_opportunities_deleted_by_users_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_owner_user_id_users_id_fk": {
+          "name": "org_opportunities_owner_user_id_users_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "users",
+          "columnsFrom": ["owner_user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_team_id_teams_id_fk": {
+          "name": "org_opportunities_team_id_teams_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "teams",
+          "columnsFrom": ["team_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_account_id_org_accounts_id_fk": {
+          "name": "org_opportunities_account_id_org_accounts_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "org_accounts",
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_opportunities_primary_contact_id_org_contacts_id_fk": {
+          "name": "org_opportunities_primary_contact_id_org_contacts_id_fk",
+          "tableFrom": "org_opportunities",
+          "tableTo": "org_contacts",
+          "columnsFrom": ["primary_contact_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.org_real_estate_bookings": {
+      "name": "org_real_estate_bookings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_id": {
+          "name": "property_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "org_real_estate_bookings_organization_id_organizations_id_fk": {
+          "name": "org_real_estate_bookings_organization_id_organizations_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "organizations",
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_bookings_owner_id_users_id_fk": {
+          "name": "org_real_estate_bookings_owner_id_users_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_bookings_created_by_users_id_fk": {
+          "name": "org_real_estate_bookings_created_by_users_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_bookings_last_updated_by_users_id_fk": {
+          "name": "org_real_estate_bookings_last_updated_by_users_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_bookings_deleted_by_users_id_fk": {
+          "name": "org_real_estate_bookings_deleted_by_users_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_bookings_project_id_org_real_estate_projects_id_fk": {
+          "name": "org_real_estate_bookings_project_id_org_real_estate_projects_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "org_real_estate_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_bookings_property_id_org_real_estate_properties_id_fk": {
+          "name": "org_real_estate_bookings_property_id_org_real_estate_properties_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "org_real_estate_properties",
+          "columnsFrom": ["property_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.org_real_estate_payment-plans": {
+      "name": "org_real_estate_payment-plans",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "org_real_estate_payment-plans_organization_id_organizations_id_fk": {
+          "name": "org_real_estate_payment-plans_organization_id_organizations_id_fk",
+          "tableFrom": "org_real_estate_payment-plans",
+          "tableTo": "organizations",
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_payment-plans_owner_id_users_id_fk": {
+          "name": "org_real_estate_payment-plans_owner_id_users_id_fk",
+          "tableFrom": "org_real_estate_payment-plans",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_payment-plans_created_by_users_id_fk": {
+          "name": "org_real_estate_payment-plans_created_by_users_id_fk",
+          "tableFrom": "org_real_estate_payment-plans",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_payment-plans_last_updated_by_users_id_fk": {
+          "name": "org_real_estate_payment-plans_last_updated_by_users_id_fk",
+          "tableFrom": "org_real_estate_payment-plans",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_payment-plans_deleted_by_users_id_fk": {
+          "name": "org_real_estate_payment-plans_deleted_by_users_id_fk",
+          "tableFrom": "org_real_estate_payment-plans",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.org_real_estate_projects": {
+      "name": "org_real_estate_projects",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "org_real_estate_projects_organization_id_organizations_id_fk": {
+          "name": "org_real_estate_projects_organization_id_organizations_id_fk",
+          "tableFrom": "org_real_estate_projects",
+          "tableTo": "organizations",
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_projects_owner_id_users_id_fk": {
+          "name": "org_real_estate_projects_owner_id_users_id_fk",
+          "tableFrom": "org_real_estate_projects",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_projects_created_by_users_id_fk": {
+          "name": "org_real_estate_projects_created_by_users_id_fk",
+          "tableFrom": "org_real_estate_projects",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_projects_last_updated_by_users_id_fk": {
+          "name": "org_real_estate_projects_last_updated_by_users_id_fk",
+          "tableFrom": "org_real_estate_projects",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_projects_deleted_by_users_id_fk": {
+          "name": "org_real_estate_projects_deleted_by_users_id_fk",
+          "tableFrom": "org_real_estate_projects",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.org_real_estate_properties": {
+      "name": "org_real_estate_properties",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "org_real_estate_properties_organization_id_organizations_id_fk": {
+          "name": "org_real_estate_properties_organization_id_organizations_id_fk",
+          "tableFrom": "org_real_estate_properties",
+          "tableTo": "organizations",
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_properties_owner_id_users_id_fk": {
+          "name": "org_real_estate_properties_owner_id_users_id_fk",
+          "tableFrom": "org_real_estate_properties",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_properties_created_by_users_id_fk": {
+          "name": "org_real_estate_properties_created_by_users_id_fk",
+          "tableFrom": "org_real_estate_properties",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_properties_last_updated_by_users_id_fk": {
+          "name": "org_real_estate_properties_last_updated_by_users_id_fk",
+          "tableFrom": "org_real_estate_properties",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_properties_deleted_by_users_id_fk": {
+          "name": "org_real_estate_properties_deleted_by_users_id_fk",
+          "tableFrom": "org_real_estate_properties",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_properties_project_id_org_real_estate_projects_id_fk": {
+          "name": "org_real_estate_properties_project_id_org_real_estate_projects_id_fk",
+          "tableFrom": "org_real_estate_properties",
+          "tableTo": "org_real_estate_projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
           "onUpdate": "no action"
         }
       },
@@ -2588,6 +4164,30 @@
           "primaryKey": false,
           "notNull": false
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "run_by": {
           "name": "run_by",
           "type": "timestamp with time zone",
@@ -2624,6 +4224,42 @@
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "org_tasks_owner_id_users_id_fk": {
+          "name": "org_tasks_owner_id_users_id_fk",
+          "tableFrom": "org_tasks",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_tasks_created_by_users_id_fk": {
+          "name": "org_tasks_created_by_users_id_fk",
+          "tableFrom": "org_tasks",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_tasks_last_updated_by_users_id_fk": {
+          "name": "org_tasks_last_updated_by_users_id_fk",
+          "tableFrom": "org_tasks",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_tasks_deleted_by_users_id_fk": {
+          "name": "org_tasks_deleted_by_users_id_fk",
+          "tableFrom": "org_tasks",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2633,7 +4269,28 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.opportunity_forecast_category": {
+      "name": "opportunity_forecast_category",
+      "schema": "public",
+      "values": ["pipeline", "best_case", "commit", "omitted", "closed"]
+    },
+    "public.opportunity_priority": {
+      "name": "opportunity_priority",
+      "schema": "public",
+      "values": ["low", "medium", "high", "urgent"]
+    },
+    "public.opportunity_status": {
+      "name": "opportunity_status",
+      "schema": "public",
+      "values": ["open", "won", "lost", "on_hold"]
+    },
+    "public.opportunity_type": {
+      "name": "opportunity_type",
+      "schema": "public",
+      "values": ["new_business", "renewal", "upsell", "cross_sell"]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

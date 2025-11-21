@@ -1,0 +1,1 @@
+ALTER TABLE "org_opportunities" DROP COLUMN "campaign_id";

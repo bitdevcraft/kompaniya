@@ -1,9 +1,10 @@
-import { pgTable, varchar } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
+import { orgRealEstateProjectsTable } from "./org-real-estate-projects";
 
 export const orgRealEstatePropertiesTable = pgTable(
   "org_real_estate_properties",
@@ -14,6 +15,10 @@ export const orgRealEstatePropertiesTable = pgTable(
     ...baseOwnerModel,
 
     name: varchar("name", { length: 255 }),
+    projectId: uuid("project_id").references(
+      () => orgRealEstateProjectsTable.id,
+      { onDelete: "restrict" },
+    ),
   },
 );
 

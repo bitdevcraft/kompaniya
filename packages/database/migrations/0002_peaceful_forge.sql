@@ -1,0 +1,1 @@
+ALTER TABLE "org_opportunities" ALTER COLUMN "account_id" DROP NOT NULL;

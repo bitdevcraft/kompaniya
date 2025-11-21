@@ -48,7 +48,6 @@ export async function seedOrgModels(
   }
 
   const ownershipFields = buildOwnershipFields(organizationId, userId);
-  const opportunityOwner = userId ?? randomUUID();
 
   return dbInstance.transaction(async (tx) => {
     const categories = await tx
@@ -355,10 +354,7 @@ export async function seedOrgModels(
         ...ownershipFields,
         name: "Workspace roll-out",
         description: "Initial deployment across the sales org",
-        ownerUserId: opportunityOwner,
-        accountId: accounts[0]?.id ?? randomUUID(),
-        pipelineId: "pipeline-standard",
-        stageId: "stage-evaluation",
+        accountId: accounts[0]?.id,
         amount: "125000",
         currencyCode: "USD",
         nextStep: "Finalize security review",
@@ -369,10 +365,7 @@ export async function seedOrgModels(
         ...ownershipFields,
         name: "Expansion for support",
         description: "Add-on for support workflows",
-        ownerUserId: opportunityOwner,
-        accountId: accounts[1]?.id ?? randomUUID(),
-        pipelineId: "pipeline-expansion",
-        stageId: "stage-proposal",
+        accountId: accounts[1]?.id,
         amount: "48000",
         currencyCode: "USD",
         nextStep: "Send proposal",
@@ -383,10 +376,7 @@ export async function seedOrgModels(
         ...ownershipFields,
         name: "Renewal - Initech",
         description: "Annual renewal with usage uplift",
-        ownerUserId: opportunityOwner,
-        accountId: accounts[2]?.id ?? randomUUID(),
-        pipelineId: "pipeline-renewal",
-        stageId: "stage-negotiation",
+        accountId: accounts[2]?.id,
         amount: "76000",
         currencyCode: "USD",
         nextStep: "Align on pricing",
