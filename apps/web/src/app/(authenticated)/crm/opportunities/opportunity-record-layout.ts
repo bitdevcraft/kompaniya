@@ -158,6 +158,7 @@ export const opportunityRecordLayout: RecordPageLayout<OpportunityRecordFormValu
                 lookup: {
                   searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/account/paginated`,
                   findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/account/r/:id`,
+                  redirectBaseUrl: `/crm/accounts/r/:id`,
                 },
               },
               {
