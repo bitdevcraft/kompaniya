@@ -1,4 +1,14 @@
+import type { OrgAccount } from "@repo/database/schema";
+
 import { z } from "zod";
+
+import { type RecordPageLayout } from "@/components/record-page/layout";
+import {
+  getAllLayoutFields,
+  getEditableLayoutFields,
+  normalizeValueForForm,
+  normalizeValueForSubmission,
+} from "@/components/record-page/layout-helpers";
 
 export const accountRecordSchema = z.object({
   annualRevenueBand: z.string().optional(),
@@ -39,3 +49,50 @@ export const accountRecordSchema = z.object({
 
 export type AccountRecordFormValues = z.input<typeof accountRecordSchema>;
 export type AccountRecordSubmitValues = z.output<typeof accountRecordSchema>;
+
+export function createAccountFormDefaults(
+  record: OrgAccount,
+  layout: RecordPageLayout<AccountRecordFormValues>,
+): AccountRecordFormValues {
+  const defaults: Partial<AccountRecordFormValues> = {};
+
+  for (const field of getAllLayoutFields(layout)) {
+    const value = (record as Record<string, unknown>)[field.id as string];
+    const normalized = normalizeValueForForm(field, value);
+
+    if (field.type === "multipicklist" && normalized === "") {
+      // @ts-expect-error todo fix-types
+      defaults[field.id] = [] as AccountRecordFormValues[typeof field.id];
+      continue;
+    }
+
+    // @ts-expect-error todo fix-types
+    defaults[field.id] = normalized as AccountRecordFormValues[typeof field.id];
+  }
+
+  return defaults as AccountRecordFormValues;
+}
+
+export function createAccountUpdatePayload(
+  record: OrgAccount,
+  values: AccountRecordSubmitValues,
+  layout: RecordPageLayout<AccountRecordFormValues>,
+): Partial<OrgAccount> {
+  const updates: Partial<OrgAccount> = {};
+  const editable = getEditableLayoutFields(layout);
+
+  for (const field of editable) {
+    // @ts-expect-error todo fix-types
+    const value = values[field.id];
+    // @ts-expect-error todo fix-types
+    updates[field.id as keyof OrgAccount] = normalizeValueForSubmission(
+      field,
+      value,
+    ) as OrgAccount[keyof OrgAccount];
+  }
+
+  return {
+    ...updates,
+    id: record.id,
+  };
+}

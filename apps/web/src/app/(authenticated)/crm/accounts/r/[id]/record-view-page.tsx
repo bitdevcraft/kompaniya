@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrgContact } from "@repo/database/schema";
+import type { OrgAccount } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/shared-ui/components/common/button";
@@ -15,24 +15,24 @@ import { toast } from "sonner";
 
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
 
-import type { ContactRecordFormValues } from "./contact-record-schema";
+import type { AccountRecordFormValues } from "../../account-record-schema";
 
-import { modelEndpoint } from "../../config";
-import { contactRecordLayout } from "./contact-record-layout";
+import { accountRecordLayout } from "../../account-record-layout";
 import {
-  contactRecordSchema,
-  createContactFormDefaults,
-  createContactUpdatePayload,
-} from "./contact-record-schema";
+  accountRecordSchema,
+  createAccountFormDefaults,
+  createAccountUpdatePayload,
+} from "../../account-record-schema";
+import { modelEndpoint } from "../../config";
 
 interface RecordViewPageProps {
-  initialRecord?: OrgContact;
+  initialRecord?: OrgAccount;
 
   recordId: string;
 }
 
-const contactRecordQueryKey = (recordId: string) =>
-  ["contact-record", recordId] as const;
+const accountRecordQueryKey = (recordId: string) =>
+  ["account-record", recordId] as const;
 
 export function RecordViewPage({
   initialRecord,
@@ -42,7 +42,7 @@ export function RecordViewPage({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(() => contactRecordQueryKey(recordId), [recordId]);
+  const queryKey = useMemo(() => accountRecordQueryKey(recordId), [recordId]);
 
   const {
     data: record,
@@ -50,7 +50,7 @@ export function RecordViewPage({
     isLoading,
   } = useQuery({
     queryKey,
-    queryFn: () => fetchContactRecord(recordId),
+    queryFn: () => fetchAccountRecord(recordId),
     initialData: initialRecord,
     retry: false,
   });
@@ -69,30 +69,30 @@ export function RecordViewPage({
   const formDefaults = useMemo(
     () =>
       record
-        ? createContactFormDefaults(record, contactRecordLayout)
+        ? createAccountFormDefaults(record, accountRecordLayout)
         : undefined,
     [record],
   );
 
-  const form = useForm<ContactRecordFormValues>({
+  const form = useForm<AccountRecordFormValues>({
     defaultValues: formDefaults,
-    resolver: zodResolver(contactRecordSchema),
+    resolver: zodResolver(accountRecordSchema),
   });
 
   useEffect(() => {
     if (record) {
-      form.reset(createContactFormDefaults(record, contactRecordLayout));
+      form.reset(createAccountFormDefaults(record, accountRecordLayout));
     }
   }, [form, record]);
 
-  const updateContact = useMutation({
-    mutationFn: (payload: Partial<OrgContact>) =>
-      updateContactRecord(recordId, payload),
+  const updateAccount = useMutation({
+    mutationFn: (payload: Partial<OrgAccount>) =>
+      updateAccountRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createContactFormDefaults(updated, contactRecordLayout));
+      form.reset(createAccountFormDefaults(updated, accountRecordLayout));
       setIsEditing(false);
-      toast.success("Contact updated");
+      toast.success("Account updated");
     },
     onError: () => {
       toast.error("We couldn't save your changes. Please try again.");
@@ -105,15 +105,15 @@ export function RecordViewPage({
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!record) return;
 
-    const parsed = contactRecordSchema.parse(values);
-    const payload = createContactUpdatePayload(
+    const parsed = accountRecordSchema.parse(values);
+    const payload = createAccountUpdatePayload(
       record,
       parsed,
-      contactRecordLayout,
+      accountRecordLayout,
     );
 
     try {
-      await updateContact.mutateAsync(payload);
+      await updateAccount.mutateAsync(payload);
     } catch (_error) {
       // handled by mutation onError
     }
@@ -130,7 +130,7 @@ export function RecordViewPage({
   if (!record) {
     return (
       <div className="text-destructive">
-        Unable to load this contact record.
+        Unable to load this account record.
       </div>
     );
   }
@@ -140,10 +140,10 @@ export function RecordViewPage({
       {isEditing ? (
         <>
           <Button
-            disabled={updateContact.isPending}
+            disabled={updateAccount.isPending}
             onClick={() => {
               form.reset(
-                createContactFormDefaults(record, contactRecordLayout),
+                createAccountFormDefaults(record, accountRecordLayout),
               );
               setIsEditing(false);
             }}
@@ -152,8 +152,8 @@ export function RecordViewPage({
           >
             Cancel
           </Button>
-          <Button disabled={updateContact.isPending} type="submit">
-            {updateContact.isPending ? (
+          <Button disabled={updateAccount.isPending} type="submit">
+            {updateAccount.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : null}
             Save changes
@@ -171,9 +171,9 @@ export function RecordViewPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost">
-          <Link className="inline-flex items-center gap-2" href="/crm/contacts">
+          <Link className="inline-flex items-center gap-2" href="/crm/accounts">
             <ArrowLeft className="size-4" />
-            Back to contacts
+            Back to accounts
           </Link>
         </Button>
       </div>
@@ -183,7 +183,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={contactRecordLayout}
+          layout={accountRecordLayout}
           record={record as Record<string, unknown>}
         />
       </form>
@@ -191,8 +191,8 @@ export function RecordViewPage({
   );
 }
 
-async function fetchContactRecord(recordId: string) {
-  const { data } = await axios.get<OrgContact>(
+async function fetchAccountRecord(recordId: string) {
+  const { data } = await axios.get<OrgAccount>(
     `${modelEndpoint}/r/${recordId}`,
     {
       withCredentials: true,
@@ -202,11 +202,11 @@ async function fetchContactRecord(recordId: string) {
   return data;
 }
 
-async function updateContactRecord(
+async function updateAccountRecord(
   recordId: string,
-  payload: Partial<OrgContact>,
+  payload: Partial<OrgAccount>,
 ) {
-  const { data } = await axios.patch<OrgContact>(
+  const { data } = await axios.patch<OrgAccount>(
     `${modelEndpoint}/r/${recordId}`,
     payload,
     {

@@ -1,4 +1,4 @@
-import { type OrgContact } from "@repo/database/schema";
+import { type OrgActivity } from "@repo/database/schema";
 import axios from "axios";
 import { notFound } from "next/navigation";
 
@@ -7,17 +7,17 @@ import { api } from "@/lib/api";
 import { modelEndpoint } from "../../config";
 import { RecordViewPage } from "./record-view-page";
 
-interface ContactRecordPageProps {
+interface ActivityRecordPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function Page({ params }: ContactRecordPageProps) {
+export default async function Page({ params }: ActivityRecordPageProps) {
   const { id } = await params;
   const client = await api();
-  let record: OrgContact;
+  let record: OrgActivity;
 
   try {
-    const { data } = await client.get<OrgContact>(`${modelEndpoint}/r/${id}`, {
+    const { data } = await client.get<OrgActivity>(`${modelEndpoint}/r/${id}`, {
       withCredentials: true,
     });
     record = data;

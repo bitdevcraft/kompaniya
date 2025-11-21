@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrgContact } from "@repo/database/schema";
+import type { OrgOpportunity } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/shared-ui/components/common/button";
@@ -15,24 +15,24 @@ import { toast } from "sonner";
 
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
 
-import type { ContactRecordFormValues } from "./contact-record-schema";
+import type { OpportunityRecordFormValues } from "../../opportunity-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { contactRecordLayout } from "./contact-record-layout";
+import { opportunityRecordLayout } from "../../opportunity-record-layout";
 import {
-  contactRecordSchema,
-  createContactFormDefaults,
-  createContactUpdatePayload,
-} from "./contact-record-schema";
+  createOpportunityFormDefaults,
+  createOpportunityUpdatePayload,
+  opportunityRecordSchema,
+} from "../../opportunity-record-schema";
 
 interface RecordViewPageProps {
-  initialRecord?: OrgContact;
+  initialRecord?: OrgOpportunity;
 
   recordId: string;
 }
 
-const contactRecordQueryKey = (recordId: string) =>
-  ["contact-record", recordId] as const;
+const opportunityRecordQueryKey = (recordId: string) =>
+  ["opportunity-record", recordId] as const;
 
 export function RecordViewPage({
   initialRecord,
@@ -42,7 +42,10 @@ export function RecordViewPage({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(() => contactRecordQueryKey(recordId), [recordId]);
+  const queryKey = useMemo(
+    () => opportunityRecordQueryKey(recordId),
+    [recordId],
+  );
 
   const {
     data: record,
@@ -50,7 +53,7 @@ export function RecordViewPage({
     isLoading,
   } = useQuery({
     queryKey,
-    queryFn: () => fetchContactRecord(recordId),
+    queryFn: () => fetchOpportunityRecord(recordId),
     initialData: initialRecord,
     retry: false,
   });
@@ -69,30 +72,34 @@ export function RecordViewPage({
   const formDefaults = useMemo(
     () =>
       record
-        ? createContactFormDefaults(record, contactRecordLayout)
+        ? createOpportunityFormDefaults(record, opportunityRecordLayout)
         : undefined,
     [record],
   );
 
-  const form = useForm<ContactRecordFormValues>({
+  const form = useForm<OpportunityRecordFormValues>({
     defaultValues: formDefaults,
-    resolver: zodResolver(contactRecordSchema),
+    resolver: zodResolver(opportunityRecordSchema),
   });
 
   useEffect(() => {
     if (record) {
-      form.reset(createContactFormDefaults(record, contactRecordLayout));
+      form.reset(
+        createOpportunityFormDefaults(record, opportunityRecordLayout),
+      );
     }
   }, [form, record]);
 
-  const updateContact = useMutation({
-    mutationFn: (payload: Partial<OrgContact>) =>
-      updateContactRecord(recordId, payload),
+  const updateOpportunity = useMutation({
+    mutationFn: (payload: Partial<OrgOpportunity>) =>
+      updateOpportunityRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createContactFormDefaults(updated, contactRecordLayout));
+      form.reset(
+        createOpportunityFormDefaults(updated, opportunityRecordLayout),
+      );
       setIsEditing(false);
-      toast.success("Contact updated");
+      toast.success("Opportunity updated");
     },
     onError: () => {
       toast.error("We couldn't save your changes. Please try again.");
@@ -105,15 +112,15 @@ export function RecordViewPage({
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!record) return;
 
-    const parsed = contactRecordSchema.parse(values);
-    const payload = createContactUpdatePayload(
+    const parsed = opportunityRecordSchema.parse(values);
+    const payload = createOpportunityUpdatePayload(
       record,
       parsed,
-      contactRecordLayout,
+      opportunityRecordLayout,
     );
 
     try {
-      await updateContact.mutateAsync(payload);
+      await updateOpportunity.mutateAsync(payload);
     } catch (_error) {
       // handled by mutation onError
     }
@@ -130,7 +137,7 @@ export function RecordViewPage({
   if (!record) {
     return (
       <div className="text-destructive">
-        Unable to load this contact record.
+        Unable to load this opportunity record.
       </div>
     );
   }
@@ -140,10 +147,10 @@ export function RecordViewPage({
       {isEditing ? (
         <>
           <Button
-            disabled={updateContact.isPending}
+            disabled={updateOpportunity.isPending}
             onClick={() => {
               form.reset(
-                createContactFormDefaults(record, contactRecordLayout),
+                createOpportunityFormDefaults(record, opportunityRecordLayout),
               );
               setIsEditing(false);
             }}
@@ -152,8 +159,8 @@ export function RecordViewPage({
           >
             Cancel
           </Button>
-          <Button disabled={updateContact.isPending} type="submit">
-            {updateContact.isPending ? (
+          <Button disabled={updateOpportunity.isPending} type="submit">
+            {updateOpportunity.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : null}
             Save changes
@@ -171,9 +178,12 @@ export function RecordViewPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost">
-          <Link className="inline-flex items-center gap-2" href="/crm/contacts">
+          <Link
+            className="inline-flex items-center gap-2"
+            href="/crm/opportunities"
+          >
             <ArrowLeft className="size-4" />
-            Back to contacts
+            Back to opportunities
           </Link>
         </Button>
       </div>
@@ -183,7 +193,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={contactRecordLayout}
+          layout={opportunityRecordLayout}
           record={record as Record<string, unknown>}
         />
       </form>
@@ -191,8 +201,8 @@ export function RecordViewPage({
   );
 }
 
-async function fetchContactRecord(recordId: string) {
-  const { data } = await axios.get<OrgContact>(
+async function fetchOpportunityRecord(recordId: string) {
+  const { data } = await axios.get<OrgOpportunity>(
     `${modelEndpoint}/r/${recordId}`,
     {
       withCredentials: true,
@@ -202,11 +212,11 @@ async function fetchContactRecord(recordId: string) {
   return data;
 }
 
-async function updateContactRecord(
+async function updateOpportunityRecord(
   recordId: string,
-  payload: Partial<OrgContact>,
+  payload: Partial<OrgOpportunity>,
 ) {
-  const { data } = await axios.patch<OrgContact>(
+  const { data } = await axios.patch<OrgOpportunity>(
     `${modelEndpoint}/r/${recordId}`,
     payload,
     {
