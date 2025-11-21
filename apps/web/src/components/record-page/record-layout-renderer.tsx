@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
 import {
@@ -29,8 +28,10 @@ import {
   Tags,
   UserCircle2,
 } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import type {
+  LookupFieldConfig,
   RecordFieldOption,
   RecordLayoutField,
   RecordLayoutHeaderChip,
@@ -58,6 +59,9 @@ import { TextRecordField } from "./text-record-field";
 import { TextareaRecordField } from "./textarea-record-field";
 import { formatDateTime, formatScore, getInitials, renderLink } from "./utils";
 
+const DEFAULT_LOOKUP_LABEL_KEY = "name";
+const DEFAULT_LOOKUP_VALUE_KEY = "id";
+const DEFAULT_LOOKUP_ID_PARAM = "id";
 const HEADER_ICONS: Record<
   RecordLayoutHeaderIcon,
   React.ComponentType<{ className?: string }>
@@ -215,6 +219,78 @@ function buildHeaderChip<TFieldValues extends FieldValues>(
   };
 }
 
+function buildLookupFindUrl(
+  lookup: LookupFieldConfig,
+  id: string,
+): string | undefined {
+  const replaced = lookup.findByIdEndpoint
+    .replace(":id", encodeURIComponent(id))
+    .replace("{id}", encodeURIComponent(id));
+
+  if (replaced !== lookup.findByIdEndpoint) {
+    return buildUrl(replaced);
+  }
+
+  const url = new URL(buildUrl(lookup.findByIdEndpoint));
+  const idParam = lookup.idParam ?? DEFAULT_LOOKUP_ID_PARAM;
+
+  if (lookup.findByIdEndpoint.includes("?")) {
+    url.searchParams.set(idParam, id);
+    return url.toString();
+  }
+
+  url.pathname = `${url.pathname.replace(/\/$/, "")}/${encodeURIComponent(id)}`;
+  return url.toString();
+}
+
+function buildUrl(endpoint: string): string {
+  const base =
+    typeof window === "undefined" ? "http://localhost" : window.location.origin;
+  try {
+    return new URL(endpoint, base).toString();
+  } catch {
+    return endpoint;
+  }
+}
+async function fetchLookupDisplayValue(
+  id: string,
+  lookup: LookupFieldConfig,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  const url = buildLookupFindUrl(lookup, id);
+  if (!url) return null;
+
+  const response = await fetch(url, { signal, credentials: "include" });
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  return normalizeLookupRecordLabel(data, lookup);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function normalizeLookupRecordLabel(
+  data: unknown,
+  lookup: LookupFieldConfig,
+): string | null {
+  const valueKey = lookup.valueKey ?? DEFAULT_LOOKUP_VALUE_KEY;
+  const labelKey = lookup.labelKey ?? DEFAULT_LOOKUP_LABEL_KEY;
+
+  const record = toRecordArray(data)[0];
+  if (!record) return null;
+
+  const rawValue = record[valueKey];
+  if (rawValue === null || rawValue === undefined) return null;
+
+  const rawLabel = record[labelKey] ?? rawValue;
+  return rawLabel === null || rawLabel === undefined ? null : String(rawLabel);
+}
+
 const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
   boolean: BooleanRecordField as FieldComponent,
   date: DateRecordField as FieldComponent,
@@ -322,8 +398,6 @@ function formatHeaderText<TFieldValues extends FieldValues>(
 ) {
   const field = fieldMap.get(item.fieldId);
   const rawValue = resolveFieldValue(record, form, item.fieldId);
-
-  console.log("Raw Value", rawValue);
   const formatted = field
     ? formatValue(field, rawValue)
     : fallbackFormat(rawValue, item.type);
@@ -335,7 +409,6 @@ function formatHeaderText<TFieldValues extends FieldValues>(
   if (!formatted) {
     return item.fallback ?? "";
   }
-  console.log("Formatted", formatted);
 
   if (
     typeof formatted === "string" ||
@@ -463,10 +536,82 @@ function Header<TFieldValues extends FieldValues>({
   header,
   record,
 }: HeaderProps<TFieldValues>) {
+  const [subtitleValues, setSubtitleValues] = useState<ReactNode[]>([]);
   const title = formatHeaderText(header.title, fieldMap, record, form);
-  const subtitle = header.subtitle?.map((item) =>
-    formatHeaderText(item, fieldMap, record, form),
-  );
+
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+
+    const loadSubtitle = async () => {
+      if (!header.subtitle || header.subtitle.length === 0) {
+        if (active) {
+          setSubtitleValues([]);
+        }
+        return;
+      }
+
+      const values = await Promise.all(
+        header.subtitle.map(async (item) => {
+          const field = fieldMap.get(item.fieldId);
+          const rawValue = resolveFieldValue(record, form, item.fieldId);
+          const emptyFallback = item.fallback ?? "Empty";
+
+          if (field?.type === "lookup") {
+            const id =
+              rawValue === null || rawValue === undefined
+                ? ""
+                : String(rawValue);
+
+            if (!id) {
+              return emptyFallback;
+            }
+
+            if (!field.lookup) {
+              return (
+                formatHeaderText(item, fieldMap, record, form, true) ??
+                emptyFallback
+              );
+            }
+
+            try {
+              const displayValue = await fetchLookupDisplayValue(
+                id,
+                field.lookup,
+                controller.signal,
+              );
+
+              if (!displayValue) {
+                return emptyFallback;
+              }
+
+              const prefix = item.prefix ?? "";
+              const suffix = item.suffix ?? "";
+              return `${prefix}${displayValue}${suffix}`;
+            } catch (_error) {
+              return emptyFallback;
+            }
+          }
+
+          return formatHeaderText(item, fieldMap, record, form, true);
+        }),
+      );
+
+      if (!active) return;
+      setSubtitleValues(
+        values.filter(
+          (value): value is ReactNode => value !== null && value !== undefined,
+        ),
+      );
+    };
+
+    void loadSubtitle();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [fieldMap, form, header.subtitle, record]);
 
   const avatarSrc = header.avatar
     ? resolveFieldValue(record, form, header.avatar.imageFieldId)
@@ -513,9 +658,17 @@ function Header<TFieldValues extends FieldValues>({
               <h1 className="text-2xl font-semibold text-foreground">
                 {title}
               </h1>
-              {subtitle && subtitle.length > 0 ? (
-                <p className="text-muted-foreground">
-                  {subtitle.filter(Boolean).join(" · ")}
+              {subtitleValues.length > 0 ? (
+                <p className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                  {subtitleValues.map((value, index) => (
+                    <span
+                      className="flex items-center gap-2"
+                      key={`subtitle-${index}`}
+                    >
+                      {index > 0 ? <span aria-hidden="true">·</span> : null}
+                      <span>{value}</span>
+                    </span>
+                  ))}
                 </p>
               ) : null}
             </div>
@@ -703,4 +856,28 @@ function Section<TFieldValues extends FieldValues>({
       </CardContent>
     </Card>
   );
+}
+
+function toRecordArray(data: unknown): Record<string, unknown>[] {
+  if (Array.isArray(data)) {
+    return data.filter((entry): entry is Record<string, unknown> =>
+      isRecord(entry),
+    );
+  }
+
+  if (isRecord(data)) {
+    if (Array.isArray(data.data)) {
+      return data.data.filter((entry): entry is Record<string, unknown> =>
+        isRecord(entry),
+      );
+    }
+
+    if (isRecord(data.data)) {
+      return [data.data];
+    }
+
+    return [data];
+  }
+
+  return [];
 }
