@@ -3,7 +3,7 @@ import type { JobsOptions, Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 
-import type { ColumnMapping } from './csv-import.service';
+import type { ColumnMapping } from './csv-import.types';
 
 export const CSV_IMPORT_QUEUE_NAME = 'csv-import';
 
