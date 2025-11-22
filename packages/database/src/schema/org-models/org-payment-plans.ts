@@ -77,6 +77,7 @@ export const orgPaymentPlansTable = pgTable("org_payment_plans", {
   ...baseTimestampModel,
   ...baseOrganizationModel,
   ...baseOwnerModel,
+  name: varchar("name", { length: 255 }),
 
   templateId: integer("template_id").references(
     () => orgPaymentPlanTemplatesTable.id,
