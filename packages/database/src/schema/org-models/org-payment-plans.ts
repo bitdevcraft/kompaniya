@@ -3,10 +3,10 @@
 import {
   char,
   date,
-  integer,
   jsonb,
   numeric,
   pgTable,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { z } from "zod";
@@ -79,7 +79,7 @@ export const orgPaymentPlansTable = pgTable("org_payment_plans", {
   ...baseOwnerModel,
   name: varchar("name", { length: 255 }),
 
-  templateId: integer("template_id").references(
+  templateId: uuid("template_id").references(
     () => orgPaymentPlanTemplatesTable.id,
   ),
 

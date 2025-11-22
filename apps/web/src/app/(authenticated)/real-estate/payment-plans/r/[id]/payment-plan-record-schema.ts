@@ -18,7 +18,7 @@ export const paymentPlanRecordSchema = z.object({
   principalAmount: z.string().optional(),
   startDate: z.string().optional(),
   status: z.string().optional(),
-  templateId: z.number().optional(),
+  templateId: z.string().optional(),
   updatedAt: z.string().optional(),
 });
 
@@ -56,6 +56,7 @@ export function createPaymentPlanUpdatePayload(
 
   for (const field of editable) {
     const value = values[field.id];
+    // @ts-expect-error type
     updates[field.id as keyof OrgPaymentPlan] = normalizeValueForSubmission(
       field,
       value,
