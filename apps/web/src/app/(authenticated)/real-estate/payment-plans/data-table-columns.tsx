@@ -64,7 +64,7 @@ export function useDataTableColumns(
       ),
       cell: ({ row }) => (
         <Button asChild size={"sm"} variant={"link"}>
-          <Link href={`/real-estate/projects/r/${row.original.id}`}>
+          <Link href={`/real-estate/payment-plans/r/${row.original.id}`}>
             {row.original.name}
           </Link>
         </Button>
@@ -72,6 +72,34 @@ export function useDataTableColumns(
       meta: {
         label: "Name",
         placeholder: "Search names...",
+        variant: "text",
+        icon: Text,
+      },
+      enableColumnFilter: true,
+    },
+    {
+      id: "currency",
+      accessorKey: "currency",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Currency" />
+      ),
+      meta: {
+        label: "Currency",
+        placeholder: "Filter currency...",
+        variant: "text",
+        icon: Text,
+      },
+      enableColumnFilter: true,
+    },
+    {
+      id: "status",
+      accessorKey: "status",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Status" />
+      ),
+      meta: {
+        label: "Status",
+        placeholder: "Filter status...",
         variant: "text",
         icon: Text,
       },

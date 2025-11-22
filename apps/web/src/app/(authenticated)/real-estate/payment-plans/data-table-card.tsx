@@ -44,7 +44,7 @@ export function DataTableCard({
       >
         <CardHeader className="">
           <CardTitle className="flex gap-4 mt-2">
-            <Link href={`/real-estate/properties/r/${row.original.id}`}>
+            <Link href={`/real-estate/payment-plans/r/${row.original.id}`}>
               {row.original.name}
             </Link>
           </CardTitle>
