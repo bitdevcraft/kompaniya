@@ -2,6 +2,7 @@
 
 import { Button } from "@repo/shared-ui/components/common/button";
 import { ResponsiveDialog } from "@repo/shared-ui/components/common/responsive-dialog";
+import { ScrollArea } from "@repo/shared-ui/components/common/scroll-area";
 import { Plus } from "lucide-react";
 import React from "react";
 
@@ -28,9 +29,9 @@ export function NewButton() {
         setIsOpen={setIsOpen}
         title="Create New Payment Plan Template"
       >
-        <div>
+        <ScrollArea className="max-h-[80vh]">
           <NewRecordForm onFinish={() => setIsOpen(false)} />
-        </div>
+        </ScrollArea>
       </ResponsiveDialog>
     </>
   );
