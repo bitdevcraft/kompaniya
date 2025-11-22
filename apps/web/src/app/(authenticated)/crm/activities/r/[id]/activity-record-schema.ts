@@ -32,7 +32,6 @@ export function createActivityFormDefaults(
     const value = (record as Record<string, unknown>)[field.id as string];
     const normalized = normalizeValueForForm(field, value);
 
-    // @ts-expect-error todo fix-types
     defaults[field.id] =
       normalized as ActivityRecordFormValues[typeof field.id];
   }
@@ -49,7 +48,6 @@ export function createActivityUpdatePayload(
   const editable = getEditableLayoutFields(layout);
 
   for (const field of editable) {
-    // @ts-expect-error todo fix-types
     const value = values[field.id];
     // @ts-expect-error todo fix-types
     updates[field.id as keyof OrgActivity] = normalizeValueForSubmission(

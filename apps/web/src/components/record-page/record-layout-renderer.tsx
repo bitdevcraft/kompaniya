@@ -28,7 +28,7 @@ import {
   Tags,
   UserCircle2,
 } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
+import { ReactElement, type ReactNode, useEffect, useState } from "react";
 
 import type {
   LookupFieldConfig,
@@ -600,7 +600,8 @@ function Header<TFieldValues extends FieldValues>({
       if (!active) return;
       setSubtitleValues(
         values.filter(
-          (value): value is ReactNode => value !== null && value !== undefined,
+          (value): value is ReactElement =>
+            value !== null && value !== undefined,
         ),
       );
     };
