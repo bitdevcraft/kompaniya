@@ -17,7 +17,6 @@ import {
   orgLeadsTable,
   orgOpportunitiesTable,
   orgRealEstateBookingsTable,
-  orgRealEstatePaymentPlansTable,
   orgRealEstateProjectsTable,
   orgRealEstatePropertiesTable,
   orgTasksTable,
@@ -432,15 +431,6 @@ export async function seedOrgModels(
       ])
       .returning();
 
-    const realEstatePaymentPlans = await tx
-      .insert(orgRealEstatePaymentPlansTable)
-      .values([
-        { ...ownershipFields, name: "Standard 12" },
-        { ...ownershipFields, name: "Accelerated 6" },
-        { ...ownershipFields, name: "Extended 24" },
-      ])
-      .returning();
-
     const realEstateBookings = await tx
       .insert(orgRealEstateBookingsTable)
       .values([
@@ -467,7 +457,6 @@ export async function seedOrgModels(
       tasks,
       realEstateProjects,
       realEstateProperties,
-      realEstatePaymentPlans,
       realEstateBookings,
     };
   });

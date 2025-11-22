@@ -5,6 +5,5 @@ export { ORG_CONTACTS_COLUMNS } from './org-contacts.columns';
 export { ORG_LEADS_COLUMNS } from './org-leads.columns';
 export { ORG_OPPORTUNITIES_COLUMNS } from './org-opportunities.columns';
 export { ORG_REAL_ESTATE_BOOKINGS_COLUMNS } from './org-real-estate-bookings.columns';
-export { ORG_REAL_ESTATE_PAYMENT_PLANS_COLUMNS } from './org-real-estate-payment-plans.columns';
 export { ORG_REAL_ESTATE_PROJECTS_COLUMNS } from './org-real-estate-projects.columns';
 export { ORG_REAL_ESTATE_PROPERTIES_COLUMNS } from './org-real-estate-properties.columns';

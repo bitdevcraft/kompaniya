@@ -6,7 +6,6 @@ import {
   orgLeadsTable,
   orgOpportunitiesTable,
   orgRealEstateBookingsTable,
-  orgRealEstatePaymentPlansTable,
   orgRealEstateProjectsTable,
   orgRealEstatePropertiesTable,
 } from '@repo/database/schema';
@@ -21,7 +20,6 @@ import {
   ORG_LEADS_COLUMNS,
   ORG_OPPORTUNITIES_COLUMNS,
   ORG_REAL_ESTATE_BOOKINGS_COLUMNS,
-  ORG_REAL_ESTATE_PAYMENT_PLANS_COLUMNS,
   ORG_REAL_ESTATE_PROJECTS_COLUMNS,
   ORG_REAL_ESTATE_PROPERTIES_COLUMNS,
 } from '../columns';
@@ -76,14 +74,6 @@ export const CSV_IMPORT_TABLES: Record<string, CsvImportTableConfig> = {
       'Import CSV data into the organization real estate bookings table.',
     table: orgRealEstateBookingsTable,
     columns: ORG_REAL_ESTATE_BOOKINGS_COLUMNS,
-  },
-  orgRealEstatePaymentPlans: {
-    id: 'orgRealEstatePaymentPlans',
-    label: 'Real Estate Payment Plans',
-    description:
-      'Import CSV data into the organization real estate payment plans table.',
-    table: orgRealEstatePaymentPlansTable,
-    columns: ORG_REAL_ESTATE_PAYMENT_PLANS_COLUMNS,
   },
   orgRealEstateProjects: {
     id: 'orgRealEstateProjects',
