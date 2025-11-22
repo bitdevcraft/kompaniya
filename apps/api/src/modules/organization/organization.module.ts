@@ -10,6 +10,8 @@ import { EmailTemplateModule } from './api/email-template/email-template.module'
 import { EmailTestReceiverModule } from './api/email-test-receiver/email-test-receiver.module';
 import { LeadModule } from './api/lead/lead.module';
 import { OpportunityModule } from './api/opportunity/opportunity.module';
+import { PaymentPlanTemplateModule } from './api/payment-plan-template/payment-plan-template.module';
+import { PaymentPlanModule } from './api/payment-plan/payment-plan.module';
 import { RealEstateBookingModule } from './api/real-estate-booking/real-estate-booking.module';
 import { RealEstateProjectModule } from './api/real-estate-project/real-estate-project.module';
 import { RealEstatePropertyModule } from './api/real-estate-property/real-estate-property.module';
@@ -31,6 +33,8 @@ import { SystemAdminModule } from './api/system-admin/system-admin.module';
     RealEstateProjectModule,
     RealEstatePropertyModule,
     RealEstateBookingModule,
+    PaymentPlanModule,
+    PaymentPlanTemplateModule,
   ],
 })
 export class OrganizationModule {}
