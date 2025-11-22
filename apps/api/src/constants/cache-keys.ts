@@ -225,4 +225,32 @@ export const Keys = {
       return `real-estate-payment-plan:id:${id}-${organizationId}`;
     },
   },
+  PaymentPlan: {
+    paginated(userId: string, organizationId: string) {
+      return `payment-plan:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `payment-plan:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `payment-plan:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `payment-plan:id:${id}-${organizationId}`;
+    },
+  },
+  PaymentPlanTemplate: {
+    paginated(userId: string, organizationId: string) {
+      return `payment-plan-template:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `payment-plan-template:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `payment-plan-template:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `payment-plan-template:id:${id}-${organizationId}`;
+    },
+  },
 };

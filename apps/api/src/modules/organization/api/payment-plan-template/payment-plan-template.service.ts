@@ -1,4 +1,134 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { type Db } from '@repo/database';
+import {
+  NewOrgPaymentPlanTemplate,
+  OrgPaymentPlanTemplate,
+  orgPaymentPlanTemplatesTable,
+} from '@repo/database/schema';
+import { and, eq } from 'drizzle-orm';
+
+import { Keys } from '~/constants/cache-keys';
+import { DRIZZLE_DB } from '~/constants/provider';
+import { type PaginationQueryParserType } from '~/lib/pagination/pagination-query-parser';
+import { CacheService } from '~/modules/core/cache/cache.service';
+import { PaginationRepositoryService } from '~/modules/core/database/repository/pagination-repository/pagination-repository.service';
 
 @Injectable()
-export class PaymentPlanTemplateService {}
+export class PaymentPlanTemplateService {
+  constructor(
+    @Inject(DRIZZLE_DB) private readonly db: Db,
+    private readonly paginationRepositoryService: PaginationRepositoryService,
+    private readonly cacheService: CacheService,
+  ) {}
+
+  async createNewRecord(
+    record: NewOrgPaymentPlanTemplate,
+  ): Promise<OrgPaymentPlanTemplate[]> {
+    return await this.db
+      .insert(orgPaymentPlanTemplatesTable)
+      .values(record)
+      .returning();
+  }
+
+  async deleteCacheById(id: string, organizationId: string) {
+    await this.cacheService.delete(
+      Keys.PaymentPlanTemplate.idByOrg(id, organizationId),
+    );
+  }
+
+  async deletePaginatedCache(userId: string, organizationId: string) {
+    const paginationCache = await this.cacheService.get<string[]>(
+      Keys.PaymentPlanTemplate.paginatedList(userId, organizationId),
+    );
+
+    if (!paginationCache) return;
+
+    paginationCache.forEach((key) => {
+      void this.cacheService.delete(key);
+    });
+
+    await this.cacheService.delete(
+      Keys.PaymentPlanTemplate.paginatedList(userId, organizationId),
+    );
+  }
+
+  async deleteRecordById(
+    id: string,
+    organizationId: string,
+  ): Promise<OrgPaymentPlanTemplate[]> {
+    await this.cacheService.delete(
+      Keys.PaymentPlanTemplate.idByOrg(id, organizationId),
+    );
+
+    return await this.db
+      .delete(orgPaymentPlanTemplatesTable)
+      .where(
+        and(
+          eq(orgPaymentPlanTemplatesTable.id, id),
+          eq(orgPaymentPlanTemplatesTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
+  }
+
+  async getDataTable(
+    userId: string,
+    organizationId: string,
+    query: PaginationQueryParserType,
+  ) {
+    const cacheKey = `${Keys.PaymentPlanTemplate.paginated(userId, organizationId)}-${JSON.stringify(query)}`;
+
+    let paginationCache = await this.cacheService.get<string[]>(
+      Keys.PaymentPlanTemplate.paginatedList(userId, organizationId),
+    );
+
+    paginationCache = paginationCache
+      ? [...paginationCache, cacheKey]
+      : [cacheKey];
+
+    await this.cacheService.set(
+      Keys.PaymentPlanTemplate.paginatedList(userId, organizationId),
+      paginationCache,
+    );
+
+    return await this.paginationRepositoryService.getPaginatedDataTable({
+      table: orgPaymentPlanTemplatesTable,
+      cacheKey,
+      query,
+      organizationId,
+    });
+  }
+
+  async getRecordById(
+    id: string,
+    organizationId: string,
+  ): Promise<OrgPaymentPlanTemplate | undefined> {
+    return this.cacheService.wrapCache<OrgPaymentPlanTemplate | undefined>({
+      key: Keys.PaymentPlanTemplate.idByOrg(id, organizationId),
+      fn: async () =>
+        await this.db.query.orgPaymentPlanTemplatesTable.findFirst({
+          where: and(
+            eq(orgPaymentPlanTemplatesTable.id, id),
+            eq(orgPaymentPlanTemplatesTable.organizationId, organizationId),
+          ),
+        }),
+    });
+  }
+
+  async updateRecordById(
+    id: string,
+    organizationId: string,
+    record: Partial<NewOrgPaymentPlanTemplate>,
+  ): Promise<OrgPaymentPlanTemplate[]> {
+    return await this.db
+      .update(orgPaymentPlanTemplatesTable)
+      .set(record)
+      .where(
+        and(
+          eq(orgPaymentPlanTemplatesTable.id, id),
+          eq(orgPaymentPlanTemplatesTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
+  }
+}
