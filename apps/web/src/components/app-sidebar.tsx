@@ -100,8 +100,8 @@ const data = {
           url: "/real-estate/bookings",
         },
         {
-          title: "Payment Plans",
-          url: "/real-estate/payment-plans",
+          title: "Payment Plan Templates",
+          url: "/real-estate/payment-plan-templates",
         },
       ],
     },
