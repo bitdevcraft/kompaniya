@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@repo/shared-ui/components/common/button";
 import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
 import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
 import { Label } from "@repo/shared-ui/components/common/label";
@@ -15,6 +16,8 @@ import { useDataTableViewMode } from "@repo/shared-ui/components/ts/data-table/h
 import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
@@ -120,6 +123,12 @@ export function OrgDataTable(props: OrgDataTableProps) {
               <div className="flex gap-4">
                 <ButtonGroup>
                   <NewButton />
+                  <Button asChild size={"sm"} variant={"outline"}>
+                    <Link href={"/marketing/email-templates/new"}>
+                      <Plus />
+                      New
+                    </Link>
+                  </Button>
                   <ImportButton />
                 </ButtonGroup>
                 <DataTableSortList align="start" table={table} />

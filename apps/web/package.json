@@ -31,6 +31,7 @@
     "axios": "^1.12.2",
     "better-auth": "catalog:",
     "class-variance-authority": "catalog:",
+    "framer-motion": "^12.23.24",
     "lucide-react": "catalog:",
     "next": "catalog:",
     "next-intl": "catalog:",
@@ -40,7 +41,8 @@
     "react-dom": "19.2.0",
     "react-hook-form": "catalog:",
     "sonner": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
