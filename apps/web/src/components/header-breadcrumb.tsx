@@ -6,7 +6,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@repo/shared-ui/components/common/breadcrumb";
+} from "@kompaniya/ui-common/components/breadcrumb";
 import { convertCase } from "@repo/shared/utils";
 import { usePathname } from "next/navigation";
 

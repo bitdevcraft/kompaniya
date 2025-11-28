@@ -1,19 +1,21 @@
 "use client";
 
-import { Badge } from "@repo/shared-ui/components/common/badge";
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Badge } from "@kompaniya/ui-common/components/badge";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardContent,
   CardHeader,
-} from "@repo/shared-ui/components/common/card";
-import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
+} from "@kompaniya/ui-common/components/card";
+import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@repo/shared-ui/components/common/dropdown-menu";
+} from "@kompaniya/ui-common/components/dropdown-menu";
+import { DataTableRowAction } from "@kompaniya/ui-data-table/types/data-table";
+import { Row } from "@tanstack/react-table";
 import { Ellipsis, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -22,16 +24,10 @@ import { DataTableActionType } from "@/types/data-table-actions";
 import { model, tableType } from "./config";
 
 interface DataTableCardProps {
-  row: {
-    id: string;
-    original: tableType;
-    getIsSelected: () => boolean;
-    toggleSelected: (value?: boolean) => void;
-  };
-  setRowAction: (action: {
-    row: DataTableCardProps["row"];
-    variant: DataTableActionType;
-  }) => void;
+  row: Row<tableType>;
+  setRowAction: React.Dispatch<
+    React.SetStateAction<DataTableRowAction<tableType> | null>
+  >;
   defaultItem?: React.ReactNode;
 }
 

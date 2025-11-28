@@ -2,7 +2,7 @@
 
 import type { OrganizationData, UserSignupData } from "@repo/shared";
 
-import { Card } from "@repo/shared-ui/components/common/card";
+import { Card } from "@kompaniya/ui-common/components/card";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { Geist, Geist_Mono } from "next/font/google";
-import "@repo/shared-ui/globals.css";
+import "@kompaniya/ui-common/globals.css";
 
 const geistSans = Geist({
   subsets: ["latin"],

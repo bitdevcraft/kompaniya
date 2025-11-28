@@ -4,7 +4,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@repo/shared-ui/components/common/collapsible";
+} from "@kompaniya/ui-common/components/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -14,7 +14,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@repo/shared-ui/components/common/sidebar";
+} from "@kompaniya/ui-common/components/sidebar";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 
 export function NavSettings({

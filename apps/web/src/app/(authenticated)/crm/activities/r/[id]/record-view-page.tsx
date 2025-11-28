@@ -3,7 +3,7 @@
 import type { OrgActivity } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Button } from "@kompaniya/ui-common/components/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { ArrowLeft, Loader2 } from "lucide-react";

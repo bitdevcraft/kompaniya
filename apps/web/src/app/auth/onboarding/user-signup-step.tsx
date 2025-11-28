@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { Input } from "@kompaniya/ui-common/components/input";
+import { Label } from "@kompaniya/ui-common/components/label";
 import { type UserSignupData, userSignupSchema } from "@repo/shared";
-import { Button } from "@repo/shared-ui/components/common/button";
-import { Input } from "@repo/shared-ui/components/common/input";
-import { Label } from "@repo/shared-ui/components/common/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

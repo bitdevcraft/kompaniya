@@ -4,7 +4,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
-} from "@repo/shared-ui/components/common/tabs";
+} from "@kompaniya/ui-common/components/tabs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

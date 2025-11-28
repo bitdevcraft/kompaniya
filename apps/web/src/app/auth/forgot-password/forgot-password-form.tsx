@@ -1,19 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  type ForgotPasswordPayload,
-  type ForgotPasswordResponse,
-  ForgotPasswordSchema,
-} from "@repo/shared";
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/shared-ui/components/common/card";
+} from "@kompaniya/ui-common/components/card";
 import {
   Form,
   FormControl,
@@ -21,8 +16,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/shared-ui/components/common/form";
-import { Input } from "@repo/shared-ui/components/common/input";
+} from "@kompaniya/ui-common/components/form";
+import { Input } from "@kompaniya/ui-common/components/input";
+import {
+  type ForgotPasswordPayload,
+  type ForgotPasswordResponse,
+  ForgotPasswordSchema,
+} from "@repo/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";

@@ -1,5 +1,7 @@
 "use client";
 
+import { Button, buttonVariants } from "@kompaniya/ui-common/components/button";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -7,9 +9,6 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
-
-import { Button, buttonVariants } from "@/components/button";
-import { cn } from "@/lib/utils";
 
 function Calendar({
   buttonVariant = "ghost",

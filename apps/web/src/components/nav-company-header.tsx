@@ -1,7 +1,7 @@
 "use client";
 
-import { SidebarMenuButton } from "@repo/shared-ui/components/common/sidebar";
-import { Skeleton } from "@repo/shared-ui/components/common/skeleton";
+import { SidebarMenuButton } from "@kompaniya/ui-common/components/sidebar";
+import { Skeleton } from "@kompaniya/ui-common/components/skeleton";
 import { GalleryVerticalEnd } from "lucide-react";
 
 import { authClient } from "@/lib/auth/client";

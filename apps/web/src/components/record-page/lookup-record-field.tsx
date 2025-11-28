@@ -1,4 +1,4 @@
-import { AsyncSelect } from "@repo/shared-ui/components/common/async-select";
+import { AsyncSelect } from "@kompaniya/ui-common/components/async-select";
 import {
   startTransition,
   useCallback,

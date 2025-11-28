@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@kompaniya/ui-data-table/*": ["./src/*"]
     }
   },
   "include": ["."],

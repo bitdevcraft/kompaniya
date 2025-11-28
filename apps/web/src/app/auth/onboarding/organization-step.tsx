@@ -1,17 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type OrganizationData, organizationSchema } from "@repo/shared";
-import { Button } from "@repo/shared-ui/components/common/button";
-import { Input } from "@repo/shared-ui/components/common/input";
-import { Label } from "@repo/shared-ui/components/common/label";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { Input } from "@kompaniya/ui-common/components/input";
+import { Label } from "@kompaniya/ui-common/components/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/shared-ui/components/common/select";
+} from "@kompaniya/ui-common/components/select";
+import { type OrganizationData, organizationSchema } from "@repo/shared";
 import { useForm } from "react-hook-form";
 import { Controller } from "react-hook-form";
 

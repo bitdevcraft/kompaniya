@@ -2,7 +2,7 @@ import {
   Card,
   CardContent,
   CardHeader,
-} from "@repo/shared-ui/components/common/card";
+} from "@kompaniya/ui-common/components/card";
 
 import { NewRecordForm } from "./new-form";
 

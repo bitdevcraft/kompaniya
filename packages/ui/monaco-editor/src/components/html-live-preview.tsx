@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@repo/shared-ui/lib/utils";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import * as React from "react";
 
 export type HtmlLivePreviewProps = {

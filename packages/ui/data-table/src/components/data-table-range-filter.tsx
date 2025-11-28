@@ -1,12 +1,11 @@
 "use client";
 
+import type { ExtendedColumnFilter } from "@kompaniya/ui-data-table/types/data-table";
 import type { Column } from "@tanstack/react-table";
 
 import { Input } from "@kompaniya/ui-common/components/input";
 import { cn } from "@kompaniya/ui-common/lib/utils";
 import * as React from "react";
-
-import type { ExtendedColumnFilter } from "@/types/data-table";
 
 interface DataTableRangeFilterProps<TData> extends React.ComponentProps<"div"> {
   filter: ExtendedColumnFilter<TData>;

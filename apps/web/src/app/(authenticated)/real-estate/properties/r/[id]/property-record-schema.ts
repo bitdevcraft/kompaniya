@@ -47,6 +47,7 @@ export function createPropertyUpdatePayload(
 
   for (const field of editable) {
     const value = values[field.id];
+    // @ts-expect-error type
     updates[field.id as keyof OrgRealEstateProperty] =
       normalizeValueForSubmission(
         field,

@@ -1,29 +1,28 @@
 "use client";
 
-import { Slot } from "@radix-ui/react-slot";
-import { cva, VariantProps } from "class-variance-authority";
-import { PanelLeftIcon } from "lucide-react";
-import * as React from "react";
-
-import { Button } from "@/components/button";
-import { Input } from "@/components/input";
-import { Separator } from "@/components/separator";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { Input } from "@kompaniya/ui-common/components/input";
+import { Separator } from "@kompaniya/ui-common/components/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/sheet";
-import { Skeleton } from "@/components/skeleton";
+} from "@kompaniya/ui-common/components/sheet";
+import { Skeleton } from "@kompaniya/ui-common/components/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/tooltip";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+} from "@kompaniya/ui-common/components/tooltip";
+import { useIsMobile } from "@kompaniya/ui-common/hooks/use-mobile";
+import { cn } from "@kompaniya/ui-common/lib/utils";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, VariantProps } from "class-variance-authority";
+import { PanelLeftIcon } from "lucide-react";
+import * as React from "react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;

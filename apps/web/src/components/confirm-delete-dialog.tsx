@@ -8,8 +8,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@repo/shared-ui/components/common/alert-dialog";
-import { Button } from "@repo/shared-ui/components/common/button";
+} from "@kompaniya/ui-common/components/alert-dialog";
+import { Button } from "@kompaniya/ui-common/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";

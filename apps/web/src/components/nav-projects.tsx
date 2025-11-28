@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/shared-ui/components/common/dropdown-menu";
+} from "@kompaniya/ui-common/components/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@repo/shared-ui/components/common/sidebar";
+} from "@kompaniya/ui-common/components/sidebar";
 import {
   Folder,
   Forward,

@@ -1,19 +1,19 @@
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@repo/shared-ui/components/common/card";
-import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
+} from "@kompaniya/ui-common/components/card";
+import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@repo/shared-ui/components/common/dropdown-menu";
-import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
+} from "@kompaniya/ui-common/components/dropdown-menu";
+import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
 import { Row } from "@tanstack/react-table";
 import { Edit, Ellipsis, Trash2 } from "lucide-react";
 import Link from "next/link";

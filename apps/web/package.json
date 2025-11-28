@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "catalog:",
+    "@kompaniya/ui-common": "workspace:^",
+    "@kompaniya/ui-data-table": "workspace:^",
+    "@kompaniya/ui-monaco-editor": "workspace:^",
     "@radix-ui/react-avatar": "catalog:",
     "@radix-ui/react-collapsible": "catalog:",
     "@radix-ui/react-dialog": "catalog:",
@@ -19,7 +22,6 @@
     "@radix-ui/react-tooltip": "catalog:",
     "@repo/database": "workspace:^",
     "@repo/shared": "workspace:^",
-    "@repo/shared-ui": "workspace:^",
     "@t3-oss/env-nextjs": "catalog:",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-query-devtools": "catalog:",

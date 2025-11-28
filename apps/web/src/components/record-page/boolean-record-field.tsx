@@ -1,4 +1,4 @@
-import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
+import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
 
 import { RecordField } from "./record-field";
 import {

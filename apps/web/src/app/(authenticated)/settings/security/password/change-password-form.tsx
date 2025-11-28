@@ -1,13 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@repo/shared-ui/components/common/card";
+} from "@kompaniya/ui-common/components/card";
 import {
   Form,
   FormControl,
@@ -15,8 +15,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/shared-ui/components/common/form";
-import { Input } from "@repo/shared-ui/components/common/input";
+} from "@kompaniya/ui-common/components/form";
+import { Input } from "@kompaniya/ui-common/components/input";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2, Lock } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";

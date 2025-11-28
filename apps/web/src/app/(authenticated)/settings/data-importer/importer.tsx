@@ -6,22 +6,22 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@repo/shared-ui/components/common/alert";
-import { Button } from "@repo/shared-ui/components/common/button";
+} from "@kompaniya/ui-common/components/alert";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/shared-ui/components/common/card";
+} from "@kompaniya/ui-common/components/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/shared-ui/components/common/select";
+} from "@kompaniya/ui-common/components/select";
 import {
   Table,
   TableBody,
@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/shared-ui/components/common/table";
+} from "@kompaniya/ui-common/components/table";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { FileUpload } from "@/components/file-upload";

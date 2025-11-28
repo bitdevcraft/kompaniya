@@ -1,14 +1,14 @@
 "use client";
 
-import { Card, CardContent } from "@repo/shared-ui/components/common/card";
+import { Card, CardContent } from "@kompaniya/ui-common/components/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@repo/shared-ui/components/common/tabs";
-import { HtmlEditor } from "@repo/shared-ui/components/monaco-editor/html-editor";
-import { HtmlLivePreview } from "@repo/shared-ui/components/monaco-editor/html-live-preview";
+} from "@kompaniya/ui-common/components/tabs";
+import { HtmlEditor } from "@kompaniya/ui-monaco-editor/components/html-editor";
+import { HtmlLivePreview } from "@kompaniya/ui-monaco-editor/components/html-live-preview";
 import * as React from "react";
 
 import { RecordField } from "./record-field";

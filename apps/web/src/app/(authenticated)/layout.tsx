@@ -1,9 +1,9 @@
-import { Separator } from "@repo/shared-ui/components/common/separator";
+import { Separator } from "@kompaniya/ui-common/components/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@repo/shared-ui/components/common/sidebar";
+} from "@kompaniya/ui-common/components/sidebar";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 

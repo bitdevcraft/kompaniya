@@ -2,17 +2,17 @@
 
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/shared-ui/components/common/card";
-import { Form, FormField } from "@repo/shared-ui/components/common/form";
-import { ScrollArea } from "@repo/shared-ui/components/common/scroll-area";
-import { cn } from "@repo/shared-ui/lib/utils";
+} from "@kompaniya/ui-common/components/card";
+import { Form, FormField } from "@kompaniya/ui-common/components/form";
+import { ScrollArea } from "@kompaniya/ui-common/components/scroll-area";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
 

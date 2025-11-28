@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@repo/shared-ui/components/common/button";
-import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
 import {
   Form,
   FormControl,
@@ -11,8 +11,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/shared-ui/components/common/form";
-import { Input } from "@repo/shared-ui/components/common/input";
+} from "@kompaniya/ui-common/components/form";
+import { Input } from "@kompaniya/ui-common/components/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";

@@ -4,7 +4,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/shared-ui/components/common/select";
+} from "@kompaniya/ui-common/components/select";
 
 import type { RecordFieldOption } from "./layout";
 

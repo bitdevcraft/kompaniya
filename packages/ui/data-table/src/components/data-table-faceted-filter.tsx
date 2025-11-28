@@ -1,5 +1,6 @@
 "use client";
 
+import type { Option } from "@kompaniya/ui-data-table/types/data-table";
 import type { Column } from "@tanstack/react-table";
 
 import { Badge } from "@kompaniya/ui-common/components/badge";
@@ -22,8 +23,6 @@ import { Separator } from "@kompaniya/ui-common/components/separator";
 import { cn } from "@kompaniya/ui-common/lib/utils";
 import { Check, PlusCircle, XCircle } from "lucide-react";
 import * as React from "react";
-
-import type { Option } from "@/types/data-table";
 
 interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;

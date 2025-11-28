@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
-import "@repo/shared-ui/globals.css";
+import "@kompaniya/ui-common/globals.css";
 
 import { Providers } from "./providers";
 

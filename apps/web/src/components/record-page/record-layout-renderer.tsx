@@ -6,17 +6,17 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@repo/shared-ui/components/common/avatar";
-import { Badge } from "@repo/shared-ui/components/common/badge";
+} from "@kompaniya/ui-common/components/avatar";
+import { Badge } from "@kompaniya/ui-common/components/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/shared-ui/components/common/card";
-import { Form, FormField } from "@repo/shared-ui/components/common/form";
-import { cn } from "@repo/shared-ui/lib/utils";
+} from "@kompaniya/ui-common/components/card";
+import { Form, FormField } from "@kompaniya/ui-common/components/form";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import {
   Building2,
   CalendarDays,

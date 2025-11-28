@@ -9,7 +9,7 @@
     "lint": "eslint --max-warnings=0 src"
   },
   "dependencies": {
-    "@repo/shared-ui": "workspace:^",
+    "@kompaniya/ui-common": "workspace:^",
     "next": "catalog:",
     "react": "19.2.0",
     "react-dom": "19.2.0"

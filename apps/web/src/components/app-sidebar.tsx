@@ -6,7 +6,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@repo/shared-ui/components/common/sidebar";
+} from "@kompaniya/ui-common/components/sidebar";
 import {
   AudioWaveform,
   Command,

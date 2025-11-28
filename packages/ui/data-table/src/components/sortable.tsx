@@ -35,11 +35,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@kompaniya/ui-common/lib/utils";
+import {
+  composeEventHandlers,
+  useComposedRefs,
+} from "@kompaniya/ui-data-table/lib/composition";
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
-import { composeEventHandlers, useComposedRefs } from "@/lib/composition";
 
 const orientationConfig = {
   vertical: {

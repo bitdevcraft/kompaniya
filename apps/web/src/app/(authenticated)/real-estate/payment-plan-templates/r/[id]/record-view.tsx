@@ -1,12 +1,12 @@
-import { type OrgPaymentPlanTemplate } from "@repo/database/schema";
-import { Badge } from "@repo/shared-ui/components/common/badge";
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Badge } from "@kompaniya/ui-common/components/badge";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@repo/shared-ui/components/common/card";
+} from "@kompaniya/ui-common/components/card";
+import { type OrgPaymentPlanTemplate } from "@repo/database/schema";
 import Link from "next/link";
 
 import { model } from "../../config";
@@ -61,8 +61,8 @@ export function RecordView({ record }: RecordViewProps) {
           <div>
             <p className="text-sm text-muted-foreground">Principal range</p>
             <p className="font-medium">
-              {formatNumber(record.minPrincipal)} -{" "}
-              {formatNumber(record.maxPrincipal)}
+              {formatNumber(parseInt(record.minPrincipal ?? "0"))} -{" "}
+              {formatNumber(parseInt(record.maxPrincipal ?? "0"))}
             </p>
           </div>
           <div className="md:col-span-3">

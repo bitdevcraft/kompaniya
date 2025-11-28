@@ -4,7 +4,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@repo/shared-ui/components/common/avatar";
+} from "@kompaniya/ui-common/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,13 +13,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/shared-ui/components/common/dropdown-menu";
+} from "@kompaniya/ui-common/components/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@repo/shared-ui/components/common/sidebar";
+} from "@kompaniya/ui-common/components/sidebar";
 import {
   BadgeCheck,
   ChevronsUpDown,

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@repo/shared-ui/*": ["./src/*"]
+      "@kompaniya/ui-monaco-editor/*": ["./src/*"]
     }
   },
   "include": ["."],

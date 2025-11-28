@@ -1,12 +1,12 @@
 "use client";
 
-import { Separator } from "@radix-ui/react-separator";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
-} from "@repo/shared-ui/components/data-table/data-table-action-bar";
-import { exportTableToCSV } from "@repo/shared-ui/components/ts/data-table/lib/export";
+} from "@kompaniya/ui-data-table/components/data-table-action-bar";
+import { exportTableToCSV } from "@kompaniya/ui-data-table/lib/export";
+import { Separator } from "@radix-ui/react-separator";
 import { Table } from "@tanstack/react-table";
 import { Download } from "lucide-react";
 import React from "react";

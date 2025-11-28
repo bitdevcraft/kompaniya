@@ -1,5 +1,5 @@
-import { Badge } from "@repo/shared-ui/components/common/badge";
-import { MultiSelect } from "@repo/shared-ui/components/common/multi-select";
+import { Badge } from "@kompaniya/ui-common/components/badge";
+import { MultiSelect } from "@kompaniya/ui-common/components/multi-select";
 import { useMemo } from "react";
 
 import type { RecordFieldOption } from "./layout";

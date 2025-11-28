@@ -11,10 +11,10 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "hooks": "@/hooks",
-    "lib": "@/lib",
-    "ui": "@/components/common"
+    "components": "@kompaniya/ui-monaco-editor/components",
+    "utils": "@kompaniya/ui-monaco-editor/lib/utils",
+    "hooks": "@kompaniya/ui-monaco-editor/hooks",
+    "lib": "@kompaniya/ui-monaco-editor/lib",
+    "ui": "@kompaniya/ui-monaco-editor/components/common"
   }
 }

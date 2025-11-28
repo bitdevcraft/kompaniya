@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@kompaniya/ui-common/components/select";
 import { cn } from "@kompaniya/ui-common/lib/utils";
+import { dataTableConfig } from "@kompaniya/ui-data-table/config/data-table";
 import {
   ArrowDownUp,
   ChevronsUpDown,
@@ -32,8 +33,6 @@ import {
   Trash2,
 } from "lucide-react";
 import * as React from "react";
-
-import { dataTableConfig } from "@/config/data-table";
 
 import {
   Sortable,

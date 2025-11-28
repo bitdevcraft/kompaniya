@@ -1,9 +1,8 @@
 "use client";
 
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { forwardRef, useState } from "react";
-
-import { cn } from "@/lib/utils";
 
 import { Button } from "./button";
 import { Input } from "./input";

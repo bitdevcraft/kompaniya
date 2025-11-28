@@ -1,14 +1,14 @@
 "use client";
 
-import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
-import { ConfirmDialog } from "@repo/shared-ui/components/common/dialog-confirm";
+import { ButtonGroup } from "@kompaniya/ui-common/components/button-group";
+import { ConfirmDialog } from "@kompaniya/ui-common/components/dialog-confirm";
 import {
   DataTable,
   DataTableSkeleton,
   DataTableToolbar,
-} from "@repo/shared-ui/components/data-table/index";
-import { useDataTable } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table";
-import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
+} from "@kompaniya/ui-data-table/components/index";
+import { useDataTable } from "@kompaniya/ui-data-table/hooks/use-data-table";
+import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 

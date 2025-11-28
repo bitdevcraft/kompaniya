@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Button } from "@kompaniya/ui-common/components/button";
 
 export function ImportButton() {
   return (

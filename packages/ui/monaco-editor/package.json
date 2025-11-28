@@ -1,5 +1,5 @@
 {
-  "name": "@repo/shared-ui",
+  "name": "@kompaniya/ui-monaco-editor",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -18,14 +18,11 @@
     "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:"
   },
+  "peerDependencies": {
+    "@kompaniya/ui-common": "workspace:^"
+  },
   "exports": {
-    "./globals.css": "./src/styles/globals.css",
-    "./styles/*": "./src/styles/*.css",
-    "./postcss.config": "./postcss.config.mjs",
-    "./lib/*": "./src/lib/*.ts",
-    "./components/ts/*": "./src/components/*.ts",
-    "./components/*": "./src/components/*.tsx",
-    "./hooks/*": "./src/hooks/*.ts"
+    "./components/*": "./src/components/*.tsx"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

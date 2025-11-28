@@ -1,5 +1,10 @@
 "use client";
 
+import type {
+  ExtendedColumnFilter,
+  FilterOperator,
+  JoinOperator,
+} from "@kompaniya/ui-data-table/types/data-table";
 import type { Column, ColumnMeta, Table } from "@tanstack/react-table";
 
 import { Badge } from "@kompaniya/ui-common/components/badge";
@@ -27,6 +32,15 @@ import {
   SelectValue,
 } from "@kompaniya/ui-common/components/select";
 import { cn } from "@kompaniya/ui-common/lib/utils";
+import { dataTableConfig } from "@kompaniya/ui-data-table/config/data-table";
+import { useDebouncedCallback } from "@kompaniya/ui-data-table/hooks/use-debounced-callback";
+import {
+  getDefaultFilterOperator,
+  getFilterOperators,
+} from "@kompaniya/ui-data-table/lib/data-table";
+import { formatDate } from "@kompaniya/ui-data-table/lib/format";
+import { generateId } from "@kompaniya/ui-data-table/lib/id";
+import { getFiltersStateParser } from "@kompaniya/ui-data-table/lib/parsers";
 import {
   CalendarIcon,
   Check,
@@ -37,19 +51,6 @@ import {
 } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
-
-import type {
-  ExtendedColumnFilter,
-  FilterOperator,
-  JoinOperator,
-} from "@/types/data-table";
-
-import { dataTableConfig } from "@/config/data-table";
-import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { getDefaultFilterOperator, getFilterOperators } from "@/lib/data-table";
-import { formatDate } from "@/lib/format";
-import { generateId } from "@/lib/id";
-import { getFiltersStateParser } from "@/lib/parsers";
 
 import { DataTableRangeFilter } from "./data-table-range-filter";
 import {

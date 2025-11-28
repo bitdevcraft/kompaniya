@@ -4,13 +4,12 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@kompaniya/ui-common/components/toggle-group";
-import { LayoutGrid, List } from "lucide-react";
-import * as React from "react";
-
 import {
   type DataTableViewMode,
   useDataTableViewMode,
-} from "@/hooks/use-data-table-view-mode";
+} from "@kompaniya/ui-data-table/hooks/use-data-table-view-mode";
+import { LayoutGrid, List } from "lucide-react";
+import * as React from "react";
 
 export interface DataTableViewToggleProps
   extends Omit<

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@repo/shared-ui/components/common/button";
+import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Form,
   FormControl,
@@ -10,12 +10,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@repo/shared-ui/components/common/form";
-import { Input } from "@repo/shared-ui/components/common/input";
-import { Label } from "@repo/shared-ui/components/common/label";
-import { HtmlEditor } from "@repo/shared-ui/components/monaco-editor/html-editor";
-import { HtmlLivePreview } from "@repo/shared-ui/components/monaco-editor/html-live-preview";
-import { HtmlPreviewer } from "@repo/shared-ui/components/monaco-editor/html-previewer";
+} from "@kompaniya/ui-common/components/form";
+import { Input } from "@kompaniya/ui-common/components/input";
+import { Label } from "@kompaniya/ui-common/components/label";
+import { HtmlEditor } from "@kompaniya/ui-monaco-editor/components/html-editor";
+import { HtmlLivePreview } from "@kompaniya/ui-monaco-editor/components/html-live-preview";
+import { HtmlPreviewer } from "@kompaniya/ui-monaco-editor/components/html-previewer";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";

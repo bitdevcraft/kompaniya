@@ -1,12 +1,11 @@
+import { Button, buttonVariants } from "@kompaniya/ui-common/components/button";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   MoreHorizontalIcon,
 } from "lucide-react";
 import * as React from "react";
-
-import { Button, buttonVariants } from "@/components/button";
-import { cn } from "@/lib/utils";
 
 type PaginationLinkProps = Pick<React.ComponentProps<typeof Button>, "size"> &
   React.ComponentProps<"a"> & {

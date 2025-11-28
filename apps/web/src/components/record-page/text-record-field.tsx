@@ -1,4 +1,4 @@
-import { Input } from "@repo/shared-ui/components/common/input";
+import { Input } from "@kompaniya/ui-common/components/input";
 
 import { RecordField } from "./record-field";
 import {

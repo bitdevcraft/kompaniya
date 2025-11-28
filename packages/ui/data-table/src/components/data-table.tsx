@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@kompaniya/ui-common/components/table";
 import { cn } from "@kompaniya/ui-common/lib/utils";
+import { getCommonPinningStyles } from "@kompaniya/ui-data-table/lib/data-table";
 import {
   flexRender,
   type Cell as TanstackCell,
@@ -15,8 +16,6 @@ import {
   type Table as TanstackTable,
 } from "@tanstack/react-table";
 import * as React from "react";
-
-import { getCommonPinningStyles } from "@/lib/data-table";
 
 import { DataTablePagination } from "./data-table-pagination";
 

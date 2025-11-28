@@ -1,5 +1,8 @@
 "use client";
 
+import type { ExtendedColumnSort } from "@kompaniya/ui-data-table/types/data-table";
+
+import { getSortingStateParser } from "@kompaniya/ui-data-table/lib/parsers";
 import {
   type ColumnFiltersState,
   getCoreRowModel,
@@ -28,10 +31,6 @@ import {
   useQueryStates,
 } from "nuqs";
 import * as React from "react";
-
-import type { ExtendedColumnSort } from "@/types/data-table";
-
-import { getSortingStateParser } from "@/lib/parsers";
 
 import { useDebouncedCallback } from "./use-debounced-callback";
 

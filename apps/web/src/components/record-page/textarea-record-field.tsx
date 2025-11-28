@@ -1,4 +1,4 @@
-import { Textarea } from "@repo/shared-ui/components/common/textarea";
+import { Textarea } from "@kompaniya/ui-common/components/textarea";
 
 import { RecordField } from "./record-field";
 import {

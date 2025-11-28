@@ -1,5 +1,6 @@
 // src/components/multi-select.tsx
 
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
   CheckIcon,
@@ -9,8 +10,6 @@ import {
   XIcon,
 } from "lucide-react";
 import * as React from "react";
-
-import { cn } from "@/lib/utils";
 
 import { Badge } from "./badge";
 import { Button } from "./button";

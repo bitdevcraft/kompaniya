@@ -1,7 +1,7 @@
 "use client";
 
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { Slot, Slottable } from "@radix-ui/react-slot";
-import { cn } from "@repo/shared-ui/lib/utils";
 import React, {
   createContext,
   HTMLProps,

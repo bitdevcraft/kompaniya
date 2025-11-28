@@ -8,13 +8,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@repo/shared-ui/components/common/dropdown-menu";
+} from "@kompaniya/ui-common/components/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@repo/shared-ui/components/common/sidebar";
+} from "@kompaniya/ui-common/components/sidebar";
 import { ChevronsUpDown, Plus } from "lucide-react";
 import * as React from "react";
 

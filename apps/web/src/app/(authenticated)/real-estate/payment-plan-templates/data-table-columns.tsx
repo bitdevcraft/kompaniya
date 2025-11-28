@@ -1,13 +1,13 @@
-import { Badge } from "@repo/shared-ui/components/common/badge";
-import { Button } from "@repo/shared-ui/components/common/button";
-import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
-import { DataTableColumnHeader } from "@repo/shared-ui/components/data-table/data-table-column-header";
+import { Badge } from "@kompaniya/ui-common/components/badge";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
+import { DataTableColumnHeader } from "@kompaniya/ui-data-table/components/data-table-column-header";
 import {
   DataTableRowAction,
   defineMeta,
   getTableColumns,
   makeRowAction,
-} from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
+} from "@kompaniya/ui-data-table/utils/data-table-columns";
 import { ColumnDef } from "@tanstack/react-table";
 import { Text, Trash2 } from "lucide-react";
 import Link from "next/link";

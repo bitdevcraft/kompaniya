@@ -1,11 +1,11 @@
-import { Button } from "@repo/shared-ui/components/common/button";
-import { Calendar } from "@repo/shared-ui/components/common/calendar";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { Calendar } from "@kompaniya/ui-common/components/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@repo/shared-ui/components/common/popover";
-import { cn } from "@repo/shared-ui/lib/utils";
+} from "@kompaniya/ui-common/components/popover";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { CalendarIcon, XIcon } from "lucide-react";
 import { useMemo } from "react";
 

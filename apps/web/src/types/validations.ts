@@ -1,7 +1,7 @@
 import {
   getFiltersStateParser,
   getSortingStateParser,
-} from "@repo/shared-ui/components/ts/data-table/lib/parsers";
+} from "@kompaniya/ui-data-table/lib/parsers";
 import {
   createSearchParamsCache,
   parseAsInteger,

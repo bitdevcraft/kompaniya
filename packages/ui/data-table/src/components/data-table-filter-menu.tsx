@@ -1,5 +1,9 @@
 "use client";
 
+import type {
+  ExtendedColumnFilter,
+  FilterOperator,
+} from "@kompaniya/ui-data-table/types/data-table";
 import type { Column, Table } from "@tanstack/react-table";
 
 import { Button } from "@kompaniya/ui-common/components/button";
@@ -26,6 +30,14 @@ import {
   SelectValue,
 } from "@kompaniya/ui-common/components/select";
 import { cn } from "@kompaniya/ui-common/lib/utils";
+import { useDebouncedCallback } from "@kompaniya/ui-data-table/hooks/use-debounced-callback";
+import {
+  getDefaultFilterOperator,
+  getFilterOperators,
+} from "@kompaniya/ui-data-table/lib/data-table";
+import { formatDate } from "@kompaniya/ui-data-table/lib/format";
+import { generateId } from "@kompaniya/ui-data-table/lib/id";
+import { getFiltersStateParser } from "@kompaniya/ui-data-table/lib/parsers";
 import {
   BadgeCheck,
   CalendarIcon,
@@ -36,14 +48,6 @@ import {
 } from "lucide-react";
 import { useQueryState } from "nuqs";
 import * as React from "react";
-
-import type { ExtendedColumnFilter, FilterOperator } from "@/types/data-table";
-
-import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { getDefaultFilterOperator, getFilterOperators } from "@/lib/data-table";
-import { formatDate } from "@/lib/format";
-import { generateId } from "@/lib/id";
-import { getFiltersStateParser } from "@/lib/parsers";
 
 import { DataTableRangeFilter } from "./data-table-range-filter";
 

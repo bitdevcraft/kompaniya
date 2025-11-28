@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 
-import { Badge } from "@repo/shared-ui/components/common/badge";
+import { Badge } from "@kompaniya/ui-common/components/badge";
 
 export interface TagListProps {
   icon: ComponentType<{ className?: string }>;

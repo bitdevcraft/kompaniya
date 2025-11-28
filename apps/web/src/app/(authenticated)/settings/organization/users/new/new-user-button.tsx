@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@repo/shared-ui/components/common/button";
-import { ResponsiveDialog } from "@repo/shared-ui/components/common/responsive-dialog";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { ResponsiveDialog } from "@kompaniya/ui-common/components/responsive-dialog";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";

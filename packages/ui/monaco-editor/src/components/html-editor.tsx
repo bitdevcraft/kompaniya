@@ -1,7 +1,7 @@
 "use client";
 
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import Editor, { type EditorProps } from "@monaco-editor/react";
-import { cn } from "@repo/shared-ui/lib/utils";
 import * as React from "react";
 import {
   type Control,

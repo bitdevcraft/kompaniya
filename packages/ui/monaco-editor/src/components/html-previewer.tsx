@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@repo/shared-ui/components/common/button";
-import { cn } from "@repo/shared-ui/lib/utils";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { ExternalLink } from "lucide-react";
 import * as React from "react";
 

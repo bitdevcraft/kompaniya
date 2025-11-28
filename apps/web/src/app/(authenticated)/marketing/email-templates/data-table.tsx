@@ -1,19 +1,19 @@
 "use client";
 
-import { Button } from "@repo/shared-ui/components/common/button";
-import { ButtonGroup } from "@repo/shared-ui/components/common/button-group";
-import { Checkbox } from "@repo/shared-ui/components/common/checkbox";
-import { Label } from "@repo/shared-ui/components/common/label";
+import { Button } from "@kompaniya/ui-common/components/button";
+import { ButtonGroup } from "@kompaniya/ui-common/components/button-group";
+import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
+import { Label } from "@kompaniya/ui-common/components/label";
 import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
   DataTableSortList,
   DataTableViewToggle,
-} from "@repo/shared-ui/components/data-table/index";
-import { useDataTable } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table";
-import { useDataTableViewMode } from "@repo/shared-ui/components/ts/data-table/hooks/use-data-table-view-mode";
-import { DataTableRowAction } from "@repo/shared-ui/components/ts/data-table/utils/data-table-columns";
+} from "@kompaniya/ui-data-table/components/index";
+import { useDataTable } from "@kompaniya/ui-data-table/hooks/use-data-table";
+import { useDataTableViewMode } from "@kompaniya/ui-data-table/hooks/use-data-table-view-mode";
+import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Plus } from "lucide-react";
