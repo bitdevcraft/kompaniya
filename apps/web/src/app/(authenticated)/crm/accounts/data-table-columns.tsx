@@ -54,7 +54,7 @@ export function useDataTableColumns(
       ),
       enableSorting: false,
       enableHiding: false,
-      size: 40,
+      size: 5,
     },
     {
       id: "name",
@@ -83,32 +83,34 @@ export function useDataTableColumns(
         label: "Actions",
       }),
       enableSorting: false,
-      size: 40,
+      size: 10,
       cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              aria-label="Open menu"
-              className="flex size-8 p-0"
-              variant="ghost"
-            >
-              <Ellipsis className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onSelect={() => onUpdate(row)}>
-              <Edit />
-              Update
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => onDelete(row)}
-              variant="destructive"
-            >
-              <Trash2 />
-              Remove
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                aria-label="Open menu"
+                className="flex h-8 w-16 p-0"
+                variant="ghost"
+              >
+                <Ellipsis className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => onUpdate(row)}>
+                <Edit />
+                Update
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => onDelete(row)}
+                variant="destructive"
+              >
+                <Trash2 />
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
     },
   ];

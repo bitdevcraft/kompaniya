@@ -34,6 +34,9 @@
     },
     "format": {
       "cache": false
+    },
+    "start": {
+      "cache": false
     }
   }
 }

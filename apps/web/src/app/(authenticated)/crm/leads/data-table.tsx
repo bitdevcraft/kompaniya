@@ -121,7 +121,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
           <div className="flex items-center w-full">
             <div className="text-xl pl-4 text-nowrap">{model.plural}</div>
             <DataTableAdvancedToolbar hideViewColumns table={table}>
-              <div className="flex gap-4">
+              <div className="hidden md:flex gap-4">
                 <ButtonGroup>
                   <NewButton />
                   <ImportButton />

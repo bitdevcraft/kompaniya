@@ -4,14 +4,22 @@ import { APP } from "@repo/shared";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
-import { Inter } from "next/font/google";
+import { DM_Sans, Lora, Space_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import "@kompaniya/ui-common/globals.css";
 
 import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ["latin"] });
+const sansSerif = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+const serif = Lora({ subsets: ["latin"], variable: "--font-serif" });
+const monospace = Space_Mono({
+  variable: "--font-mono",
+  weight: ["400", "700"],
+});
 
 export const metadata: Metadata = {
   description: "Enterprise Resource Planning",
@@ -26,8 +34,12 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
   return (
-    <html className="h-full w-full" lang={locale} suppressHydrationWarning>
-      <body className={`${inter.className}  antialiased`}>
+    <html
+      className={`h-full w-full ${sansSerif.variable} ${monospace.variable} ${serif.variable}`}
+      lang={locale}
+      suppressHydrationWarning
+    >
+      <body className={`  antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

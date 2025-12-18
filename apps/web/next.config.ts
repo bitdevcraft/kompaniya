@@ -5,7 +5,6 @@ import createNextIntlPlugin from "next-intl/plugin";
 const nextConfig: NextConfig = {
   /* config options here */
   transpilePackages: [
-    "@repo/shared-ui",
     "@kompaniya/ui-common",
     "@kompaniya/ui-data-table",
     "@kompaniya/ui-monaco-editor",

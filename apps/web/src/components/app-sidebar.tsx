@@ -135,7 +135,7 @@ const data = {
       title: "Settings",
       url: "#",
       icon: Settings2,
-      isActive: true,
+      isActive: false,
       items: [
         {
           title: "Security",
@@ -177,7 +177,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...props} className="border-none">
       <SidebarHeader>
         <NavCompanyHeader />
       </SidebarHeader>

@@ -13,6 +13,7 @@ import {
 import { useDataTable } from "@kompaniya/ui-data-table/hooks/use-data-table";
 import { useDataTableViewMode } from "@kompaniya/ui-data-table/hooks/use-data-table-view-mode";
 import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
+import { convertCase } from "@repo/shared/utils";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
@@ -114,7 +115,9 @@ export function OrgDataTable(props: OrgDataTableProps) {
       >
         <div className="flex flex-col items-end gap-4">
           <div className="flex items-center w-full">
-            <div className="text-xl pl-4 text-nowrap">{model.plural}</div>
+            <div className="text-xl pl-4 text-nowrap">
+              {convertCase(model.plural, "kebab", "title")}
+            </div>
             <DataTableAdvancedToolbar hideViewColumns table={table}>
               <div className="flex gap-4">
                 <ButtonGroup>

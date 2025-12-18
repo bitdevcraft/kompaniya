@@ -643,7 +643,7 @@ function Header<TFieldValues extends FieldValues>({
 
   return (
     <Card className="border-border/60">
-      <CardContent className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between">
+      <CardContent className="flex flex-col gap-6 px-6 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
           {header.avatar ? (
             <Avatar className="size-16">

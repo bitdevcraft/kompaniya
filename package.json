@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "start": "turbo run start",
     "dev": "turbo run dev",
     "dev:pkg": "turbo run dev:pkg",
     "build:pkg": "turbo run build:pkg",

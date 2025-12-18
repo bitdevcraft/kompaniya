@@ -140,10 +140,7 @@ export function DataTable<TData>({
   };
 
   return (
-    <div
-      className={cn("flex w-full flex-col gap-2.5 overflow-auto", className)}
-      {...props}
-    >
+    <div className={cn("space-y-4 overflow-auto", className)} {...props}>
       <div className="w-full p-2 border rounded-md bg-background shadow">
         {children}
       </div>
@@ -151,7 +148,7 @@ export function DataTable<TData>({
       {enableGrid && resolvedViewMode === "grid" ? (
         <div
           className={cn(
-            "grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3",
+            "grid gap-2.5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3",
             gridOptions?.containerClassName,
           )}
         >

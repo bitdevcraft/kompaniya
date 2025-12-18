@@ -1,12 +1,12 @@
 "use client";
 
+import { Separator } from "@kompaniya/ui-common/components/separator";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
 } from "@kompaniya/ui-data-table/components/data-table-action-bar";
 import { exportTableToCSV } from "@kompaniya/ui-data-table/lib/export";
-import { Separator } from "@radix-ui/react-separator";
 import { Table } from "@tanstack/react-table";
 import { Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -56,32 +56,30 @@ export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {
   }, [table]);
 
   return (
-    <>
-      <DataTableActionBar table={table} visible={rows.length > 0}>
-        <DataTableActionBarSelection table={table} />
-        <Separator
-          className="hidden data-[orientation=vertical]:h-5 sm:block"
-          orientation="vertical"
-        />
-        <div className="flex items-center gap-1.5">
-          <DataTableActionBarAction
-            isPending={getIsActionPending("export")}
-            onClick={onDataRowExport}
-            size="icon"
-            tooltip="Export Contacts"
-          >
-            <Download />
-          </DataTableActionBarAction>
-          <DataTableActionBarAction
-            isPending={getIsActionPending("delete")}
-            onClick={onDataRowDelete}
-            size="icon"
-            tooltip="Delete Contacts"
-          >
-            <Trash2 />
-          </DataTableActionBarAction>
-        </div>
-      </DataTableActionBar>
-    </>
+    <DataTableActionBar table={table} visible={rows.length > 0}>
+      <DataTableActionBarSelection table={table} />
+      <Separator
+        className="hidden data-[orientation=vertical]:h-5 sm:block"
+        orientation="vertical"
+      />
+      <div className="flex items-center gap-1.5">
+        <DataTableActionBarAction
+          isPending={getIsActionPending("export")}
+          onClick={onDataRowExport}
+          size="icon"
+          tooltip="Export Contacts"
+        >
+          <Download />
+        </DataTableActionBarAction>
+        <DataTableActionBarAction
+          isPending={getIsActionPending("delete")}
+          onClick={onDataRowDelete}
+          size="icon"
+          tooltip="Delete Contacts"
+        >
+          <Trash2 />
+        </DataTableActionBarAction>
+      </div>
+    </DataTableActionBar>
   );
 }
