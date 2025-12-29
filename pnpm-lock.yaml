@@ -607,6 +607,9 @@ importers:
       '@kompaniya/ui-data-table':
         specifier: workspace:^
         version: link:../../packages/ui/data-table
+      '@kompaniya/ui-mjml-editor':
+        specifier: workspace:^
+        version: link:../../packages/ui/mjml-editor
       '@kompaniya/ui-monaco-editor':
         specifier: workspace:^
         version: link:../../packages/ui/monaco-editor
