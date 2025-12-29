@@ -1,7 +1,5 @@
 import type { JSONContent } from "@tiptap/core";
 
-import mjml2html from "mjml-browser";
-
 export function jsonToMjml(json: JSONContent): string {
   if (json.type === "doc") {
     const body = (json.content ?? []).map(renderNode).join("");
@@ -12,6 +10,11 @@ export function jsonToMjml(json: JSONContent): string {
 }
 
 export function mjmlToHtml(mjml: string): string {
+  if (typeof window === "undefined") {
+    throw new Error("mjmlToHtml can only be called in the browser.");
+  }
+
+  const mjml2html = require("mjml-browser") as typeof import("mjml-browser");
   const { html } = mjml2html(mjml);
   return html;
 }
