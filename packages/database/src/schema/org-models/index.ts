@@ -2,6 +2,7 @@ export * from "./org-accounts";
 export * from "./org-activities";
 export * from "./org-categories";
 export * from "./org-contacts";
+export * from "./org-email-assets";
 export * from "./org-email-campaigns";
 export * from "./org-email-clicks";
 export * from "./org-email-domains";

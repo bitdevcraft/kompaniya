@@ -187,20 +187,116 @@ export async function seedOrgModels(
         {
           ...ownershipFields,
           name: "Welcome Series",
-          subject: "Welcome to our platform",
-          body: "Hi {{firstName}}, thanks for joining us!",
+          jsonSchema: {
+            meta: {
+              id: randomUUID(),
+              name: "Welcome Series",
+              version: 1,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            root: "root",
+            blocks: {
+              root: {
+                id: "root",
+                type: "section",
+                props: {},
+                children: ["column-1"],
+              },
+              "column-1": {
+                id: "column-1",
+                type: "column",
+                props: {},
+                children: ["text-1"],
+              },
+              "text-1": {
+                id: "text-1",
+                type: "text",
+                props: {
+                  content: "Hi {{firstName}}, thanks for joining us!",
+                },
+              },
+            },
+          },
+          mjml: "<mjml><mj-body><mj-section><mj-column><mj-text>Hi {{firstName}}, thanks for joining us!</mj-text></mj-column></mj-section></mj-body></mjml>",
+          html: "<p>Hi {{firstName}}, thanks for joining us!</p>",
+          version: 1,
         },
         {
           ...ownershipFields,
           name: "Product Update",
-          subject: "What's new this month",
-          body: "We shipped great features you will love.",
+          jsonSchema: {
+            meta: {
+              id: randomUUID(),
+              name: "Product Update",
+              version: 1,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            root: "root",
+            blocks: {
+              root: {
+                id: "root",
+                type: "section",
+                props: {},
+                children: ["column-1"],
+              },
+              "column-1": {
+                id: "column-1",
+                type: "column",
+                props: {},
+                children: ["text-1"],
+              },
+              "text-1": {
+                id: "text-1",
+                type: "text",
+                props: {
+                  content: "We shipped great features you will love.",
+                },
+              },
+            },
+          },
+          mjml: "<mjml><mj-body><mj-section><mj-column><mj-text>We shipped great features you will love.</mj-text></mj-column></mj-section></mj-body></mjml>",
+          html: "<p>We shipped great features you will love.</p>",
+          version: 1,
         },
         {
           ...ownershipFields,
           name: "Feedback Request",
-          subject: "Can we get your feedback?",
-          body: "Tell us how we did and what to improve.",
+          jsonSchema: {
+            meta: {
+              id: randomUUID(),
+              name: "Feedback Request",
+              version: 1,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            root: "root",
+            blocks: {
+              root: {
+                id: "root",
+                type: "section",
+                props: {},
+                children: ["column-1"],
+              },
+              "column-1": {
+                id: "column-1",
+                type: "column",
+                props: {},
+                children: ["text-1"],
+              },
+              "text-1": {
+                id: "text-1",
+                type: "text",
+                props: {
+                  content: "Tell us how we did and what to improve.",
+                },
+              },
+            },
+          },
+          mjml: "<mjml><mj-body><mj-section><mj-column><mj-text>Tell us how we did and what to improve.</mj-text></mj-column></mj-section></mj-body></mjml>",
+          html: "<p>Tell us how we did and what to improve.</p>",
+          version: 1,
         },
       ])
       .returning();

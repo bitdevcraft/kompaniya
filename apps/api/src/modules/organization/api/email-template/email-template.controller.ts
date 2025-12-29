@@ -40,10 +40,12 @@ export class EmailTemplateController {
     @Session() session: UserSession,
   ) {
     const template: NewOrgEmailTemplate = {
+      html: createTemplate.html,
+      jsonSchema: createTemplate.jsonSchema,
+      mjml: createTemplate.mjml,
       name: createTemplate.name,
-      subject: createTemplate.subject,
-      body: createTemplate.body,
       organizationId: organization.id,
+      version: createTemplate.version,
     };
 
     await this.emailTemplateService.deletePaginatedCache(
