@@ -1,5 +1,7 @@
 export class CreateTemplateDto {
-  body!: string;
+  html!: string;
+  jsonSchema!: Record<string, unknown>;
+  mjml!: string;
   name!: string;
-  subject?: string;
+  version?: number;
 }
