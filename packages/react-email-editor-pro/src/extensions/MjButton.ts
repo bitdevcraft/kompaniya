@@ -4,7 +4,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { ButtonComponent } from "../components/editor/ButtonComponent";
 
 export const MjButton = Node.create({
-  name: "mj-button",
+  name: "mjButton",
   group: "block",
   atom: true,
 

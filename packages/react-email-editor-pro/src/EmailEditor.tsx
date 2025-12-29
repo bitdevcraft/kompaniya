@@ -32,13 +32,13 @@ const defaultContent: JSONContent = {
   type: "doc",
   content: [
     {
-      type: "mj-section",
+      type: "mjSection",
       content: [
         {
-          type: "mj-column",
+          type: "mjColumn",
           content: [
             {
-              type: "mj-text",
+              type: "mjText",
               content: [{ type: "text", text: "Start building your email..." }],
             },
           ],
@@ -132,7 +132,7 @@ function useSelectedNode(
       for (let depth = $from.depth; depth >= 1; depth -= 1) {
         const node = $from.node(depth);
         const type = node.type.name;
-        if (type.startsWith("mj-")) {
+        if (type.startsWith("mj")) {
           setSelectedNode({
             type,
             attrs: node.attrs as Record<string, unknown>,

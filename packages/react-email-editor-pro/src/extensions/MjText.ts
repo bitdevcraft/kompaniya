@@ -4,7 +4,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { TextComponent } from "../components/editor/TextComponent";
 
 export const MjText = Node.create({
-  name: "mj-text",
+  name: "mjText",
   group: "block",
   content: "inline*",
   defining: true,

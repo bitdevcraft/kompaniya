@@ -16,11 +16,11 @@ export function Sidebar() {
           Select a block to edit its properties.
         </p>
       )}
-      {selectedNode?.type === "mj-section" && <SectionPanel />}
-      {selectedNode?.type === "mj-column" && <ColumnPanel />}
-      {selectedNode?.type === "mj-text" && <TextPanel />}
-      {selectedNode?.type === "mj-image" && <ImagePanel />}
-      {selectedNode?.type === "mj-button" && <ButtonPanel />}
+      {selectedNode?.type === "mjSection" && <SectionPanel />}
+      {selectedNode?.type === "mjColumn" && <ColumnPanel />}
+      {selectedNode?.type === "mjText" && <TextPanel />}
+      {selectedNode?.type === "mjImage" && <ImagePanel />}
+      {selectedNode?.type === "mjButton" && <ButtonPanel />}
     </aside>
   );
 }

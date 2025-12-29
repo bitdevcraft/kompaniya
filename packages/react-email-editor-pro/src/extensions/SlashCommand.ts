@@ -59,7 +59,7 @@ export const SlashCommand = Extension.create({
                   .chain()
                   .focus()
                   .deleteRange(range)
-                  .insertContent({ type: "mj-image" })
+                  .insertContent({ type: "mjImage" })
                   .run();
               },
             },
@@ -71,7 +71,7 @@ export const SlashCommand = Extension.create({
                   .chain()
                   .focus()
                   .deleteRange(range)
-                  .insertContent({ type: "mj-button" })
+                  .insertContent({ type: "mjButton" })
                   .run();
               },
             },
@@ -84,22 +84,22 @@ export const SlashCommand = Extension.create({
                   .focus()
                   .deleteRange(range)
                   .insertContent({
-                    type: "mj-section",
+                    type: "mjSection",
                     content: [
                       {
-                        type: "mj-column",
+                        type: "mjColumn",
                         content: [
                           {
-                            type: "mj-text",
+                            type: "mjText",
                             content: [{ type: "text", text: "Column 1" }],
                           },
                         ],
                       },
                       {
-                        type: "mj-column",
+                        type: "mjColumn",
                         content: [
                           {
-                            type: "mj-text",
+                            type: "mjText",
                             content: [{ type: "text", text: "Column 2" }],
                           },
                         ],
@@ -118,31 +118,31 @@ export const SlashCommand = Extension.create({
                   .focus()
                   .deleteRange(range)
                   .insertContent({
-                    type: "mj-section",
+                    type: "mjSection",
                     content: [
                       {
-                        type: "mj-column",
+                        type: "mjColumn",
                         content: [
                           {
-                            type: "mj-text",
+                            type: "mjText",
                             content: [{ type: "text", text: "Column 1" }],
                           },
                         ],
                       },
                       {
-                        type: "mj-column",
+                        type: "mjColumn",
                         content: [
                           {
-                            type: "mj-text",
+                            type: "mjText",
                             content: [{ type: "text", text: "Column 2" }],
                           },
                         ],
                       },
                       {
-                        type: "mj-column",
+                        type: "mjColumn",
                         content: [
                           {
-                            type: "mj-text",
+                            type: "mjText",
                             content: [{ type: "text", text: "Column 3" }],
                           },
                         ],

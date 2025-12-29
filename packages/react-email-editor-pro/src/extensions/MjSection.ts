@@ -4,9 +4,9 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { SectionComponent } from "../components/editor/SectionComponent";
 
 export const MjSection = Node.create({
-  name: "mj-section",
+  name: "mjSection",
   group: "block",
-  content: "mj-column+",
+  content: "mjColumn+",
   defining: true,
 
   addAttributes() {

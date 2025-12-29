@@ -4,7 +4,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { ColumnComponent } from "../components/editor/ColumnComponent";
 
 export const MjColumn = Node.create({
-  name: "mj-column",
+  name: "mjColumn",
   group: "block",
   content: "block+",
   defining: true,
