@@ -4,7 +4,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { ImageComponent } from "../components/editor/ImageComponent";
 
 export const MjImage = Node.create({
-  name: "mj-image",
+  name: "mjImage",
   group: "block",
   atom: true,
 

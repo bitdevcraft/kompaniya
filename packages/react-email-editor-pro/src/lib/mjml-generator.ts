@@ -1,5 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 
+import mjml2html from "mjml-browser";
+
 export function jsonToMjml(json: JSONContent): string {
   if (json.type === "doc") {
     const body = (json.content ?? []).map(renderNode).join("");
@@ -14,7 +16,6 @@ export function mjmlToHtml(mjml: string): string {
     throw new Error("mjmlToHtml can only be called in the browser.");
   }
 
-  const mjml2html = require("mjml-browser") as typeof import("mjml-browser");
   const { html } = mjml2html(mjml);
   return html;
 }
@@ -29,6 +30,20 @@ function attrsToString(attrs: Record<string, unknown> | undefined): string {
     .join(" ");
 }
 
+function nodeTypeToTag(type: string | undefined): string {
+  if (!type) return "div";
+
+  const map: Record<string, string> = {
+    mjSection: "mj-section",
+    mjColumn: "mj-column",
+    mjText: "mj-text",
+    mjImage: "mj-image",
+    mjButton: "mj-button",
+  };
+
+  return map[type] ?? type;
+}
+
 function renderNode(node: JSONContent): string {
   if (node.type === "text") {
     return node.text ?? "";
@@ -37,7 +52,7 @@ function renderNode(node: JSONContent): string {
   const children = (node.content ?? []).map(renderNode).join("");
   const attrs = attrsToString(node.attrs ?? undefined);
   const attributes = attrs.length > 0 ? ` ${attrs}` : "";
-  const tag = node.type ?? "div";
+  const tag = nodeTypeToTag(node.type);
 
   return `<${tag}${attributes}>${children}</${tag}>`;
 }
