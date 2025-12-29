@@ -1,0 +1,50 @@
+import { useEmailEditorContext } from "../../../context/email-editor-context";
+import { Input } from "../../ui/input";
+
+export function ColumnPanel() {
+  const { editor, selectedNode } = useEmailEditorContext();
+  if (!selectedNode) return null;
+
+  const attrs = selectedNode.attrs as {
+    width?: string;
+    padding?: string;
+    backgroundColor?: string;
+  };
+
+  const update = (nextAttrs: Partial<typeof attrs>) => {
+    editor
+      ?.chain()
+      .focus()
+      .updateAttributes(selectedNode.type, nextAttrs)
+      .run();
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="text-xs font-medium text-slate-600">Width</label>
+        <Input
+          onChange={(event) => update({ width: event.target.value })}
+          placeholder="100%"
+          value={attrs.width ?? ""}
+        />
+      </div>
+      <div>
+        <label className="text-xs font-medium text-slate-600">Padding</label>
+        <Input
+          onChange={(event) => update({ padding: event.target.value })}
+          placeholder="10px"
+          value={attrs.padding ?? ""}
+        />
+      </div>
+      <div>
+        <label className="text-xs font-medium text-slate-600">Background</label>
+        <Input
+          onChange={(event) => update({ backgroundColor: event.target.value })}
+          type="color"
+          value={attrs.backgroundColor ?? "#ffffff"}
+        />
+      </div>
+    </div>
+  );
+}

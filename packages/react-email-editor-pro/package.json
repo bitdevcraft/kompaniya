@@ -1,0 +1,43 @@
+{
+  "name": "react-email-editor-pro",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build:pkg": "tsup",
+    "dev:pkg": "tsup --watch",
+    "lint": "eslint --max-warnings=0 src",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tiptap/core": "catalog:",
+    "@tiptap/extension-document": "catalog:",
+    "@tiptap/extension-history": "catalog:",
+    "@tiptap/extension-paragraph": "catalog:",
+    "@tiptap/extension-text": "catalog:",
+    "@tiptap/react": "catalog:",
+    "@tiptap/suggestion": "catalog:",
+    "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "mjml-browser": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwind-merge": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tsup": "catalog:",
+    "typescript": "^5.9.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  }
+}

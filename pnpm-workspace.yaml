@@ -111,3 +111,13 @@ catalog:
   uuid: ^13.0.0
   vaul: ^1.1.2
   zod: ^4.1.12
+  "@tiptap/core": ^2.26.0
+  "@tiptap/extension-document": ^2.26.0
+  "@tiptap/extension-history": ^2.26.0
+  "@tiptap/extension-paragraph": ^2.26.0
+  "@tiptap/extension-text": ^2.26.0
+  "@tiptap/react": ^2.26.0
+  "@tiptap/suggestion": ^2.26.0
+  "mjml-browser": ^4.15.3
+  "react": ^19.2.0
+  "react-dom": ^19.2.0
