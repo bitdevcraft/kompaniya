@@ -9,36 +9,116 @@ import { create } from "zustand";
 import type { MjmlEditorContent, MjmlEditorUpdate } from "./mjml-editor";
 
 import { MjmlEditor } from "./mjml-editor";
+import {
+  type MjmlJsonNode,
+  mjmlJsonToMjmlString,
+  tiptapJsonToMjmlJson,
+} from "./mjml-extensions";
+
+type MjmlEditorView = "editor" | "preview";
+type MjmlOutputTab = "json" | "mjml" | "html";
+
+type MjmlRenderer = (
+  input: string,
+  options?: { validationLevel?: string },
+) => { html?: string };
+
+let mjmlRenderer: MjmlRenderer | null = null;
+let mjmlRendererPromise: Promise<void> | null = null;
+
+const loadMjmlRenderer = async (): Promise<MjmlRenderer | null> => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  if (mjmlRenderer) {
+    return mjmlRenderer;
+  }
+  if (!mjmlRendererPromise) {
+    mjmlRendererPromise = import("mjml-browser")
+      .then((mod) => {
+        const resolved =
+          (mod as { default?: MjmlRenderer }).default ??
+          (mod as unknown as MjmlRenderer);
+        mjmlRenderer = resolved;
+      })
+      .catch(() => {
+        mjmlRenderer = null;
+      });
+  }
+  await mjmlRendererPromise;
+  return mjmlRenderer;
+};
+
+const renderMjml = async (markup: string) => {
+  const renderer = await loadMjmlRenderer();
+  if (!renderer) {
+    return "";
+  }
+  try {
+    const result = renderer(markup, {
+      validationLevel: "soft",
+    }) as { html?: string };
+    return result.html || "";
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to render MJML.";
+    return `<pre>${message}</pre>`;
+  }
+};
 
 type MjmlEditorStore = {
   view: MjmlEditorView;
+  sidebarTab: MjmlOutputTab;
   html: string;
+  mjml: string;
+  mjmlJson: MjmlJsonNode | null;
   json: JSONContent | null;
   text: string;
   setView: (view: MjmlEditorView) => void;
+  setSidebarTab: (tab: MjmlOutputTab) => void;
+  setHtml: (html: string) => void;
   setFromUpdate: (update: MjmlEditorUpdate) => void;
   setFromEditor: (editor: Editor) => void;
 };
 
-type MjmlEditorView = "editor" | "preview";
+const emptyMjmlJson: MjmlJsonNode = {
+  tagName: "mjml",
+  content: [{ tagName: "mj-body", content: [] }],
+};
 
 const useMjmlEditorStore = create<MjmlEditorStore>((set) => ({
   view: "editor",
+  sidebarTab: "json",
   html: "",
+  mjml: "",
+  mjmlJson: null,
   json: null,
   text: "",
   setView: (view) => set({ view }),
+  setSidebarTab: (sidebarTab) => set({ sidebarTab }),
+  setHtml: (html) => set({ html }),
   setFromUpdate: (update) =>
-    set({
-      html: update.html,
-      json: update.json,
-      text: update.text,
+    set(() => {
+      const mjmlJson = update.mjmlJson ?? tiptapJsonToMjmlJson(update.json);
+      const mjmlMarkup = update.mjml || mjmlJsonToMjmlString(mjmlJson);
+      return {
+        mjml: mjmlMarkup,
+        mjmlJson,
+        json: update.json,
+        text: update.text,
+      };
     }),
   setFromEditor: (editor) =>
-    set({
-      html: editor.getHTML(),
-      json: editor.getJSON(),
-      text: editor.getText(),
+    set(() => {
+      const json = editor.getJSON();
+      const mjmlJson = tiptapJsonToMjmlJson(json);
+      const mjmlMarkup = mjmlJsonToMjmlString(mjmlJson);
+      return {
+        mjml: mjmlMarkup,
+        mjmlJson,
+        json,
+        text: editor.getText(),
+      };
     }),
 }));
 
@@ -69,7 +149,25 @@ export type MjmlEditorPanelProps = {
   onEditorReady?: (editor: Editor) => void;
 };
 
-const fallbackContent: MjmlEditorContent = "<p></p>";
+const fallbackContent: MjmlEditorContent = {
+  type: "doc",
+  content: [
+    {
+      type: "mjmlSection",
+      content: [
+        {
+          type: "mjmlColumn",
+          content: [
+            {
+              type: "mjmlText",
+              content: [{ type: "text", text: "" }],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 export function MjmlEditorPanel({
   className,
@@ -84,9 +182,13 @@ export function MjmlEditorPanel({
     "text-slate-900 dark:text-slate-900",
   );
   const view = useMjmlEditorStore((state) => state.view);
+  const sidebarTab = useMjmlEditorStore((state) => state.sidebarTab);
   const html = useMjmlEditorStore((state) => state.html);
-  const json = useMjmlEditorStore((state) => state.json);
+  const mjml = useMjmlEditorStore((state) => state.mjml);
+  const mjmlJson = useMjmlEditorStore((state) => state.mjmlJson);
   const setView = useMjmlEditorStore((state) => state.setView);
+  const setSidebarTab = useMjmlEditorStore((state) => state.setSidebarTab);
+  const setHtml = useMjmlEditorStore((state) => state.setHtml);
   const setFromUpdate = useMjmlEditorStore((state) => state.setFromUpdate);
   const setFromEditor = useMjmlEditorStore((state) => state.setFromEditor);
 
@@ -111,8 +213,28 @@ export function MjmlEditorPanel({
   );
 
   const jsonOutput = React.useMemo(() => {
-    return json ? JSON.stringify(json, null, 2) : "{}";
-  }, [json]);
+    return JSON.stringify(mjmlJson ?? emptyMjmlJson, null, 2);
+  }, [mjmlJson]);
+
+  const mjmlOutput = React.useMemo(() => {
+    return mjml || mjmlJsonToMjmlString(emptyMjmlJson);
+  }, [mjml]);
+
+  const htmlOutput = React.useMemo(() => {
+    return html || "";
+  }, [html]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    void renderMjml(mjmlOutput).then((rendered) => {
+      if (!cancelled) {
+        setHtml(rendered);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mjmlOutput, setHtml]);
 
   return (
     <div
@@ -164,11 +286,31 @@ export function MjmlEditorPanel({
         <aside className="flex w-72 shrink-0 flex-col border-r border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
           <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
             <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-              JSON Output
+              Output
             </h3>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {(["json", "mjml", "html"] as const).map((tab) => (
+                <button
+                  aria-pressed={sidebarTab === tab}
+                  className={cn(
+                    "rounded-md border border-transparent px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] transition",
+                    sidebarTab === tab
+                      ? "bg-slate-900 text-white shadow-sm dark:bg-slate-100 dark:text-slate-900"
+                      : "text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800",
+                  )}
+                  key={tab}
+                  onClick={() => setSidebarTab(tab)}
+                  type="button"
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
           <pre className="flex-1 overflow-auto px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
-            {jsonOutput}
+            {sidebarTab === "json" && jsonOutput}
+            {sidebarTab === "mjml" && mjmlOutput}
+            {sidebarTab === "html" && htmlOutput}
           </pre>
         </aside>
 

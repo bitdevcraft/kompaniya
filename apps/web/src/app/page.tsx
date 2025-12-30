@@ -2,10 +2,39 @@
 
 import { MjmlEditorPanel } from "@kompaniya/ui-mjml-editor/components/mjml-editor-panel";
 
-const initialContent = `
-<h2>Welcome to the MJML editor</h2>
-<p>Start typing to see the live preview update in real time.</p>
-`;
+const initialContent = {
+  type: "doc",
+  content: [
+    {
+      type: "mjmlSection",
+      content: [
+        {
+          type: "mjmlColumn",
+          content: [
+            {
+              type: "mjmlText",
+              content: [
+                {
+                  type: "text",
+                  text: "Welcome to the MJML editor",
+                },
+              ],
+            },
+            {
+              type: "mjmlText",
+              content: [
+                {
+                  type: "text",
+                  text: "Start typing to see the live preview update in real time.",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 export default function Home() {
   return (

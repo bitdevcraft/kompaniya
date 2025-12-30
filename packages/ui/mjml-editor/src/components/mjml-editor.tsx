@@ -8,8 +8,14 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import * as React from "react";
 
-import { mjmlEmailExtensions } from "./mjml-extensions";
-export type MjmlEditorContent = Content;
+import {
+  mjmlEmailExtensions,
+  type MjmlJsonNode,
+  mjmlJsonToMjmlString,
+  mjmlJsonToTiptapJson,
+  tiptapJsonToMjmlJson,
+} from "./mjml-extensions";
+export type MjmlEditorContent = Content | MjmlJsonNode;
 
 export type MjmlEditorProps = {
   /**
@@ -50,10 +56,51 @@ export type MjmlEditorUpdate = {
   editor: Editor;
   html: string;
   json: JSONContent;
+  mjml: string;
+  mjmlJson: MjmlJsonNode;
   text: string;
 };
 
-const fallbackContent: MjmlEditorContent = "<p></p>";
+const fallbackContent: MjmlEditorContent = {
+  type: "doc",
+  content: [
+    {
+      type: "mjmlSection",
+      content: [
+        {
+          type: "mjmlColumn",
+          content: [
+            {
+              type: "mjmlText",
+              content: [{ type: "text", text: "" }],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+const isMjmlJsonNode = (value: MjmlEditorContent): value is MjmlJsonNode => {
+  const candidate = value as MjmlJsonNode;
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    "tagName" in value &&
+    typeof candidate.tagName === "string"
+  );
+};
+
+const resolveContent = (value?: MjmlEditorContent): Content | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  if (isMjmlJsonNode(value)) {
+    return mjmlJsonToTiptapJson(value);
+  }
+  return value;
+};
 
 const createDragHandleElement = () => {
   const element = document.createElement("div");
@@ -88,7 +135,17 @@ export function MjmlEditor({
 
   const extensions = React.useMemo(() => {
     return [
-      StarterKit,
+      StarterKit.configure({
+        paragraph: false,
+        heading: false,
+        blockquote: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        codeBlock: false,
+        code: false,
+        horizontalRule: false,
+      }),
       ...mjmlEmailExtensions,
       DragHandle.configure({
         render: createDragHandleElement,
@@ -99,7 +156,7 @@ export function MjmlEditor({
   const editor = useEditor(
     {
       extensions,
-      content: content ?? initialContent ?? fallbackContent,
+      content: resolveContent(content ?? initialContent ?? fallbackContent),
       immediatelyRender: false,
       editable,
       autofocus,
@@ -109,10 +166,14 @@ export function MjmlEditor({
         },
       },
       onUpdate({ editor }) {
+        const json = editor.getJSON();
+        const mjmlJson = tiptapJsonToMjmlJson(json);
         contentChangeRef.current?.({
           editor,
           html: editor.getHTML(),
-          json: editor.getJSON(),
+          json,
+          mjml: mjmlJsonToMjmlString(mjmlJson),
+          mjmlJson,
           text: editor.getText(),
         });
       },
@@ -149,17 +210,23 @@ export function MjmlEditor({
     if (!editor || typeof content === "undefined") {
       return;
     }
-    const isHtmlContent = typeof content === "string";
+    const resolvedContent = resolveContent(content);
+    if (!resolvedContent) {
+      return;
+    }
+    const isHtmlContent = typeof resolvedContent === "string";
     const incoming = isHtmlContent
-      ? content
+      ? resolvedContent
       : JSON.stringify(
-          Array.isArray(content) ? { type: "doc", content } : content,
+          Array.isArray(resolvedContent)
+            ? { type: "doc", content: resolvedContent }
+            : resolvedContent,
         );
     const current = isHtmlContent
       ? editor.getHTML()
       : JSON.stringify(editor.getJSON());
     if (incoming !== current) {
-      editor.commands.setContent(content);
+      editor.commands.setContent(resolvedContent);
     }
   }, [content, editor]);
 

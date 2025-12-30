@@ -13,6 +13,8 @@
     "@tailwindcss/postcss": "catalog:",
     "@turbo/gen": "catalog:",
     "@types/lodash": "catalog:",
+    "@types/mjml": "^4.7.4",
+    "@types/mjml-browser": "^4.15.0",
     "@types/node": "^24.7.2",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -62,7 +64,6 @@
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
     "@tiptap/suggestion": "^3.14.0",
-    "zustand": "^5.0.8",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",
@@ -71,6 +72,7 @@
     "embla-carousel-react": "catalog:",
     "input-otp": "catalog:",
     "lucide-react": "catalog:",
+    "mjml-browser": "^4.18.0",
     "motion": "^12.23.24",
     "nanoid": "^5.1.6",
     "next-themes": "catalog:",
@@ -88,6 +90,7 @@
     "tailwind-scrollbar-hide": "catalog:",
     "tw-animate-css": "catalog:",
     "vaul": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zustand": "^5.0.8"
   }
 }
