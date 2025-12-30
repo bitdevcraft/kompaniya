@@ -22,20 +22,84 @@ type SlashCommandItem = {
 
 const mjmlNodeClass = "mjml-node";
 
+const baseStyleAttributes = {
+  backgroundColor: { default: null },
+  color: { default: null },
+  fontFamily: { default: null },
+  fontSize: { default: null },
+  fontWeight: { default: null },
+  lineHeight: { default: null },
+  align: { default: null },
+  padding: { default: null },
+  paddingTop: { default: null },
+  paddingRight: { default: null },
+  paddingBottom: { default: null },
+  paddingLeft: { default: null },
+  width: { default: null },
+  height: { default: null },
+  border: { default: null },
+  borderRadius: { default: null },
+  borderWidth: { default: null },
+  borderStyle: { default: null },
+  borderColor: { default: null },
+};
+
+const inlineStyleMappings: Array<[string, string]> = [
+  ["backgroundColor", "background-color"],
+  ["color", "color"],
+  ["fontFamily", "font-family"],
+  ["fontSize", "font-size"],
+  ["fontWeight", "font-weight"],
+  ["lineHeight", "line-height"],
+  ["align", "text-align"],
+  ["padding", "padding"],
+  ["paddingTop", "padding-top"],
+  ["paddingRight", "padding-right"],
+  ["paddingBottom", "padding-bottom"],
+  ["paddingLeft", "padding-left"],
+  ["width", "width"],
+  ["height", "height"],
+  ["border", "border"],
+  ["borderRadius", "border-radius"],
+  ["borderWidth", "border-width"],
+  ["borderStyle", "border-style"],
+  ["borderColor", "border-color"],
+];
+
+const buildInlineStyle = (attrs: Record<string, unknown>) => {
+  const entries = inlineStyleMappings
+    .map(([key, cssKey]) => {
+      const value = attrs[key];
+      if (value === null || typeof value === "undefined" || value === "") {
+        return "";
+      }
+      return `${cssKey}: ${String(value)};`;
+    })
+    .filter(Boolean);
+  return entries.join(" ");
+};
+
 export const MjmlSection = Node.create({
   name: "mjmlSection",
   group: "block",
   content: "mjmlColumn+",
   isolating: true,
+  addAttributes() {
+    return {
+      ...baseStyleAttributes,
+    };
+  },
   parseHTML() {
     return [{ tag: "mj-section" }];
   },
   renderHTML({ HTMLAttributes }) {
+    const inlineStyle = buildInlineStyle(HTMLAttributes);
     return [
       "mj-section",
       mergeAttributes(HTMLAttributes, {
         class: `${mjmlNodeClass} mjml-section`,
         "data-label": "Section",
+        ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
       0,
     ];
@@ -47,15 +111,22 @@ export const MjmlColumn = Node.create({
   group: "block",
   content: "(mjmlText|mjmlButton|mjmlImage|mjmlDivider|mjmlSpacer)+",
   isolating: true,
+  addAttributes() {
+    return {
+      ...baseStyleAttributes,
+    };
+  },
   parseHTML() {
     return [{ tag: "mj-column" }];
   },
   renderHTML({ HTMLAttributes }) {
+    const inlineStyle = buildInlineStyle(HTMLAttributes);
     return [
       "mj-column",
       mergeAttributes(HTMLAttributes, {
         class: `${mjmlNodeClass} mjml-column`,
         "data-label": "Column",
+        ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
       0,
     ];
@@ -67,15 +138,22 @@ export const MjmlText = Node.create({
   group: "block",
   content: "inline*",
   defining: true,
+  addAttributes() {
+    return {
+      ...baseStyleAttributes,
+    };
+  },
   parseHTML() {
     return [{ tag: "mj-text" }];
   },
   renderHTML({ HTMLAttributes }) {
+    const inlineStyle = buildInlineStyle(HTMLAttributes);
     return [
       "mj-text",
       mergeAttributes(HTMLAttributes, {
         class: `${mjmlNodeClass} mjml-text`,
         "data-label": "Text",
+        ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
       0,
     ];
@@ -89,6 +167,7 @@ export const MjmlButton = Node.create({
   defining: true,
   addAttributes() {
     return {
+      ...baseStyleAttributes,
       href: {
         default: null,
       },
@@ -98,11 +177,13 @@ export const MjmlButton = Node.create({
     return [{ tag: "mj-button" }];
   },
   renderHTML({ HTMLAttributes }) {
+    const inlineStyle = buildInlineStyle(HTMLAttributes);
     return [
       "mj-button",
       mergeAttributes(HTMLAttributes, {
         class: `${mjmlNodeClass} mjml-button`,
         "data-label": "Button",
+        ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
       0,
     ];
@@ -116,6 +197,7 @@ export const MjmlImage = Node.create({
   draggable: true,
   addAttributes() {
     return {
+      ...baseStyleAttributes,
       src: {
         default: "https://placehold.co/600x240",
       },
@@ -131,11 +213,13 @@ export const MjmlImage = Node.create({
     return [{ tag: "mj-image" }];
   },
   renderHTML({ HTMLAttributes }) {
+    const inlineStyle = buildInlineStyle(HTMLAttributes);
     return [
       "mj-image",
       mergeAttributes(HTMLAttributes, {
         class: `${mjmlNodeClass} mjml-image`,
         "data-label": "Image",
+        ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
     ];
   },
@@ -148,6 +232,7 @@ export const MjmlDivider = Node.create({
   draggable: true,
   addAttributes() {
     return {
+      ...baseStyleAttributes,
       borderColor: {
         default: "#e2e8f0",
       },
@@ -157,11 +242,13 @@ export const MjmlDivider = Node.create({
     return [{ tag: "mj-divider" }];
   },
   renderHTML({ HTMLAttributes }) {
+    const inlineStyle = buildInlineStyle(HTMLAttributes);
     return [
       "mj-divider",
       mergeAttributes(HTMLAttributes, {
         class: `${mjmlNodeClass} mjml-divider`,
         "data-label": "Divider",
+        ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
     ];
   },
@@ -174,6 +261,7 @@ export const MjmlSpacer = Node.create({
   draggable: true,
   addAttributes() {
     return {
+      ...baseStyleAttributes,
       height: {
         default: "24px",
       },
@@ -183,11 +271,13 @@ export const MjmlSpacer = Node.create({
     return [{ tag: "mj-spacer" }];
   },
   renderHTML({ HTMLAttributes }) {
+    const inlineStyle = buildInlineStyle(HTMLAttributes);
     return [
       "mj-spacer",
       mergeAttributes(HTMLAttributes, {
         class: `${mjmlNodeClass} mjml-spacer`,
         "data-label": "Spacer",
+        ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
     ];
   },

@@ -259,6 +259,11 @@ export function MjmlEditor({
           padding: 12px 14px;
         }
 
+        .mjml-node:focus-within {
+          border-color: #38bdf8;
+          box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
         .mjml-node::before {
           content: attr(data-label);
           display: block;
