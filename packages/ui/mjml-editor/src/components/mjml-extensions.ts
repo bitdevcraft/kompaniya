@@ -9,6 +9,9 @@ import {
   Node,
   type Range,
 } from "@tiptap/core";
+import UniqueID from "@tiptap/extension-unique-id";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import Suggestion, {
   type SuggestionKeyDownProps,
   type SuggestionProps,
@@ -21,6 +24,26 @@ type SlashCommandItem = {
 };
 
 const mjmlNodeClass = "mjml-node";
+export const mjmlUniqueIdAttributeName = "data-mjml-id";
+const uniqueIdAttributeName = mjmlUniqueIdAttributeName;
+const uniqueIdTypes = [
+  "mjmlSection",
+  "mjmlColumn",
+  "mjmlText",
+  "mjmlButton",
+  "mjmlImage",
+  "mjmlDivider",
+  "mjmlSpacer",
+];
+const mjmlHandleTargets = new Set([
+  "mjmlButton",
+  "mjmlColumn",
+  "mjmlDivider",
+  "mjmlImage",
+  "mjmlSection",
+  "mjmlSpacer",
+  "mjmlText",
+]);
 
 const baseStyleAttributes = {
   backgroundColor: { default: null },
@@ -79,11 +102,75 @@ const buildInlineStyle = (attrs: Record<string, unknown>) => {
   return entries.join(" ");
 };
 
+const resolveBorderValue = (
+  border: unknown,
+  borderWidth: unknown,
+  borderStyle: unknown,
+  borderColor: unknown,
+) => {
+  if (typeof border === "string" && border.trim()) {
+    return border.trim();
+  }
+  const parts = [
+    typeof borderWidth === "string" ? borderWidth : "",
+    typeof borderStyle === "string" ? borderStyle : "",
+    typeof borderColor === "string" ? borderColor : "",
+  ].filter(Boolean);
+  return parts.join(" ");
+};
+
+export const MjmlDoc = Node.create({
+  name: "doc",
+  topNode: true,
+  content: "mjmlSection+",
+});
+
+const createHandleElement = () => {
+  const handle = document.createElement("button");
+  handle.type = "button";
+  handle.className = "mjml-node__handle";
+  handle.setAttribute("aria-label", "Drag to move block");
+  handle.setAttribute("contenteditable", "false");
+  handle.setAttribute("data-mjml-handle", "true");
+  handle.setAttribute("draggable", "true");
+  handle.setAttribute("tabindex", "-1");
+  return handle;
+};
+
+export const MjmlNodeHandles = Extension.create({
+  name: "mjmlNodeHandles",
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey("mjmlNodeHandles"),
+        props: {
+          decorations(state) {
+            const decorations: Decoration[] = [];
+            state.doc.descendants((node, pos) => {
+              if (!mjmlHandleTargets.has(node.type.name)) {
+                return;
+              }
+              decorations.push(
+                Decoration.widget(pos + 1, () => createHandleElement(), {
+                  side: -1,
+                }),
+              );
+            });
+            return DecorationSet.create(state.doc, decorations);
+          },
+        },
+      }),
+    ];
+  },
+});
+
 export const MjmlSection = Node.create({
   name: "mjmlSection",
   group: "block",
   content: "mjmlColumn+",
   isolating: true,
+  selectable: true,
+  draggable: true,
   addAttributes() {
     return {
       ...baseStyleAttributes,
@@ -111,6 +198,8 @@ export const MjmlColumn = Node.create({
   group: "block",
   content: "(mjmlText|mjmlButton|mjmlImage|mjmlDivider|mjmlSpacer)+",
   isolating: true,
+  selectable: true,
+  draggable: true,
   addAttributes() {
     return {
       ...baseStyleAttributes,
@@ -138,6 +227,8 @@ export const MjmlText = Node.create({
   group: "block",
   content: "inline*",
   defining: true,
+  selectable: true,
+  draggable: true,
   addAttributes() {
     return {
       ...baseStyleAttributes,
@@ -165,6 +256,8 @@ export const MjmlButton = Node.create({
   group: "block",
   content: "inline*",
   defining: true,
+  selectable: true,
+  draggable: true,
   addAttributes() {
     return {
       ...baseStyleAttributes,
@@ -194,6 +287,7 @@ export const MjmlImage = Node.create({
   name: "mjmlImage",
   group: "block",
   atom: true,
+  selectable: true,
   draggable: true,
   addAttributes() {
     return {
@@ -214,6 +308,10 @@ export const MjmlImage = Node.create({
   },
   renderHTML({ HTMLAttributes }) {
     const inlineStyle = buildInlineStyle(HTMLAttributes);
+    const src =
+      typeof HTMLAttributes.src === "string" ? HTMLAttributes.src : "";
+    const alt =
+      typeof HTMLAttributes.alt === "string" ? HTMLAttributes.alt : "";
     return [
       "mj-image",
       mergeAttributes(HTMLAttributes, {
@@ -221,6 +319,7 @@ export const MjmlImage = Node.create({
         "data-label": "Image",
         ...(inlineStyle ? { style: inlineStyle } : {}),
       }),
+      ["img", { src, alt, draggable: "false" }],
     ];
   },
 });
@@ -229,6 +328,7 @@ export const MjmlDivider = Node.create({
   name: "mjmlDivider",
   group: "block",
   atom: true,
+  selectable: true,
   draggable: true,
   addAttributes() {
     return {
@@ -242,7 +342,19 @@ export const MjmlDivider = Node.create({
     return [{ tag: "mj-divider" }];
   },
   renderHTML({ HTMLAttributes }) {
-    const inlineStyle = buildInlineStyle(HTMLAttributes);
+    const { border, borderWidth, borderStyle, borderColor, ...rest } =
+      HTMLAttributes as Record<string, unknown>;
+    const baseStyle = buildInlineStyle(rest);
+    const resolvedBorder = resolveBorderValue(
+      border,
+      borderWidth,
+      borderStyle,
+      borderColor,
+    );
+    const dividerStyle = resolvedBorder
+      ? `border-top: ${resolvedBorder}; border-left: 0; border-right: 0; border-bottom: 0;`
+      : "";
+    const inlineStyle = [baseStyle, dividerStyle].filter(Boolean).join(" ");
     return [
       "mj-divider",
       mergeAttributes(HTMLAttributes, {
@@ -258,6 +370,7 @@ export const MjmlSpacer = Node.create({
   name: "mjmlSpacer",
   group: "block",
   atom: true,
+  selectable: true,
   draggable: true,
   addAttributes() {
     return {
@@ -324,12 +437,11 @@ const insertAfterParent = (
     const target = $from.node(depth);
     if (target.type.name === parentType) {
       const insertPos = $from.after(depth);
-      editor
-        .chain()
-        .focus()
-        .deleteRange(range)
-        .insertContentAt(insertPos, node)
-        .run();
+      const { tr } = editor.state;
+      tr.deleteRange(range.from, range.to);
+      const mappedPos = tr.mapping.map(insertPos);
+      tr.insert(mappedPos, editor.schema.nodeFromJSON(node));
+      editor.view.dispatch(tr.scrollIntoView());
       return;
     }
   }
@@ -888,6 +1000,12 @@ export const mjmlJsonToMjmlString = (
 };
 
 export const mjmlEmailExtensions = [
+  MjmlDoc,
+  UniqueID.configure({
+    types: uniqueIdTypes,
+    attributeName: uniqueIdAttributeName,
+  }),
+  MjmlNodeHandles,
   MjmlSection,
   MjmlColumn,
   MjmlText,

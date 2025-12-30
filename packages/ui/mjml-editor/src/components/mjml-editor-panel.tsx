@@ -247,10 +247,33 @@ const buildBorder = (border: BorderParts) => {
 const isHexColor = (value: string) =>
   /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
 
+const unitValuePattern = /^(-?\d*\.?\d+)\s*(px|rem|em)$/i;
+const numericPattern = /^-?\d*\.?\d+$/;
+const partialNumericPattern = /^-?\d*\.?\d*$/;
+
+const normalizePxInput = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  const unitMatch = trimmed.match(unitValuePattern);
+  if (unitMatch) {
+    const unit = unitMatch[2];
+    if (unit) {
+      return `${unitMatch[1]}${unit.toLowerCase()}`;
+    }
+  }
+  if (numericPattern.test(trimmed)) {
+    return `${trimmed}px`;
+  }
+  if (partialNumericPattern.test(trimmed)) {
+    return trimmed;
+  }
+  return trimmed;
+};
+
 const fieldInputClassName =
   "w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100";
-
-const compactInputClassName = "text-center";
 
 const InspectorSection = ({
   title,
@@ -304,13 +327,15 @@ const SelectInput = ({
   value,
   options,
   onChange,
+  className,
 }: {
   value: string;
   options: Array<{ label: string; value: string }>;
   onChange: (value: string) => void;
+  className?: string;
 }) => (
   <select
-    className={fieldInputClassName}
+    className={cn(fieldInputClassName, className)}
     onChange={(event) => onChange(event.target.value)}
     value={value}
   >
@@ -321,6 +346,24 @@ const SelectInput = ({
     ))}
   </select>
 );
+
+const UnitInput = ({
+  value,
+  placeholder,
+  onChange,
+}: {
+  value: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
+}) => {
+  return (
+    <TextInput
+      onChange={(nextValue) => onChange(normalizePxInput(nextValue))}
+      placeholder={placeholder}
+      value={value}
+    />
+  );
+};
 
 const ColorInput = ({
   value,
@@ -562,6 +605,43 @@ export function MjmlEditorPanel({
     [updateSelectedAttributes],
   );
 
+  const handleAddColumn = React.useCallback(() => {
+    if (!editorInstance || !selectedNode) {
+      return;
+    }
+    const { doc } = editorInstance.state;
+    const resolvedPos = doc.resolve(
+      Math.min(selectedNode.pos + 1, doc.content.size),
+    );
+    let sectionPos: number | null = null;
+    let sectionNode: typeof doc | null = null;
+    for (let depth = resolvedPos.depth; depth > 0; depth -= 1) {
+      const node = resolvedPos.node(depth);
+      if (node.type.name === "mjmlSection") {
+        sectionPos = resolvedPos.before(depth);
+        sectionNode = node;
+        break;
+      }
+    }
+    if (!sectionNode || sectionPos === null) {
+      return;
+    }
+    const insertPos = sectionPos + sectionNode.nodeSize - 1;
+    editorInstance
+      .chain()
+      .focus()
+      .insertContentAt(insertPos, {
+        type: "mjmlColumn",
+        content: [
+          {
+            type: "mjmlText",
+            content: [{ type: "text", text: "Column content" }],
+          },
+        ],
+      })
+      .run();
+  }, [editorInstance, selectedNode]);
+
   const borderParts =
     selectedType === "mjmlDivider"
       ? {
@@ -713,6 +793,17 @@ export function MjmlEditorPanel({
                 <div className="mt-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
                   {selectedNode ? selectedNode.label : "No block selected"}
                 </div>
+                {selectedNode &&
+                  (selectedType === "mjmlSection" ||
+                    selectedType === "mjmlColumn") && (
+                    <button
+                      className="mt-2 w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                      onClick={handleAddColumn}
+                      type="button"
+                    >
+                      Add column
+                    </button>
+                  )}
                 {!selectedNode && (
                   <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     Click a block inside the editor to edit its styles.
@@ -735,7 +826,7 @@ export function MjmlEditorPanel({
                         )}
                         {supportsWidth && (
                           <InspectorField label="Width">
-                            <TextInput
+                            <UnitInput
                               onChange={(value) => setAttrValue("width", value)}
                               placeholder="auto"
                               value={attrValue("width")}
@@ -744,7 +835,7 @@ export function MjmlEditorPanel({
                         )}
                         {supportsHeight && (
                           <InspectorField label="Height">
-                            <TextInput
+                            <UnitInput
                               onChange={(value) =>
                                 setAttrValue("height", value)
                               }
@@ -761,8 +852,7 @@ export function MjmlEditorPanel({
                             <div className="grid grid-cols-2 gap-2">
                               <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                                 Top
-                                <TextInput
-                                  className={compactInputClassName}
+                                <UnitInput
                                   onChange={(value) =>
                                     setAttrValue("paddingTop", value)
                                   }
@@ -772,8 +862,7 @@ export function MjmlEditorPanel({
                               </label>
                               <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                                 Right
-                                <TextInput
-                                  className={compactInputClassName}
+                                <UnitInput
                                   onChange={(value) =>
                                     setAttrValue("paddingRight", value)
                                   }
@@ -783,8 +872,7 @@ export function MjmlEditorPanel({
                               </label>
                               <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                                 Bottom
-                                <TextInput
-                                  className={compactInputClassName}
+                                <UnitInput
                                   onChange={(value) =>
                                     setAttrValue("paddingBottom", value)
                                   }
@@ -794,8 +882,7 @@ export function MjmlEditorPanel({
                               </label>
                               <label className="flex flex-col gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                                 Left
-                                <TextInput
-                                  className={compactInputClassName}
+                                <UnitInput
                                   onChange={(value) =>
                                     setAttrValue("paddingLeft", value)
                                   }
@@ -821,7 +908,7 @@ export function MjmlEditorPanel({
                           />
                         </InspectorField>
                         <InspectorField label="Size">
-                          <TextInput
+                          <UnitInput
                             onChange={(value) =>
                               setAttrValue("fontSize", value)
                             }
@@ -874,7 +961,7 @@ export function MjmlEditorPanel({
                     {supportsBorder && (
                       <InspectorSection title="Border">
                         <InspectorField label="Width">
-                          <TextInput
+                          <UnitInput
                             onChange={(value) =>
                               handleBorderChange({ width: value })
                             }
@@ -902,7 +989,7 @@ export function MjmlEditorPanel({
                         </InspectorField>
                         {supportsBorderRadius && (
                           <InspectorField label="Radius">
-                            <TextInput
+                            <UnitInput
                               onChange={(value) =>
                                 setAttrValue("borderRadius", value)
                               }
