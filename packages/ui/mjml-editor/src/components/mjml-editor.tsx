@@ -8,6 +8,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import * as React from "react";
 
+import { mjmlEmailExtensions } from "./mjml-extensions";
 export type MjmlEditorContent = Content;
 
 export type MjmlEditorProps = {
@@ -88,6 +89,7 @@ export function MjmlEditor({
   const extensions = React.useMemo(() => {
     return [
       StarterKit,
+      ...mjmlEmailExtensions,
       DragHandle.configure({
         render: createDragHandleElement,
       }),
@@ -179,6 +181,97 @@ export function MjmlEditor({
 
         .mjml-editor__prose > * + * {
           margin-top: 0.75rem;
+        }
+
+        .mjml-node {
+          position: relative;
+          display: block;
+          border: 1px dashed #cbd5f5;
+          background: #f8fafc;
+          border-radius: 10px;
+          padding: 12px 14px;
+        }
+
+        .mjml-node::before {
+          content: attr(data-label);
+          display: block;
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #94a3b8;
+          margin-bottom: 8px;
+        }
+
+        .mjml-section {
+          background: #eef2ff;
+        }
+
+        .mjml-column {
+          background: #ffffff;
+        }
+
+        .mjml-text {
+          background: #f8fafc;
+        }
+
+        .mjml-button {
+          background: #e0f2fe;
+        }
+
+        .mjml-image,
+        .mjml-divider,
+        .mjml-spacer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 48px;
+        }
+
+        .mjml-image::after,
+        .mjml-divider::after,
+        .mjml-spacer::after {
+          content: attr(data-label);
+          font-size: 12px;
+          color: #64748b;
+        }
+
+        .mjml-slash-menu {
+          position: absolute;
+          z-index: 50;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+          padding: 6px;
+          width: 260px;
+        }
+
+        .mjml-slash-item {
+          width: 100%;
+          text-align: left;
+          border: none;
+          background: transparent;
+          padding: 8px 10px;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .mjml-slash-item--active {
+          background: #f1f5f9;
+        }
+
+        .mjml-slash-item__title {
+          font-size: 12px;
+          font-weight: 600;
+          color: #0f172a;
+        }
+
+        .mjml-slash-item__description {
+          font-size: 11px;
+          color: #64748b;
         }
 
         .mjml-editor__drag-handle {
