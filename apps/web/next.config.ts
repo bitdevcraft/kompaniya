@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@kompaniya/ui-common",
     "@kompaniya/ui-data-table",
+    "@kompaniya/ui-mjml-editor",
     "@kompaniya/ui-monaco-editor",
   ],
 };
