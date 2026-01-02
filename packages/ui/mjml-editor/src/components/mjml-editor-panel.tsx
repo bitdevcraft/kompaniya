@@ -323,6 +323,58 @@ const TextInput = ({
   />
 );
 
+const ContentEditableInput = ({
+  value,
+  placeholder,
+  onChange,
+  className,
+}: {
+  value: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) => {
+  const ref = React.useRef<HTMLDivElement | null>(null);
+  const isFocusedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    const element = ref.current;
+    if (!element || isFocusedRef.current) {
+      return;
+    }
+    if (element.textContent !== value) {
+      element.textContent = value;
+    }
+  }, [value]);
+
+  const handleInput = (event: React.FormEvent<HTMLDivElement>) => {
+    onChange(event.currentTarget.textContent ?? "");
+  };
+
+  return (
+    <div
+      aria-label={placeholder ?? "Content"}
+      aria-multiline="true"
+      className={cn(
+        fieldInputClassName,
+        "min-h-[28px] whitespace-pre-wrap",
+        className,
+      )}
+      contentEditable
+      onBlur={() => {
+        isFocusedRef.current = false;
+      }}
+      onFocus={() => {
+        isFocusedRef.current = true;
+      }}
+      onInput={handleInput}
+      ref={ref}
+      role="textbox"
+      suppressContentEditableWarning
+    />
+  );
+};
+
 const SelectInput = ({
   value,
   options,
@@ -605,6 +657,26 @@ export function MjmlEditorPanel({
     [updateSelectedAttributes],
   );
 
+  const updateSelectedContent = React.useCallback(
+    (value: string) => {
+      if (!editorInstance || !selectedNode) {
+        return;
+      }
+      const node = editorInstance.state.doc.nodeAt(selectedNode.pos);
+      if (!node || node.type.name !== selectedNode.type) {
+        return;
+      }
+      if (node.textContent === value) {
+        return;
+      }
+      const from = selectedNode.pos + 1;
+      const to = selectedNode.pos + node.nodeSize - 1;
+      const tr = editorInstance.state.tr.insertText(value, from, to);
+      editorInstance.view.dispatch(tr);
+    },
+    [editorInstance, selectedNode],
+  );
+
   const handleAddColumn = React.useCallback(() => {
     if (!editorInstance || !selectedNode) {
       return;
@@ -685,8 +757,15 @@ export function MjmlEditorPanel({
   const supportsFill = !!selectedType && fillTypes.has(selectedType);
   const supportsBorder = !!selectedType && borderTypes.has(selectedType);
   const supportsBorderRadius = !!selectedType && radiusTypes.has(selectedType);
+  const supportsContent =
+    selectedType === "mjmlText" || selectedType === "mjmlButton";
   const showLayoutSection =
     supportsAlign || supportsWidth || supportsHeight || supportsPadding;
+  const contentLabel = selectedType === "mjmlButton" ? "Label" : "Text";
+  const selectedContent =
+    supportsContent && editorInstance && selectedNode
+      ? (editorInstance.state.doc.nodeAt(selectedNode.pos)?.textContent ?? "")
+      : "";
 
   const jsonOutput = React.useMemo(() => {
     return JSON.stringify(mjmlJson ?? emptyMjmlJson, null, 2);
@@ -813,6 +892,17 @@ export function MjmlEditorPanel({
               <div className="flex-1 overflow-auto">
                 {selectedNode ? (
                   <>
+                    {supportsContent && (
+                      <InspectorSection title="Content">
+                        <InspectorField label={contentLabel}>
+                          <ContentEditableInput
+                            onChange={updateSelectedContent}
+                            placeholder="Enter text"
+                            value={selectedContent}
+                          />
+                        </InspectorField>
+                      </InspectorSection>
+                    )}
                     {showLayoutSection && (
                       <InspectorSection title="Layout">
                         {supportsAlign && (

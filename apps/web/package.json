@@ -13,6 +13,7 @@
     "@kompaniya/ui-common": "workspace:^",
     "@kompaniya/ui-data-table": "workspace:^",
     "@kompaniya/ui-mjml-editor": "workspace:^",
+    "@kompaniya/ui-email-editor": "workspace:^",
     "@kompaniya/ui-monaco-editor": "workspace:^",
     "@radix-ui/react-avatar": "catalog:",
     "@radix-ui/react-collapsible": "catalog:",

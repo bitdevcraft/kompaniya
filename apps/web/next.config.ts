@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     "@kompaniya/ui-common",
     "@kompaniya/ui-data-table",
     "@kompaniya/ui-mjml-editor",
+    "@kompaniya/ui-email-editor",
     "@kompaniya/ui-monaco-editor",
   ],
 };
