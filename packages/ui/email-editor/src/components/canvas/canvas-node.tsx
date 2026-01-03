@@ -108,7 +108,7 @@ export function CanvasNode({
       }
       currentId = current.parent as UniqueIdentifier | undefined;
     }
-    return "600px";
+    return "100%";
   };
 
   const sectionInnerStyles = isColumnRow
@@ -129,6 +129,7 @@ export function CanvasNode({
   const mergedStyle = {
     ...containerStyles,
     ...(props.style ?? {}),
+    width: "100%",
   } as React.CSSProperties;
 
   const leafContent = renderLeafNode(node.tagName, {

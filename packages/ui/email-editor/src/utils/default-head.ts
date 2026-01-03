@@ -348,7 +348,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 }
 
 /* ----- Mobile adjustments ----- */
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 900px) {
   .container { padding-left: 16px !important; padding-right: 16px !important; }
   .sm-w-full{ width:100% !important; }
   .sm-hidden{ display:none !important; }

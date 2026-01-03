@@ -66,6 +66,8 @@ const buildBodyStyles = (attributes: Record<string, string>): NodeStyles => {
   const containerStyles: React.CSSProperties = { width: "100%" };
   const innerStyles: React.CSSProperties = {
     width: "100%",
+    maxWidth: attributes["width"] ?? "600px",
+    margin: "0 auto",
   };
 
   if (attributes["background-color"]) {

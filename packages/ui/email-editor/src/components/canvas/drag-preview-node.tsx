@@ -55,6 +55,10 @@ export function DragPreviewNode({
     contentStyles = {},
     innerStyles = {},
   } = getNodeStyles(node.tagName, attributes);
+  const mergedContainerStyles: React.CSSProperties = {
+    ...containerStyles,
+    width: "100%",
+  };
 
   const resolveBodyWidth = (startId?: UniqueIdentifier) => {
     let currentId = startId;
@@ -71,7 +75,7 @@ export function DragPreviewNode({
       }
       currentId = current.parent as UniqueIdentifier | undefined;
     }
-    return "600px";
+    return "100%";
   };
 
   const sectionInnerStyles = isColumnRow
@@ -133,7 +137,7 @@ export function DragPreviewNode({
 
   if (isLeafNode) {
     return (
-      <div className="w-full" style={containerStyles}>
+      <div className="w-full" style={mergedContainerStyles}>
         {renderLeafNode(node.tagName, {
           id,
           node,
@@ -149,7 +153,7 @@ export function DragPreviewNode({
   }
 
   return (
-    <div className="w-full" style={containerStyles}>
+    <div className="w-full" style={mergedContainerStyles}>
       {isColumnRow ? (
         <div className="flex w-full items-stretch" style={sectionInnerStyles}>
           {renderableItems.map((childId) => {
