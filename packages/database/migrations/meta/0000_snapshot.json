@@ -1,5 +1,5 @@
 {
-  "id": "bbf8a80c-eece-4fe5-86fc-2630b614fdfd",
+  "id": "73a24410-5b81-44e1-9ebf-d5cff4dd43fc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1996,6 +1996,24 @@
           "primaryKey": false,
           "notNull": false
         },
+        "mjml_content": {
+          "name": "mjml_content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mjml_json_content": {
+          "name": "mjml_json_content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "html_content": {
+          "name": "html_content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "org_email_domain_id": {
           "name": "org_email_domain_id",
           "type": "uuid",
@@ -2505,6 +2523,24 @@
         },
         "body": {
           "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mjml_content": {
+          "name": "mjml_content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mjml_json_content": {
+          "name": "mjml_json_content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "html_content": {
+          "name": "html_content",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -3602,6 +3638,363 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.org_payment_plan_templates": {
+      "name": "org_payment_plan_templates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "default_currency": {
+          "name": "default_currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subject_type": {
+          "name": "subject_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "min_principal": {
+          "name": "min_principal",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_principal": {
+          "name": "max_principal",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "template_config": {
+          "name": "template_config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "org_payment_plan_templates_organization_id_organizations_id_fk": {
+          "name": "org_payment_plan_templates_organization_id_organizations_id_fk",
+          "tableFrom": "org_payment_plan_templates",
+          "tableTo": "organizations",
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_payment_plan_templates_owner_id_users_id_fk": {
+          "name": "org_payment_plan_templates_owner_id_users_id_fk",
+          "tableFrom": "org_payment_plan_templates",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_payment_plan_templates_created_by_users_id_fk": {
+          "name": "org_payment_plan_templates_created_by_users_id_fk",
+          "tableFrom": "org_payment_plan_templates",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_payment_plan_templates_last_updated_by_users_id_fk": {
+          "name": "org_payment_plan_templates_last_updated_by_users_id_fk",
+          "tableFrom": "org_payment_plan_templates",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_payment_plan_templates_deleted_by_users_id_fk": {
+          "name": "org_payment_plan_templates_deleted_by_users_id_fk",
+          "tableFrom": "org_payment_plan_templates",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "org_payment_plan_templates_code_unique": {
+          "name": "org_payment_plan_templates_code_unique",
+          "nullsNotDistinct": false,
+          "columns": ["code"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.org_payment_plans": {
+      "name": "org_payment_plans",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "organization_id": {
+          "name": "organization_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_by": {
+          "name": "deleted_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "template_id": {
+          "name": "template_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "char(3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "principal_amount": {
+          "name": "principal_amount",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "instance_config": {
+          "name": "instance_config",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "org_payment_plans_organization_id_organizations_id_fk": {
+          "name": "org_payment_plans_organization_id_organizations_id_fk",
+          "tableFrom": "org_payment_plans",
+          "tableTo": "organizations",
+          "columnsFrom": ["organization_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "org_payment_plans_owner_id_users_id_fk": {
+          "name": "org_payment_plans_owner_id_users_id_fk",
+          "tableFrom": "org_payment_plans",
+          "tableTo": "users",
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_payment_plans_created_by_users_id_fk": {
+          "name": "org_payment_plans_created_by_users_id_fk",
+          "tableFrom": "org_payment_plans",
+          "tableTo": "users",
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_payment_plans_last_updated_by_users_id_fk": {
+          "name": "org_payment_plans_last_updated_by_users_id_fk",
+          "tableFrom": "org_payment_plans",
+          "tableTo": "users",
+          "columnsFrom": ["last_updated_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_payment_plans_deleted_by_users_id_fk": {
+          "name": "org_payment_plans_deleted_by_users_id_fk",
+          "tableFrom": "org_payment_plans",
+          "tableTo": "users",
+          "columnsFrom": ["deleted_by"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "org_payment_plans_template_id_org_payment_plan_templates_id_fk": {
+          "name": "org_payment_plans_template_id_org_payment_plan_templates_id_fk",
+          "tableFrom": "org_payment_plans",
+          "tableTo": "org_payment_plan_templates",
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.org_real_estate_booking_buyers": {
       "name": "org_real_estate_booking_buyers",
       "schema": "",
@@ -3828,6 +4221,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "reference_code": {
+          "name": "reference_code",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "project_id": {
           "name": "project_id",
           "type": "uuid",
@@ -3837,6 +4236,57 @@
         "property_id": {
           "name": "property_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "booking_type": {
+          "name": "booking_type",
+          "type": "org_real_estate_booking_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "org_real_estate_booking_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'pending'"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency_code": {
+          "name": "currency_code",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deposit_amount": {
+          "name": "deposit_amount",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expected_completion_at": {
+          "name": "expected_completion_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contract_signed_at": {
+          "name": "contract_signed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -3913,8 +4363,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.org_real_estate_payment-plans": {
-      "name": "org_real_estate_payment-plans",
+    "public.org_real_estate_projects": {
+      "name": "org_real_estate_projects",
       "schema": "",
       "columns": {
         "id": {
@@ -3979,125 +4429,71 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "org_real_estate_payment-plans_organization_id_organizations_id_fk": {
-          "name": "org_real_estate_payment-plans_organization_id_organizations_id_fk",
-          "tableFrom": "org_real_estate_payment-plans",
-          "tableTo": "organizations",
-          "columnsFrom": ["organization_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
         },
-        "org_real_estate_payment-plans_owner_id_users_id_fk": {
-          "name": "org_real_estate_payment-plans_owner_id_users_id_fk",
-          "tableFrom": "org_real_estate_payment-plans",
-          "tableTo": "users",
-          "columnsFrom": ["owner_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "org_real_estate_payment-plans_created_by_users_id_fk": {
-          "name": "org_real_estate_payment-plans_created_by_users_id_fk",
-          "tableFrom": "org_real_estate_payment-plans",
-          "tableTo": "users",
-          "columnsFrom": ["created_by"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "org_real_estate_payment-plans_last_updated_by_users_id_fk": {
-          "name": "org_real_estate_payment-plans_last_updated_by_users_id_fk",
-          "tableFrom": "org_real_estate_payment-plans",
-          "tableTo": "users",
-          "columnsFrom": ["last_updated_by"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "org_real_estate_payment-plans_deleted_by_users_id_fk": {
-          "name": "org_real_estate_payment-plans_deleted_by_users_id_fk",
-          "tableFrom": "org_real_estate_payment-plans",
-          "tableTo": "users",
-          "columnsFrom": ["deleted_by"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.org_real_estate_projects": {
-      "name": "org_real_estate_projects",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp with time zone",
+        "description": {
+          "name": "description",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "organization_id": {
-          "name": "organization_id",
-          "type": "uuid",
+        "developer_name": {
+          "name": "developer_name",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
-        "owner_id": {
-          "name": "owner_id",
-          "type": "uuid",
+        "status": {
+          "name": "status",
+          "type": "org_real_estate_project_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'planning'"
+        },
+        "launch_year": {
+          "name": "launch_year",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
+        "expected_completion_year": {
+          "name": "expected_completion_year",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "last_updated_by": {
-          "name": "last_updated_by",
-          "type": "uuid",
+        "total_units": {
+          "name": "total_units",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "deleted_by": {
-          "name": "deleted_by",
-          "type": "uuid",
+        "city": {
+          "name": "city",
+          "type": "varchar(150)",
           "primaryKey": false,
           "notNull": false
         },
-        "name": {
-          "name": "name",
+        "state": {
+          "name": "state",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address_line_1": {
+          "name": "address_line_1",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address_line_2": {
+          "name": "address_line_2",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -4224,9 +4620,140 @@
           "primaryKey": false,
           "notNull": false
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_code": {
+          "name": "property_code",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "project_id": {
           "name": "project_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "property_type": {
+          "name": "property_type",
+          "type": "org_real_estate_property_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "listing_type": {
+          "name": "listing_type",
+          "type": "org_real_estate_property_listing_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "org_real_estate_property_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'available'"
+        },
+        "bedrooms": {
+          "name": "bedrooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bathrooms": {
+          "name": "bathrooms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floor": {
+          "name": "floor",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "area": {
+          "name": "area",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "area_unit": {
+          "name": "area_unit",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address_line_1": {
+          "name": "address_line_1",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address_line_2": {
+          "name": "address_line_2",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "postal_code": {
+          "name": "postal_code",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "asking_price": {
+          "name": "asking_price",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "asking_rent": {
+          "name": "asking_rent",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency_code": {
+          "name": "currency_code",
+          "type": "varchar(3)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_furnished": {
+          "name": "is_furnished",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "parking_spots": {
+          "name": "parking_spots",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         }
@@ -4456,6 +4983,36 @@
       "name": "opportunity_type",
       "schema": "public",
       "values": ["new_business", "renewal", "upsell", "cross_sell"]
+    },
+    "public.org_real_estate_booking_status": {
+      "name": "org_real_estate_booking_status",
+      "schema": "public",
+      "values": ["pending", "confirmed", "cancelled", "completed"]
+    },
+    "public.org_real_estate_booking_type": {
+      "name": "org_real_estate_booking_type",
+      "schema": "public",
+      "values": ["sale", "rent"]
+    },
+    "public.org_real_estate_project_status": {
+      "name": "org_real_estate_project_status",
+      "schema": "public",
+      "values": ["planning", "active", "completed", "on_hold", "cancelled"]
+    },
+    "public.org_real_estate_property_listing_type": {
+      "name": "org_real_estate_property_listing_type",
+      "schema": "public",
+      "values": ["sale", "rent"]
+    },
+    "public.org_real_estate_property_status": {
+      "name": "org_real_estate_property_status",
+      "schema": "public",
+      "values": ["available", "reserved", "sold", "rented", "inactive"]
+    },
+    "public.org_real_estate_property_type": {
+      "name": "org_real_estate_property_type",
+      "schema": "public",
+      "values": ["unit", "plot", "villa", "apartment", "other"]
     }
   },
   "schemas": {},

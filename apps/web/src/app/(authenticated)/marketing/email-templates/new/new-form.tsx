@@ -12,21 +12,21 @@ import {
   FormMessage,
 } from "@kompaniya/ui-common/components/form";
 import { Input } from "@kompaniya/ui-common/components/input";
-import { Label } from "@kompaniya/ui-common/components/label";
-import { HtmlEditor } from "@kompaniya/ui-monaco-editor/components/html-editor";
-import { HtmlLivePreview } from "@kompaniya/ui-monaco-editor/components/html-live-preview";
-import { HtmlPreviewer } from "@kompaniya/ui-monaco-editor/components/html-previewer";
+import {
+  type EmailEditorOutputs,
+  UiEditor,
+} from "@kompaniya/ui-email-editor/editor";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { useCallback } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import z from "zod";
 
 import { authClient } from "@/lib/auth/client";
 
 import { dictTranslation, model, modelEndpoint } from "../config";
-import { defaultHtml } from "./sample";
 
 interface NewRecordFormProps {
   onFinish?: () => void;
@@ -35,17 +35,13 @@ interface NewRecordFormProps {
 const FormSchema = z.object({
   name: z.string().min(1, "Template name is missing"),
   subject: z.string(),
-  body: z.string().min(1, "HTML Body of the Email Template is required"),
+  body: z.string().min(1, "Email HTML is required"),
+  htmlContent: z.string().optional(),
+  mjmlContent: z.string().optional(),
+  mjmlJsonContent: z.string().optional(),
 });
 
 type FormValue = z.infer<typeof FormSchema>;
-
-const livePreviewStyles = `body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  padding: 1.5rem;
-  background-color: #f8fafc;
-  color: #0f172a;
-}`;
 
 const useSubmit = () => {
   return useMutation({
@@ -68,12 +64,25 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
-      body: defaultHtml,
+      body: "",
+      htmlContent: "",
+      mjmlContent: "",
+      mjmlJsonContent: "",
       subject: "",
     },
   });
 
-  const watchedHtml = useWatch({ control: form.control, name: "body" });
+  const handleOutputsChange = useCallback(
+    (outputs: EmailEditorOutputs) => {
+      form.setValue("mjmlContent", outputs.mjmlOutput, { shouldDirty: true });
+      form.setValue("mjmlJsonContent", outputs.jsonOutput, {
+        shouldDirty: true,
+      });
+      form.setValue("htmlContent", outputs.htmlOutput, { shouldDirty: true });
+      form.setValue("body", outputs.htmlOutput, { shouldDirty: true });
+    },
+    [form],
+  );
 
   const submit = useSubmit();
 
@@ -129,30 +138,26 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
             </FormItem>
           )}
         />
-        <div className="flex flex-col gap-4 lg:flex-row h-[60vh]">
-          <div className="flex-1">
-            <Label>{t("form.body.label")}</Label>
-            <HtmlEditor
-              className="h-full"
-              control={form.control}
-              editorClassName="h-[60vh]"
-              height={360}
-              name="body"
-            />
-          </div>
-          <HtmlLivePreview
-            className="flex-1"
-            html={watchedHtml ?? ""}
-            previewStyles={livePreviewStyles}
-          />
+        <FormField
+          control={form.control}
+          name="body"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <input type="hidden" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <input type="hidden" {...form.register("htmlContent")} />
+        <input type="hidden" {...form.register("mjmlContent")} />
+        <input type="hidden" {...form.register("mjmlJsonContent")} />
+        <div className="min-h-svh">
+          <UiEditor onOutputsChange={handleOutputsChange} />
         </div>
 
         <div className="flex w-full justify-end gap-2">
-          <HtmlPreviewer
-            buttonProps={{ variant: "outline" }}
-            html={watchedHtml ?? ""}
-            title="Preview custom HTML"
-          />
           <Button
             className="w-full md:w-auto"
             disabled={submit.isPending}

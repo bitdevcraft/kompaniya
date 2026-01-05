@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@kompaniya/ui-common/components/dropdown-menu";
 import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
-import { HtmlLivePreview } from "@kompaniya/ui-monaco-editor/components/html-live-preview";
 import { Row } from "@tanstack/react-table";
 import { Edit, Ellipsis, Trash2 } from "lucide-react";
 import React from "react";
@@ -36,6 +35,8 @@ export function DataTableCard({
   row,
   defaultItem,
 }: DataTableCardProps) {
+  const previewHtml = row.original.htmlContent || row.original.body || "";
+
   return (
     <div className="p-1">
       <Card
@@ -87,10 +88,17 @@ export function DataTableCard({
         <CardContent className="grid gap-2">
           {defaultItem}
           <div>
-            <HtmlLivePreview
-              className="flex-1"
-              html={row.original.body ?? ""}
-            />
+            <div className="overflow-hidden rounded-md border bg-muted/40">
+              <iframe
+                className="h-48 w-full bg-white"
+                sandbox=""
+                srcDoc={
+                  previewHtml ||
+                  "<div style='padding:12px;font-family:system-ui'>No preview.</div>"
+                }
+                title={`${row.original.name ?? "Email template"} preview`}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

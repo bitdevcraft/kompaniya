@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1763724339669,
-      "tag": "0000_tense_rocket_racer",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1763835476677,
-      "tag": "0001_neat_manta",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1763838785044,
-      "tag": "0002_noisy_captain_marvel",
+      "when": 1767615821787,
+      "tag": "0000_flippant_black_cat",
       "breakpoints": true
     }
   ]

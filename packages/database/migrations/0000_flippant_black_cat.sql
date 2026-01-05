@@ -2,6 +2,12 @@ CREATE TYPE "public"."opportunity_forecast_category" AS ENUM('pipeline', 'best_c
 CREATE TYPE "public"."opportunity_priority" AS ENUM('low', 'medium', 'high', 'urgent');--> statement-breakpoint
 CREATE TYPE "public"."opportunity_status" AS ENUM('open', 'won', 'lost', 'on_hold');--> statement-breakpoint
 CREATE TYPE "public"."opportunity_type" AS ENUM('new_business', 'renewal', 'upsell', 'cross_sell');--> statement-breakpoint
+CREATE TYPE "public"."org_real_estate_booking_status" AS ENUM('pending', 'confirmed', 'cancelled', 'completed');--> statement-breakpoint
+CREATE TYPE "public"."org_real_estate_booking_type" AS ENUM('sale', 'rent');--> statement-breakpoint
+CREATE TYPE "public"."org_real_estate_project_status" AS ENUM('planning', 'active', 'completed', 'on_hold', 'cancelled');--> statement-breakpoint
+CREATE TYPE "public"."org_real_estate_property_listing_type" AS ENUM('sale', 'rent');--> statement-breakpoint
+CREATE TYPE "public"."org_real_estate_property_status" AS ENUM('available', 'reserved', 'sold', 'rented', 'inactive');--> statement-breakpoint
+CREATE TYPE "public"."org_real_estate_property_type" AS ENUM('unit', 'plot', 'villa', 'apartment', 'other');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"account_id" text NOT NULL,
@@ -294,6 +300,9 @@ CREATE TABLE "org_email_campaigns" (
 	"name" varchar(255),
 	"subject" varchar(998),
 	"body" text,
+	"mjml_content" text,
+	"mjml_json_content" text,
+	"html_content" text,
 	"org_email_domain_id" uuid,
 	"org_email_template_id" uuid,
 	"org_email_test_receiver_id" uuid,
@@ -349,7 +358,10 @@ CREATE TABLE "org_email_templates" (
 	"deleted_by" uuid,
 	"name" varchar(255),
 	"subject" varchar(998),
-	"body" text
+	"body" text,
+	"mjml_content" text,
+	"mjml_json_content" text,
+	"html_content" text
 );
 --> statement-breakpoint
 CREATE TABLE "org_email_test_receivers" (
@@ -479,6 +491,49 @@ CREATE TABLE "org_opportunities" (
 	"is_archived" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "org_payment_plan_templates" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"owner_id" uuid,
+	"created_by" uuid,
+	"last_updated_by" uuid,
+	"deleted_by" uuid,
+	"code" varchar(100) NOT NULL,
+	"name" text NOT NULL,
+	"description" text,
+	"default_currency" char(3),
+	"subject_type" varchar(100),
+	"min_principal" numeric(18, 2),
+	"max_principal" numeric(18, 2),
+	"is_active" boolean DEFAULT true NOT NULL,
+	"version" integer DEFAULT 1 NOT NULL,
+	"template_config" jsonb NOT NULL,
+	CONSTRAINT "org_payment_plan_templates_code_unique" UNIQUE("code")
+);
+--> statement-breakpoint
+CREATE TABLE "org_payment_plans" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"owner_id" uuid,
+	"created_by" uuid,
+	"last_updated_by" uuid,
+	"deleted_by" uuid,
+	"name" varchar(255),
+	"template_id" uuid,
+	"currency" char(3) NOT NULL,
+	"principal_amount" numeric(18, 2) NOT NULL,
+	"start_date" date NOT NULL,
+	"end_date" date,
+	"status" varchar(50) NOT NULL,
+	"instance_config" jsonb NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "org_real_estate_booking_buyers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -506,21 +561,17 @@ CREATE TABLE "org_real_estate_bookings" (
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
 	"name" varchar(255),
+	"reference_code" varchar(100),
 	"project_id" uuid,
-	"property_id" uuid
-);
---> statement-breakpoint
-CREATE TABLE "org_real_estate_payment-plans" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"organization_id" uuid,
-	"owner_id" uuid,
-	"created_by" uuid,
-	"last_updated_by" uuid,
-	"deleted_by" uuid,
-	"name" varchar(255)
+	"property_id" uuid,
+	"booking_type" "org_real_estate_booking_type",
+	"status" "org_real_estate_booking_status" DEFAULT 'pending',
+	"amount" numeric(14, 2),
+	"currency_code" varchar(3),
+	"deposit_amount" numeric(14, 2),
+	"expected_completion_at" timestamp with time zone,
+	"contract_signed_at" timestamp with time zone,
+	"notes" text
 );
 --> statement-breakpoint
 CREATE TABLE "org_real_estate_projects" (
@@ -533,7 +584,18 @@ CREATE TABLE "org_real_estate_projects" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
-	"name" varchar(255)
+	"name" varchar(255),
+	"description" text,
+	"developer_name" varchar(255),
+	"status" "org_real_estate_project_status" DEFAULT 'planning',
+	"launch_year" integer,
+	"expected_completion_year" integer,
+	"total_units" integer,
+	"city" varchar(150),
+	"state" varchar(150),
+	"country" varchar(150),
+	"address_line_1" varchar(255),
+	"address_line_2" varchar(255)
 );
 --> statement-breakpoint
 CREATE TABLE "org_real_estate_properties" (
@@ -547,7 +609,28 @@ CREATE TABLE "org_real_estate_properties" (
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
 	"name" varchar(255),
-	"project_id" uuid
+	"description" text,
+	"property_code" varchar(100),
+	"project_id" uuid,
+	"property_type" "org_real_estate_property_type",
+	"listing_type" "org_real_estate_property_listing_type",
+	"status" "org_real_estate_property_status" DEFAULT 'available',
+	"bedrooms" integer,
+	"bathrooms" integer,
+	"floor" varchar(50),
+	"area" numeric(12, 2),
+	"area_unit" varchar(50),
+	"address_line_1" varchar(255),
+	"address_line_2" varchar(255),
+	"city" varchar(150),
+	"state" varchar(150),
+	"country" varchar(150),
+	"postal_code" varchar(20),
+	"asking_price" numeric(14, 2),
+	"asking_rent" numeric(14, 2),
+	"currency_code" varchar(3),
+	"is_furnished" boolean DEFAULT false,
+	"parking_spots" integer
 );
 --> statement-breakpoint
 CREATE TABLE "org_tasks" (
@@ -653,6 +736,17 @@ ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_owner_user_id_
 ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_account_id_org_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."org_accounts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_opportunities" ADD CONSTRAINT "org_opportunities_primary_contact_id_org_contacts_id_fk" FOREIGN KEY ("primary_contact_id") REFERENCES "public"."org_contacts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plan_templates" ADD CONSTRAINT "org_payment_plan_templates_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plan_templates" ADD CONSTRAINT "org_payment_plan_templates_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plan_templates" ADD CONSTRAINT "org_payment_plan_templates_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plan_templates" ADD CONSTRAINT "org_payment_plan_templates_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plan_templates" ADD CONSTRAINT "org_payment_plan_templates_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plans" ADD CONSTRAINT "org_payment_plans_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plans" ADD CONSTRAINT "org_payment_plans_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plans" ADD CONSTRAINT "org_payment_plans_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plans" ADD CONSTRAINT "org_payment_plans_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plans" ADD CONSTRAINT "org_payment_plans_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_payment_plans" ADD CONSTRAINT "org_payment_plans_template_id_org_payment_plan_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."org_payment_plan_templates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_booking_buyers" ADD CONSTRAINT "org_real_estate_booking_buyers_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -667,11 +761,6 @@ ALTER TABLE "org_real_estate_bookings" ADD CONSTRAINT "org_real_estate_bookings_
 ALTER TABLE "org_real_estate_bookings" ADD CONSTRAINT "org_real_estate_bookings_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_bookings" ADD CONSTRAINT "org_real_estate_bookings_project_id_org_real_estate_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."org_real_estate_projects"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_bookings" ADD CONSTRAINT "org_real_estate_bookings_property_id_org_real_estate_properties_id_fk" FOREIGN KEY ("property_id") REFERENCES "public"."org_real_estate_properties"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "org_real_estate_payment-plans" ADD CONSTRAINT "org_real_estate_payment-plans_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "org_real_estate_payment-plans" ADD CONSTRAINT "org_real_estate_payment-plans_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "org_real_estate_payment-plans" ADD CONSTRAINT "org_real_estate_payment-plans_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "org_real_estate_payment-plans" ADD CONSTRAINT "org_real_estate_payment-plans_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "org_real_estate_payment-plans" ADD CONSTRAINT "org_real_estate_payment-plans_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_projects" ADD CONSTRAINT "org_real_estate_projects_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_projects" ADD CONSTRAINT "org_real_estate_projects_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_projects" ADD CONSTRAINT "org_real_estate_projects_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint

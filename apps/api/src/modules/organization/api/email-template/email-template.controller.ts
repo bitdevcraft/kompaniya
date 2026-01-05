@@ -39,10 +39,15 @@ export class EmailTemplateController {
     @ActiveOrganization() organization: Organization,
     @Session() session: UserSession,
   ) {
+    const body = createTemplate.body ?? createTemplate.htmlContent;
+    const htmlContent = createTemplate.htmlContent ?? createTemplate.body;
     const template: NewOrgEmailTemplate = {
       name: createTemplate.name,
       subject: createTemplate.subject,
-      body: createTemplate.body,
+      body,
+      htmlContent,
+      mjmlContent: createTemplate.mjmlContent,
+      mjmlJsonContent: createTemplate.mjmlJsonContent,
       organizationId: organization.id,
     };
 
@@ -134,10 +139,20 @@ export class EmailTemplateController {
 
     await this.emailTemplateService.deleteCacheById(record.id, organization.id);
 
+    const updatePayload: UpdateTemplateDto = { ...updateTemplateDto };
+
+    if (updatePayload.body && !updatePayload.htmlContent) {
+      updatePayload.htmlContent = updatePayload.body;
+    }
+
+    if (updatePayload.htmlContent && !updatePayload.body) {
+      updatePayload.body = updatePayload.htmlContent;
+    }
+
     return await this.emailTemplateService.updateRecordById(
       id,
       organization.id,
-      updateTemplateDto,
+      updatePayload,
     );
   }
 }

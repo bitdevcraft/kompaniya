@@ -5,7 +5,7 @@ import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
 import { orgEmailDomainsTable } from "./org-email-domains";
-import { orgEmailTemplatesTable } from "./org-email-templates";
+import { mjmlEditorField, orgEmailTemplatesTable } from "./org-email-templates";
 import { orgEmailTestReceiversTable } from "./org-email-test-receivers";
 
 export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
@@ -17,6 +17,9 @@ export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
   name: varchar("name", { length: 255 }),
   subject: varchar("subject", { length: 998 }),
   body: text("body"),
+
+  ...mjmlEditorField,
+
   orgEmailDomainId: uuid("org_email_domain_id").references(
     () => orgEmailDomainsTable.id,
     {
