@@ -1,4 +1,4 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import { applyPaddingStyles, NodeStyles, toTextAlign } from "./node-styles";
 
 export const buildHeroStyles = (
   attributes: Record<string, string>,
@@ -53,7 +53,7 @@ export const buildHeroStyles = (
   }
 
   if (attributes["align"]) {
-    containerStyles.textAlign = attributes["align"];
+    containerStyles.textAlign = toTextAlign(attributes["align"]);
   }
   if (attributes["vertical-align"]) {
     containerStyles.verticalAlign = attributes["vertical-align"];

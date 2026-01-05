@@ -1,4 +1,4 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import { applyPaddingStyles, NodeStyles, toTextAlign } from "./node-styles";
 
 export const buildTableStyles = (
   attributes: Record<string, string>,
@@ -7,7 +7,7 @@ export const buildTableStyles = (
   const innerStyles: React.CSSProperties = { width: "100%" };
 
   const align = attributes["align"];
-  if (align) containerStyles.textAlign = align;
+  if (align) containerStyles.textAlign = toTextAlign(align);
 
   if (attributes["background-color"]) {
     containerStyles.backgroundColor = attributes["background-color"];

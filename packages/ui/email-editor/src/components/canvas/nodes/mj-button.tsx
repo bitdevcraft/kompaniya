@@ -2,7 +2,12 @@ import type { UniqueIdentifier } from "@dnd-kit/core";
 
 import type { UiComponentConfig } from "../../../types/ui-component";
 
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import {
+  applyPaddingStyles,
+  NodeStyles,
+  toTextAlign,
+  toTextTransform,
+} from "./node-styles";
 import { useContentEditable } from "./use-content-editable";
 
 export const buildButtonStyles = (
@@ -24,7 +29,7 @@ export const buildButtonStyles = (
     attributes["padding-left"];
 
   const align = attributes["align"];
-  if (align) containerStyles.textAlign = align;
+  if (align) containerStyles.textAlign = toTextAlign(align);
 
   if (attributes["container-background-color"]) {
     containerStyles.backgroundColor = attributes["container-background-color"];
@@ -55,11 +60,12 @@ export const buildButtonStyles = (
   }
   buttonStyles.textDecoration = attributes["text-decoration"] ?? "none";
   if (attributes["text-transform"]) {
-    buttonStyles.textTransform = attributes["text-transform"];
+    buttonStyles.textTransform = toTextTransform(attributes["text-transform"]);
   }
 
-  if (attributes["text-align"])
-    buttonStyles.textAlign = attributes["text-align"];
+  if (attributes["text-align"]) {
+    buttonStyles.textAlign = toTextAlign(attributes["text-align"]);
+  }
   if (attributes["height"]) buttonStyles.height = attributes["height"];
   if (attributes["width"]) buttonStyles.width = attributes["width"];
 

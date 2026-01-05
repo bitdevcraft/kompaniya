@@ -1,4 +1,4 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import { applyPaddingStyles, NodeStyles, toTextAlign } from "./node-styles";
 
 export const buildSocialStyles = (
   attributes: Record<string, string>,
@@ -13,7 +13,7 @@ export const buildSocialStyles = (
     attributes["padding-left"];
 
   const align = attributes["align"];
-  if (align) containerStyles.textAlign = align;
+  if (align) containerStyles.textAlign = toTextAlign(align);
 
   const containerBackground =
     attributes["container-background-color"] ?? attributes["background-color"];

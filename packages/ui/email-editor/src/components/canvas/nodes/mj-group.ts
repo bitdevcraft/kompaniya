@@ -1,4 +1,4 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import { applyPaddingStyles, NodeStyles, toDirection } from "./node-styles";
 
 export const buildGroupStyles = (
   attributes: Record<string, string>,
@@ -27,7 +27,7 @@ export const buildGroupStyles = (
   }
 
   if (attributes["direction"]) {
-    containerStyles.direction = attributes["direction"];
+    containerStyles.direction = toDirection(attributes["direction"]);
   }
   if (attributes["width"]) containerStyles.width = attributes["width"];
   if (attributes["vertical-align"]) {

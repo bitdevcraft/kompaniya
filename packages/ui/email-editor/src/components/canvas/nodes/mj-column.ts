@@ -1,4 +1,4 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import { applyPaddingStyles, NodeStyles, toDirection } from "./node-styles";
 
 export const buildColumnStyles = (
   attributes: Record<string, string>,
@@ -26,8 +26,9 @@ export const buildColumnStyles = (
   if (attributes["border-radius"]) {
     containerStyles.borderRadius = attributes["border-radius"];
   }
-  if (attributes["direction"])
-    containerStyles.direction = attributes["direction"];
+  if (attributes["direction"]) {
+    containerStyles.direction = toDirection(attributes["direction"]);
+  }
   if (attributes["width"]) containerStyles.width = attributes["width"];
   if (attributes["vertical-align"]) {
     containerStyles.verticalAlign = attributes["vertical-align"];

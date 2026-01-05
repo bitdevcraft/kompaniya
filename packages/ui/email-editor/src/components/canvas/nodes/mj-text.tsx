@@ -2,7 +2,12 @@ import type { UniqueIdentifier } from "@dnd-kit/core";
 
 import type { UiComponentConfig } from "../../../types/ui-component";
 
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import {
+  applyPaddingStyles,
+  NodeStyles,
+  toTextAlign,
+  toTextTransform,
+} from "./node-styles";
 import { useContentEditable } from "./use-content-editable";
 
 export const buildTextStyles = (
@@ -18,7 +23,7 @@ export const buildTextStyles = (
     attributes["padding-left"];
 
   const align = attributes["align"] || attributes["text-align"];
-  if (align) textStyles.textAlign = align;
+  if (align) textStyles.textAlign = toTextAlign(align);
 
   textStyles.color = attributes["color"] ?? "#000000";
   if (attributes["font-family"]) {
@@ -37,7 +42,7 @@ export const buildTextStyles = (
     textStyles.textDecoration = attributes["text-decoration"];
   }
   if (attributes["text-transform"]) {
-    textStyles.textTransform = attributes["text-transform"];
+    textStyles.textTransform = toTextTransform(attributes["text-transform"]);
   }
   if (attributes["height"]) textStyles.height = attributes["height"];
 

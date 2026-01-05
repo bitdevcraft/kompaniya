@@ -1,4 +1,9 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import {
+  applyPaddingStyles,
+  NodeStyles,
+  toDirection,
+  toTextAlign,
+} from "./node-styles";
 
 export const buildSectionStyles = (
   attributes: Record<string, string>,
@@ -50,8 +55,12 @@ export const buildSectionStyles = (
   if (attributes["border-radius"]) {
     styles.borderRadius = attributes["border-radius"];
   }
-  if (attributes["text-align"]) styles.textAlign = attributes["text-align"];
-  if (attributes["direction"]) styles.direction = attributes["direction"];
+  if (attributes["text-align"]) {
+    styles.textAlign = toTextAlign(attributes["text-align"]);
+  }
+  if (attributes["direction"]) {
+    styles.direction = toDirection(attributes["direction"]);
+  }
 
   if (!hasPadding) {
     styles.padding = "20px 0";

@@ -1,4 +1,9 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import {
+  applyPaddingStyles,
+  NodeStyles,
+  toTextAlign,
+  toTextTransform,
+} from "./node-styles";
 
 const resolveVerticalAlign = (value?: string) => {
   if (value === "middle") return "center";
@@ -44,7 +49,7 @@ export const buildTableCellStyles = (
   const contentStyles: React.CSSProperties = { width: "100%" };
 
   const align = attributes["align"];
-  if (align) contentStyles.textAlign = align;
+  if (align) contentStyles.textAlign = toTextAlign(align);
 
   if (attributes["background-color"]) {
     containerStyles.backgroundColor = attributes["background-color"];
@@ -83,7 +88,7 @@ export const buildTableCellStyles = (
     contentStyles.textDecoration = attributes["text-decoration"];
   }
   if (attributes["text-transform"]) {
-    contentStyles.textTransform = attributes["text-transform"];
+    contentStyles.textTransform = toTextTransform(attributes["text-transform"]);
   }
   if (attributes["width"]) containerStyles.width = attributes["width"];
   if (attributes["height"]) containerStyles.height = attributes["height"];

@@ -1,12 +1,18 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import {
+  applyPaddingStyles,
+  NodeStyles,
+  toBorderTopStyle,
+} from "./node-styles";
 
 export const buildDividerStyles = (
   attributes: Record<string, string>,
 ): NodeStyles => {
   const containerStyles: React.CSSProperties = {};
+  const borderTopStyle =
+    toBorderTopStyle(attributes["border-style"]) ?? "solid";
   const lineStyles: React.CSSProperties = {
     borderTopWidth: attributes["border-width"] ?? "4px",
-    borderTopStyle: attributes["border-style"] ?? "solid",
+    borderTopStyle,
     borderTopColor: attributes["border-color"] ?? "#000000",
     width: attributes["width"] ?? "100%",
   };

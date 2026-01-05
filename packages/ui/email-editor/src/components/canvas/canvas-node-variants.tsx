@@ -18,7 +18,7 @@ export type CanvasNodeChildComponent = (props: {
   parentId: UniqueIdentifier;
   className?: string;
   children?: React.ReactNode;
-}) => JSX.Element;
+}) => React.ReactElement | null;
 
 type BaseRenderProps = {
   id: UniqueIdentifier;

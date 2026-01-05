@@ -1,4 +1,4 @@
-import { applyPaddingStyles, NodeStyles } from "./node-styles";
+import { applyPaddingStyles, NodeStyles, toTextAlign } from "./node-styles";
 
 export const buildNavbarStyles = (
   attributes: Record<string, string>,
@@ -6,7 +6,7 @@ export const buildNavbarStyles = (
   const containerStyles: React.CSSProperties = {};
 
   const align = attributes["align"];
-  if (align) containerStyles.textAlign = align;
+  if (align) containerStyles.textAlign = toTextAlign(align);
 
   if (attributes["background-color"]) {
     containerStyles.backgroundColor = attributes["background-color"];
