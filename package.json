@@ -7,6 +7,7 @@
     "dev": "turbo run dev",
     "dev:pkg": "turbo run dev:pkg",
     "build:pkg": "turbo run build:pkg",
+    "deploy:wrangler": "pnpm --filter web deploy:cf && pnpm --filter docs deploy:cf",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",

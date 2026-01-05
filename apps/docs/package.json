@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev --turbopack --port 3002",
     "build": "next build --turbopack",
+    "build:cf": "next build && next-on-pages",
     "start": "next start --port 3002",
+    "deploy:cf": "pnpm run build:cf && wrangler pages deploy",
     "lint": "eslint --max-warnings=0 src"
   },
   "dependencies": {
@@ -15,6 +17,7 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.0",
     "@eslint/eslintrc": "^3.3.1",
     "@repo/eslint-config": "workspace:^",
     "@repo/typescript-config": "workspace:^",
@@ -25,6 +28,7 @@
     "eslint": "^9.37.0",
     "eslint-config-next": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^3.96.0"
   }
 }
