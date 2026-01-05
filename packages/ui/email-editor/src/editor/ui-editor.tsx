@@ -13,23 +13,22 @@ import {
   TabsList,
   TabsTrigger,
 } from "@kompaniya/ui-common/components/tabs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { MjmlJsonNode } from "../types/ui-component";
 import type { ViewportMode } from "../types/viewport";
 
 import { Canvas } from "../components/canvas/canvas";
 import { TreeView } from "../components/tree/tree-view";
+import { type EmailEditorOutputs, useEmailEditorOutputs } from "../hooks";
 import {
   selectActiveId,
   selectCanRedo,
   selectCanUndo,
-  selectDoc,
   useEmailDocStore,
   useEmailUIStore,
 } from "../store";
 import { isEditableTarget } from "../utils/dom";
-import { formatMjmlErrors, serializeMjml } from "../utils/mjml";
 import { AttributesPanel } from "./attributes-panel";
 import { EditorHeader } from "./editor-header";
 import { OutputPanel } from "./output-panel";
@@ -41,21 +40,24 @@ type CssVars = CSSProperties & {
 
 export function UiEditor({
   initialValue,
+  onOutputsChange,
 }: {
   initialValue?: MjmlJsonNode | null;
+  onOutputsChange?: (outputs: EmailEditorOutputs) => void;
 }) {
-  const data = useEmailDocStore(selectDoc);
-  const toMjmlJson = useEmailDocStore((s) => s.toMjmlJson);
   const setFromMjmlJson = useEmailDocStore((s) => s.setFromMjmlJson);
   const undo = useEmailDocStore((s) => s.undo);
   const redo = useEmailDocStore((s) => s.redo);
   const canUndo = useEmailDocStore(selectCanUndo);
   const canRedo = useEmailDocStore(selectCanRedo);
   const activeId = useEmailUIStore(selectActiveId);
-  const [htmlOutput, setHtmlOutput] = useState("");
   const [viewMode, setViewMode] = useState<"editor" | "preview">("editor");
   const [viewportMode, setViewportMode] = useState<ViewportMode>("web");
   const didApplyInitial = useRef(false);
+
+  const { htmlOutput, jsonOutput, mjmlOutput } = useEmailEditorOutputs({
+    onOutputsChange,
+  });
 
   const viewportMaxWidth =
     viewportMode === "mobile"
@@ -64,61 +66,11 @@ export function UiEditor({
         ? "768px"
         : "100%";
 
-  const mjmlJson = useMemo(() => {
-    void data;
-    return toMjmlJson();
-  }, [data, toMjmlJson]);
-  const jsonOutput = useMemo(
-    () => (mjmlJson ? JSON.stringify(mjmlJson, null, 2) : "{}"),
-    [mjmlJson],
-  );
-  const mjmlOutput = useMemo(
-    () => (mjmlJson ? serializeMjml(mjmlJson) : ""),
-    [mjmlJson],
-  );
-
   useEffect(() => {
     if (!initialValue || didApplyInitial.current) return;
     setFromMjmlJson(initialValue);
     didApplyInitial.current = true;
   }, [initialValue, setFromMjmlJson]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (!mjmlOutput) {
-      setHtmlOutput("");
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    const run = async () => {
-      try {
-        const { default: mjml2html } = await import("mjml-browser");
-        const result = mjml2html(mjmlOutput);
-        const errorBanner = formatMjmlErrors(result.errors ?? []);
-        const html = errorBanner
-          ? `${errorBanner}\n${result.html}`
-          : result.html;
-        if (!cancelled) {
-          setHtmlOutput(html);
-        }
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Unknown MJML error";
-        if (!cancelled) {
-          setHtmlOutput(`<!-- MJML compile failed: ${message} -->`);
-        }
-      }
-    };
-
-    run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mjmlOutput]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

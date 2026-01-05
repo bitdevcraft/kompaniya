@@ -1,9 +1,9 @@
 import type { ComponentProps } from "react";
 
-import { UiEditor } from "@kompaniya/ui-email-editor/editor";
+import { EmailEditorForm } from "./email-editor-form";
 
 export default async function Page() {
-  const initialValue: ComponentProps<typeof UiEditor>["initialValue"] = {
+  const initialValue: ComponentProps<typeof EmailEditorForm>["initialValue"] = {
     tagName: "mjml",
     attributes: {
       lang: "en",
@@ -868,9 +868,5 @@ export default async function Page() {
     ],
   };
 
-  return (
-    <div className="flex justify-center min-h-svh">
-      <UiEditor initialValue={initialValue} />
-    </div>
-  );
+  return <EmailEditorForm initialValue={initialValue} />;
 }
