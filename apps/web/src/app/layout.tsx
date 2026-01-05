@@ -19,6 +19,7 @@ const serif = Lora({ subsets: ["latin"], variable: "--font-serif" });
 const monospace = JetBrains_Mono({
   variable: "--font-mono",
   weight: ["400", "700"],
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
