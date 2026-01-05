@@ -14,7 +14,7 @@ import { Copy, GripHorizontal, Plus, Trash2 } from "lucide-react";
 import { ReactNode } from "react";
 
 import { getAllowedChildOptions } from "../../config/nodes";
-import { useComponentStore } from "../../store/use-component-store";
+import { selectDoc, useEmailDocStore } from "../../store";
 import { TableSizePicker } from "../table/table-size-picker";
 
 interface Props {
@@ -46,12 +46,12 @@ export function DroppableContainer({
     },
   );
 
-  const duplicateComponent = useComponentStore((s) => s.duplicateComponent);
-  const removeComponent = useComponentStore((s) => s.removeComponent);
-  const appendChild = useComponentStore((s) => s.appendChild);
-  const appendTableWithSize = useComponentStore((s) => s.appendTableWithSize);
-  const data = useComponentStore((s) => s.data);
-  const node = useComponentStore((s) => s.data[id]);
+  const duplicateComponent = useEmailDocStore((s) => s.duplicateComponent);
+  const removeComponent = useEmailDocStore((s) => s.removeComponent);
+  const appendChild = useEmailDocStore((s) => s.appendChild);
+  const appendTableWithSize = useEmailDocStore((s) => s.appendTableWithSize);
+  const data = useEmailDocStore(selectDoc);
+  const node = data[id];
   const hasHeadChild =
     node?.tagName === "mjml" &&
     node.items.some((childId) => data[childId]?.tagName === "mj-head");

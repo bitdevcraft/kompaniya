@@ -45,6 +45,39 @@ const mergeAttributes = (
   incoming: Record<string, string>,
 ) => ({ ...base, ...incoming });
 
+export const resolveNodeAttributesFromHead = (
+  node: UiComponentConfig | undefined,
+  isBodyNode: boolean,
+  headAttributes?: HeadAttributesConfig,
+) => {
+  if (!node) return {};
+
+  const inlineAttributes = node.attributes ?? {};
+  if (!headAttributes || !isBodyNode) return inlineAttributes;
+
+  let merged = mergeAttributes({}, headAttributes.all);
+
+  const tagDefaults = headAttributes.byTag[node.tagName];
+  if (tagDefaults) {
+    merged = mergeAttributes(merged, tagDefaults);
+  }
+
+  const classValue = inlineAttributes["mj-class"] ?? "";
+  if (classValue.trim()) {
+    classValue
+      .split(/\s+/)
+      .filter(Boolean)
+      .forEach((className) => {
+        const classAttributes = headAttributes.classes[className];
+        if (classAttributes) {
+          merged = mergeAttributes(merged, classAttributes);
+        }
+      });
+  }
+
+  return mergeAttributes(merged, inlineAttributes);
+};
+
 export const buildHeadAttributes = (
   data: ComponentData,
 ): HeadAttributesConfig => {
@@ -110,31 +143,6 @@ export const resolveNodeAttributes = (
   const node = data[id];
   if (!node) return {};
 
-  const inlineAttributes = node.attributes ?? {};
-  if (!headAttributes) return inlineAttributes;
-
   const isBodyNode = isDescendantOfTag(id, data, "mj-body");
-  if (!isBodyNode) return inlineAttributes;
-
-  let merged = mergeAttributes({}, headAttributes.all);
-
-  const tagDefaults = headAttributes.byTag[node.tagName];
-  if (tagDefaults) {
-    merged = mergeAttributes(merged, tagDefaults);
-  }
-
-  const classValue = inlineAttributes["mj-class"] ?? "";
-  if (classValue.trim()) {
-    classValue
-      .split(/\s+/)
-      .filter(Boolean)
-      .forEach((className) => {
-        const classAttributes = headAttributes.classes[className];
-        if (classAttributes) {
-          merged = mergeAttributes(merged, classAttributes);
-        }
-      });
-  }
-
-  return mergeAttributes(merged, inlineAttributes);
+  return resolveNodeAttributesFromHead(node, isBodyNode, headAttributes);
 };

@@ -12,16 +12,16 @@ import { Button } from "@kompaniya/ui-common/components/button";
 import { useState } from "react";
 
 import { collisionDetection } from "../../lib/collission-detection";
-import { useComponentStore } from "../../store/use-component-store";
+import { selectDoc, useEmailDocStore, useEmailUIStore } from "../../store";
 import { TreeNode } from "./tree-node";
 
 const ROOT_ID = "root-canvas" as UniqueIdentifier;
 const ROOT_HEAD_ID = "root-head" as UniqueIdentifier;
 
 export function TreeView() {
-  const data = useComponentStore((s) => s.data);
-  const moveComponent = useComponentStore((s) => s.moveComponent);
-  const setDragActiveId = useComponentStore((s) => s.setDragActiveId);
+  const data = useEmailDocStore(selectDoc);
+  const moveComponent = useEmailDocStore((s) => s.moveComponent);
+  const setDragActiveId = useEmailUIStore((s) => s.setDragActiveId);
   const [collapsedIds, setCollapsedIds] = useState<Set<UniqueIdentifier>>(
     new Set([ROOT_HEAD_ID]),
   );

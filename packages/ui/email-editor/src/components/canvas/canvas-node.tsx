@@ -15,7 +15,7 @@ import type { BuilderNodeTag } from "../../config/nodes";
 import type { ViewportMode } from "../../types/viewport";
 
 import { canAcceptChildTag, LEAF_NODE_TAGS } from "../../config/nodes";
-import { useComponentStore } from "../../store/use-component-store";
+import { selectDoc, useEmailDocStore, useEmailUIStore } from "../../store";
 import {
   HeadAttributesConfig,
   isDescendantOfTag,
@@ -43,16 +43,16 @@ export function CanvasNode({
   viewportMode?: ViewportMode;
   headAttributes?: HeadAttributesConfig;
 } & Omit<React.ComponentProps<"div">, "id">) {
-  const node = useComponentStore((s) => s.data[id]);
-  const data = useComponentStore((s) => s.data);
-  const activeId = useComponentStore((s) => s.activeId);
-  const setActiveId = useComponentStore((s) => s.setActiveId);
-  const hoverActiveId = useComponentStore((s) => s.hoverActiveId);
-  const setHoverActiveId = useComponentStore((s) => s.setHoverActiveId);
-  const setNodeContent = useComponentStore((s) => s.setNodeContent);
-  const insertSiblingAfter = useComponentStore((s) => s.insertSiblingAfter);
-  const appendTableRow = useComponentStore((s) => s.appendTableRow);
-  const appendTableColumn = useComponentStore((s) => s.appendTableColumn);
+  const data = useEmailDocStore(selectDoc);
+  const node = data[id];
+  const activeId = useEmailUIStore((state) => state.activeId);
+  const hoverActiveId = useEmailUIStore((state) => state.hoverActiveId);
+  const setActiveId = useEmailUIStore((state) => state.setActiveId);
+  const setHoverActiveId = useEmailUIStore((state) => state.setHoverActiveId);
+  const setNodeContent = useEmailDocStore((s) => s.setNodeContent);
+  const insertSiblingAfter = useEmailDocStore((s) => s.insertSiblingAfter);
+  const appendTableRow = useEmailDocStore((s) => s.appendTableRow);
+  const appendTableColumn = useEmailDocStore((s) => s.appendTableColumn);
 
   if (!node) return null;
   if (isDescendantOfTag(id, data, "mj-head")) return null;

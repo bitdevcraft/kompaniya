@@ -6,7 +6,7 @@ import type { BuilderNodeTag } from "../../config/nodes";
 import type { ViewportMode } from "../../types/viewport";
 
 import { LEAF_NODE_TAGS } from "../../config/nodes";
-import { useComponentStore } from "../../store/use-component-store";
+import { selectDoc, useEmailDocStore } from "../../store";
 import {
   HeadAttributesConfig,
   isDescendantOfTag,
@@ -27,8 +27,8 @@ export function DragPreviewNode({
   viewportMode?: ViewportMode;
   headAttributes?: HeadAttributesConfig;
 }) {
-  const node = useComponentStore((s) => s.data[id]);
-  const data = useComponentStore((s) => s.data);
+  const data = useEmailDocStore(selectDoc);
+  const node = data[id];
 
   if (!node) return null;
   if (isDescendantOfTag(id, data, "mj-head")) return null;

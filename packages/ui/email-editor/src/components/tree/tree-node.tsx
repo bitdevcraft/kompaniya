@@ -25,7 +25,7 @@ import {
   getAllowedChildOptions,
   LEAF_NODE_TAGS,
 } from "../../config/nodes";
-import { useComponentStore } from "../../store/use-component-store";
+import { selectDoc, useEmailDocStore, useEmailUIStore } from "../../store";
 import { TableSizePicker } from "../table/table-size-picker";
 import { TreeDroppableGap } from "./tree-droppable-gap";
 
@@ -44,16 +44,13 @@ export function TreeNode({
   collapsedIds: Set<UniqueIdentifier>;
   onToggleCollapse: (id: UniqueIdentifier) => void;
 }) {
-  const node = useComponentStore((s) => s.data[id]);
-  const data = useComponentStore((s) => s.data);
-  const activeId = useComponentStore((s) => s.activeId);
-  const dragActiveId = useComponentStore((s) => s.dragActiveId);
-  const dragNodeTag = useComponentStore((s) =>
-    s.dragActiveId ? s.data[s.dragActiveId]?.tagName : undefined,
-  );
-  const setActiveId = useComponentStore((s) => s.setActiveId);
-  const appendChild = useComponentStore((s) => s.appendChild);
-  const appendTableWithSize = useComponentStore((s) => s.appendTableWithSize);
+  const data = useEmailDocStore(selectDoc);
+  const node = data[id];
+  const activeId = useEmailUIStore((state) => state.activeId);
+  const dragActiveId = useEmailUIStore((state) => state.dragActiveId);
+  const setActiveId = useEmailUIStore((state) => state.setActiveId);
+  const appendChild = useEmailDocStore((s) => s.appendChild);
+  const appendTableWithSize = useEmailDocStore((s) => s.appendTableWithSize);
 
   const isRoot = id === ROOT_ID || id === ROOT_BODY_ID || id === ROOT_HEAD_ID;
   const displayTag = node?.tagName?.startsWith("mj-")
@@ -83,6 +80,7 @@ export function TreeNode({
     transition: suppressTransform ? undefined : transition,
     paddingLeft: depth * 12,
   } as React.CSSProperties;
+  const dragNodeTag = dragActiveId ? data[dragActiveId]?.tagName : undefined;
   const canDropHere =
     isDragActive && dragNodeTag
       ? canAcceptChildTag(node.tagName, dragNodeTag)

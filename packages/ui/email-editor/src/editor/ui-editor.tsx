@@ -20,7 +20,14 @@ import type { ViewportMode } from "../types/viewport";
 
 import { Canvas } from "../components/canvas/canvas";
 import { TreeView } from "../components/tree/tree-view";
-import { useComponentStore } from "../store/use-component-store";
+import {
+  selectActiveId,
+  selectCanRedo,
+  selectCanUndo,
+  selectDoc,
+  useEmailDocStore,
+  useEmailUIStore,
+} from "../store";
 import { isEditableTarget } from "../utils/dom";
 import { formatMjmlErrors, serializeMjml } from "../utils/mjml";
 import { AttributesPanel } from "./attributes-panel";
@@ -37,14 +44,14 @@ export function UiEditor({
 }: {
   initialValue?: MjmlJsonNode | null;
 }) {
-  const data = useComponentStore((s) => s.data);
-  const toMjmlJson = useComponentStore((s) => s.toMjmlJson);
-  const setFromMjmlJson = useComponentStore((s) => s.setFromMjmlJson);
-  const activeId = useComponentStore((s) => s.activeId);
-  const undo = useComponentStore((s) => s.undo);
-  const redo = useComponentStore((s) => s.redo);
-  const canUndo = useComponentStore((s) => s.past.length > 0);
-  const canRedo = useComponentStore((s) => s.future.length > 0);
+  const data = useEmailDocStore(selectDoc);
+  const toMjmlJson = useEmailDocStore((s) => s.toMjmlJson);
+  const setFromMjmlJson = useEmailDocStore((s) => s.setFromMjmlJson);
+  const undo = useEmailDocStore((s) => s.undo);
+  const redo = useEmailDocStore((s) => s.redo);
+  const canUndo = useEmailDocStore(selectCanUndo);
+  const canRedo = useEmailDocStore(selectCanRedo);
+  const activeId = useEmailUIStore(selectActiveId);
   const [htmlOutput, setHtmlOutput] = useState("");
   const [viewMode, setViewMode] = useState<"editor" | "preview">("editor");
   const [viewportMode, setViewportMode] = useState<ViewportMode>("web");

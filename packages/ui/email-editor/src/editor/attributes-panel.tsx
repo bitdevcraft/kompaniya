@@ -13,7 +13,7 @@ import { Textarea } from "@kompaniya/ui-common/components/textarea";
 import { X } from "lucide-react";
 
 import { ATTRIBUTE_GROUPS } from "../config/attributes";
-import { useComponentStore } from "../store/use-component-store";
+import { useEmailDocStore } from "../store";
 
 const CONTENT_FIELDS: Record<
   string,
@@ -52,14 +52,14 @@ export function AttributesPanel({
 }: {
   activeId: UniqueIdentifier | "";
 }) {
-  const node = useComponentStore((s) =>
-    activeId ? s.data[activeId] : undefined,
+  const node = useEmailDocStore((s) =>
+    activeId ? s.doc[activeId] : undefined,
   );
-  const setNodeAttribute = useComponentStore((s) => s.setNodeAttribute);
-  const removeNodeAttribute = useComponentStore((s) => s.removeNodeAttribute);
-  const setNodeContent = useComponentStore((s) => s.setNodeContent);
-  const setHeadDefaults = useComponentStore((s) => s.setHeadDefaults);
-  const clearHead = useComponentStore((s) => s.clearHead);
+  const setNodeAttribute = useEmailDocStore((s) => s.setNodeAttribute);
+  const removeNodeAttribute = useEmailDocStore((s) => s.removeNodeAttribute);
+  const setNodeContent = useEmailDocStore((s) => s.setNodeContent);
+  const setHeadDefaults = useEmailDocStore((s) => s.setHeadDefaults);
+  const clearHead = useEmailDocStore((s) => s.clearHead);
 
   const displayTag = node?.tagName?.startsWith("mj-")
     ? node.tagName.slice(3)

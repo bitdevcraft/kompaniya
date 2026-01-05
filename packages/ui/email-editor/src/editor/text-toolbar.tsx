@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useComponentStore } from "../store/use-component-store";
+import { useEmailDocStore } from "../store";
 
 const TEXT_TAGS = new Set([
   "mj-accordion-text",
@@ -156,11 +156,11 @@ export function TextToolbar({
   activeId: UniqueIdentifier | "";
   viewMode: "editor" | "preview";
 }) {
-  const node = useComponentStore((s) =>
-    activeId ? s.data[activeId] : undefined,
+  const node = useEmailDocStore((s) =>
+    activeId ? s.doc[activeId] : undefined,
   );
-  const setNodeAttribute = useComponentStore((s) => s.setNodeAttribute);
-  const removeNodeAttribute = useComponentStore((s) => s.removeNodeAttribute);
+  const setNodeAttribute = useEmailDocStore((s) => s.setNodeAttribute);
+  const removeNodeAttribute = useEmailDocStore((s) => s.removeNodeAttribute);
 
   const isTextNode = Boolean(node && TEXT_TAGS.has(node.tagName));
   const isEnabled = viewMode === "editor" && isTextNode;

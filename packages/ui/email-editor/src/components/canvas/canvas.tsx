@@ -19,7 +19,12 @@ import type { ViewportMode } from "../../types/viewport";
 
 import { collisionDetection } from "../../lib/collission-detection";
 import { snapToLeftTopCorner } from "../../lib/drag-overlay-modifiers";
-import { useComponentStore } from "../../store/use-component-store";
+import {
+  selectDoc,
+  selectDragId,
+  useEmailDocStore,
+  useEmailUIStore,
+} from "../../store";
 import { buildHeadAttributes } from "../../utils/head-attributes";
 import { CanvasNode } from "./canvas-node";
 import { DragPreviewNode } from "./drag-preview-node";
@@ -29,10 +34,10 @@ export function Canvas({
 }: {
   viewportMode?: ViewportMode;
 }) {
-  const moveComponent = useComponentStore((s) => s.moveComponent);
-  const setDragActiveId = useComponentStore((s) => s.setDragActiveId);
-  const dragActiveId = useComponentStore((s) => s.dragActiveId);
-  const data = useComponentStore((s) => s.data);
+  const moveComponent = useEmailDocStore((s) => s.moveComponent);
+  const setDragActiveId = useEmailUIStore((s) => s.setDragActiveId);
+  const dragActiveId = useEmailUIStore(selectDragId);
+  const data = useEmailDocStore(selectDoc);
   const headAttributes = useMemo(() => buildHeadAttributes(data), [data]);
 
   // const [dragActiveId, setDragActiveId] = useQueryState(
