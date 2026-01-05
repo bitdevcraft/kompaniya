@@ -12,6 +12,12 @@ import {
   isDescendantOfTag,
   resolveNodeAttributes,
 } from "../../utils/head-attributes";
+import {
+  getAlignItemsClass,
+  getColumnStyle,
+  getJustifyClass,
+  parseCellSpacing,
+} from "./canvas-node-utils";
 import { getNodeStyles, renderLeafNode } from "./nodes";
 
 const noop = (_id: UniqueIdentifier) => {};
@@ -45,11 +51,6 @@ export function DragPreviewNode({
   const isSocial = node.tagName === "mj-social";
   const attributes = resolveNodeAttributes(id, data, headAttributes);
   const isLeafNode = LEAF_NODE_TAGS.has(node.tagName as BuilderNodeTag);
-  const isFullWidthSection =
-    node.tagName === "mj-section" &&
-    (attributes["full-width"] === "full-width" ||
-      attributes["full-width"] === "true");
-
   const {
     containerStyles = {},
     contentStyles = {},
@@ -78,20 +79,24 @@ export function DragPreviewNode({
     return "100%";
   };
 
-  const sectionInnerStyles = isColumnRow
-    ? ({
-        ...innerStyles,
-        width: "100%",
-        ...(isFullWidthSection
-          ? { maxWidth: "100%" }
-          : node.tagName === "mj-section"
-            ? {
-                maxWidth: resolveBodyWidth(node.parent ?? id),
-                margin: "0 auto",
-              }
-            : {}),
-      } as React.CSSProperties)
+  const sectionContentWidth =
+    node.tagName === "mj-section"
+      ? attributes["content-width"]?.trim() ||
+        resolveBodyWidth(node.parent ?? id)
+      : "";
+  const baseInnerStyles = isColumnRow
+    ? ({ ...innerStyles, width: "100%" } as React.CSSProperties)
     : innerStyles;
+  const sectionInnerStyles =
+    node.tagName === "mj-section"
+      ? ({
+          ...baseInnerStyles,
+          width: "100%",
+          ...(sectionContentWidth
+            ? { maxWidth: sectionContentWidth, margin: "0 auto" }
+            : {}),
+        } as React.CSSProperties)
+      : baseInnerStyles;
   const tableParentAttributes =
     isTableRow && node.parent
       ? resolveNodeAttributes(node.parent, data, headAttributes)
@@ -100,14 +105,7 @@ export function DragPreviewNode({
     (isTable
       ? attributes["cellspacing"]
       : tableParentAttributes?.cellspacing) ?? "";
-  const tableGapValue = (() => {
-    const trimmed = tableCellSpacing.trim();
-    if (!trimmed) return undefined;
-    const numeric = Number(trimmed);
-    return Number.isFinite(numeric) && trimmed === String(numeric)
-      ? numeric
-      : trimmed;
-  })();
+  const tableGapValue = parseCellSpacing(tableCellSpacing);
   const rowFlexStyles: React.CSSProperties = isTableRow
     ? { display: "flex", gap: tableGapValue }
     : {};
@@ -121,18 +119,8 @@ export function DragPreviewNode({
   const socialMode = attributes["mode"] ?? "horizontal";
   const isSocialHorizontal = socialMode !== "vertical";
   const socialAlign = attributes["align"];
-  const socialJustifyClass =
-    socialAlign === "center"
-      ? "justify-center"
-      : socialAlign === "right"
-        ? "justify-end"
-        : "justify-start";
-  const socialAlignItemsClass =
-    socialAlign === "center"
-      ? "items-center"
-      : socialAlign === "right"
-        ? "items-end"
-        : "items-start";
+  const socialJustifyClass = getJustifyClass(socialAlign);
+  const socialAlignItemsClass = getAlignItemsClass(socialAlign);
   const socialInnerStyles = innerStyles;
 
   if (isLeafNode) {
@@ -162,19 +150,7 @@ export function DragPreviewNode({
               data,
               headAttributes,
             );
-            const columnWidth = columnAttributes?.width;
-            const verticalAlign = columnAttributes?.["vertical-align"];
-            const columnStyle: React.CSSProperties = {
-              flex: columnWidth ? `0 0 ${columnWidth}` : "1 1 0",
-              maxWidth: columnWidth,
-              width: columnWidth,
-            };
-
-            if (verticalAlign === "middle") {
-              columnStyle.alignSelf = "center";
-            } else if (verticalAlign === "bottom") {
-              columnStyle.alignSelf = "flex-end";
-            }
+            const columnStyle = getColumnStyle(columnAttributes);
 
             return (
               <div className="flex min-w-0" key={childId} style={columnStyle}>

@@ -26,13 +26,14 @@ export default async function Page() {
             tagName: "mj-title",
             attributes: {},
             children: [],
-            content: "MJML Component Applications",
+            content: "Kompaniya Email Editor",
           },
           {
             tagName: "mj-preview",
             attributes: {},
             children: [],
-            content: "All MJML components separated by application.",
+            content:
+              "Launch a modern promo email in minutes with drag-and-drop.",
           },
           {
             tagName: "mj-breakpoint",
@@ -44,8 +45,8 @@ export default async function Page() {
           {
             tagName: "mj-font",
             attributes: {
-              name: "Inter",
-              href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap",
+              name: "Space Grotesk",
+              href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap",
             },
             children: [],
           },
@@ -56,7 +57,7 @@ export default async function Page() {
             },
             children: [],
             content:
-              ".brand a { text-decoration: none !important; } .muted div { color: #666666 !important; }",
+              ".brand div { color: #0f172a !important; } .brand a { text-decoration: none !important; color: #0f172a !important; } .muted div { color: #667085 !important; } .eyebrow div { letter-spacing: 2px !important; text-transform: uppercase !important; } .cta-secondary a { background: transparent !important; color: #0f172a !important; border: 1px solid #0f172a !important; } .pill span { background: #e0f2fe !important; color: #0369a1 !important; padding: 4px 10px !important; border-radius: 999px !important; display: inline-block !important; font-size: 12px !important; } .card td { background: #ffffff !important; border: 1px solid #e5e7eb !important; border-radius: 14px !important; } .shadow td { box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important; }",
           },
           {
             tagName: "mj-attributes",
@@ -65,8 +66,8 @@ export default async function Page() {
               {
                 tagName: "mj-all",
                 attributes: {
-                  "font-family": "Inter, Arial, sans-serif",
-                  color: "#222222",
+                  "font-family": "Space Grotesk, Arial, sans-serif",
+                  color: "#0f172a",
                   "line-height": "1.6",
                 },
                 children: [],
@@ -82,10 +83,12 @@ export default async function Page() {
               {
                 tagName: "mj-button",
                 attributes: {
-                  "background-color": "#111111",
+                  "background-color": "#0f172a",
                   color: "#ffffff",
-                  "border-radius": "8px",
-                  padding: "12px 18px",
+                  "border-radius": "10px",
+                  "font-size": "15px",
+                  "font-weight": "600",
+                  padding: "12px 20px",
                 },
                 children: [],
               },
@@ -93,7 +96,17 @@ export default async function Page() {
                 tagName: "mj-class",
                 attributes: {
                   name: "muted",
-                  color: "#666666",
+                  color: "#667085",
+                },
+                children: [],
+              },
+              {
+                tagName: "mj-class",
+                attributes: {
+                  name: "eyebrow",
+                  color: "#0ea5e9",
+                  "font-size": "12px",
+                  "font-weight": "600",
                 },
                 children: [],
               },
@@ -127,16 +140,14 @@ export default async function Page() {
         tagName: "mj-body",
         attributes: {
           width: "600px",
-          "background-color": "#f5f5f5",
-          "css-class": "body",
+          "background-color": "#f3f4f6",
         },
         children: [
           {
             tagName: "mj-section",
             attributes: {
               "background-color": "#ffffff",
-              padding: "24px 0 8px",
-              "css-class": "s-intro",
+              padding: "20px 0",
             },
             children: [
               {
@@ -146,254 +157,203 @@ export default async function Page() {
                   {
                     tagName: "mj-text",
                     attributes: {
-                      "font-size": "22px",
+                      "font-size": "20px",
                       "font-weight": "700",
-                      padding: "0 24px 6px",
+                      padding: "0 24px 4px",
+                      "css-class": "brand",
                     },
                     children: [],
-                    content: "MJML component applications",
-                  },
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      padding: "0 24px 8px",
-                      "css-class": "muted",
-                    },
-                    children: [],
-                    content:
-                      "Each application below isolates a single MJML component or layout pattern.",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#111111",
-              padding: "12px 0",
-              "css-class": "s-navbar",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      color: "#ffffff",
-                      "font-size": "14px",
-                      "text-transform": "uppercase",
-                      "letter-spacing": "1px",
-                      padding: "0 24px 6px",
-                    },
-                    children: [],
-                    content: "Navigation application",
-                  },
-                  {
-                    tagName: "mj-navbar",
-                    attributes: {
-                      "base-url": "https://example.com",
-                      hamburger: "hamburger",
-                      "ico-color": "#ffffff",
-                    },
-                    children: [
-                      {
-                        tagName: "mj-navbar-link",
-                        attributes: {
-                          href: "/home",
-                          color: "#ffffff",
-                          padding: "10px 12px",
-                          "css-class": "brand",
-                        },
-                        children: [],
-                        content: "Home",
-                      },
-                      {
-                        tagName: "mj-navbar-link",
-                        attributes: {
-                          href: "/features",
-                          color: "#ffffff",
-                          padding: "10px 12px",
-                        },
-                        children: [],
-                        content: "Features",
-                      },
-                      {
-                        tagName: "mj-navbar-link",
-                        attributes: {
-                          href: "/pricing",
-                          color: "#ffffff",
-                          padding: "10px 12px",
-                        },
-                        children: [],
-                        content: "Pricing",
-                      },
-                      {
-                        tagName: "mj-navbar-link",
-                        attributes: {
-                          href: "/support",
-                          color: "#ffffff",
-                          padding: "10px 12px",
-                        },
-                        children: [],
-                        content: "Support",
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-hero",
-            attributes: {
-              mode: "fixed-height",
-              height: "280px",
-              "background-width": "600px",
-              "background-height": "280px",
-              "background-url":
-                "https://images.unsplash.com/photo-1520975958225-6d3a6aa1c4f2?auto=format&fit=crop&w=1200&q=60",
-              "background-color": "#2a3448",
-              padding: "36px 0",
-              "css-class": "s-hero",
-            },
-            children: [
-              {
-                tagName: "mj-text",
-                attributes: {
-                  align: "center",
-                  "font-size": "16px",
-                  "text-transform": "uppercase",
-                  "letter-spacing": "1px",
-                  color: "#ffffff",
-                  padding: "0 24px 6px",
-                },
-                children: [],
-                content: "Hero application",
-              },
-              {
-                tagName: "mj-text",
-                attributes: {
-                  align: "center",
-                  "font-size": "30px",
-                  "font-weight": "800",
-                  color: "#ffffff",
-                  padding: "0 24px 10px",
-                },
-                children: [],
-                content: "Hero headline",
-              },
-              {
-                tagName: "mj-button",
-                attributes: {
-                  href: "https://example.com/hero",
-                  align: "center",
-                  "background-color": "#ffffff",
-                  color: "#111111",
-                },
-                children: [],
-                content: "Hero CTA",
-              },
-            ],
-          },
-          {
-            tagName: "mj-wrapper",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "0",
-              "css-class": "s-layout",
-            },
-            children: [
-              {
-                tagName: "mj-section",
-                attributes: {
-                  padding: "24px 0",
-                },
-                children: [
-                  {
-                    tagName: "mj-group",
-                    attributes: {},
-                    children: [
-                      {
-                        tagName: "mj-column",
-                        attributes: {},
-                        children: [
-                          {
-                            tagName: "mj-text",
-                            attributes: {
-                              "font-size": "18px",
-                              "font-weight": "600",
-                              padding: "0 24px 8px",
-                            },
-                            children: [],
-                            content: "Layout application",
-                          },
-                          {
-                            tagName: "mj-text",
-                            attributes: {
-                              padding: "0 24px",
-                              "css-class": "muted",
-                            },
-                            children: [],
-                            content:
-                              "Wrapper, section, group, and columns work together here.",
-                          },
-                        ],
-                      },
-                      {
-                        tagName: "mj-column",
-                        attributes: {},
-                        children: [
-                          {
-                            tagName: "mj-image",
-                            attributes: {
-                              src: "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=60",
-                              alt: "Layout image",
-                              padding: "0 24px",
-                            },
-                            children: [],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "8px 0 20px",
-              "css-class": "s-text",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
-                      padding: "0 24px 6px",
-                    },
-                    children: [],
-                    content: "Text application",
+                    content: "Kompaniya Email Editor",
                   },
                   {
                     tagName: "mj-text",
                     attributes: {
                       padding: "0 24px",
+                      "font-size": "13px",
                       "css-class": "muted",
                     },
                     children: [],
                     content:
-                      "Use text for long-form messaging and announcements.",
+                      "Design, preview, and publish promo emails without touching code.",
+                  },
+                ],
+              },
+              {
+                tagName: "mj-column",
+                attributes: {},
+                children: [
+                  {
+                    tagName: "mj-button",
+                    attributes: {
+                      href: "https://example.com/start",
+                      align: "right",
+                      padding: "0 24px",
+                    },
+                    children: [],
+                    content: "Start free",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            tagName: "mj-section",
+            attributes: {
+              "background-color": "#ffffff",
+              padding: "12px 0 24px",
+            },
+            children: [
+              {
+                tagName: "mj-group",
+                attributes: {},
+                children: [
+                  {
+                    tagName: "mj-column",
+                    attributes: {
+                      width: "55%",
+                    },
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          padding: "0 24px 6px",
+                          "css-class": "eyebrow",
+                        },
+                        children: [],
+                        content: "Promo-ready UI",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          "font-size": "32px",
+                          "font-weight": "700",
+                          padding: "0 24px 10px",
+                        },
+                        children: [],
+                        content: "Launch a modern promo email in minutes.",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          padding: "0 24px 16px",
+                          "css-class": "muted",
+                        },
+                        children: [],
+                        content:
+                          "Drag blocks into place, update copy in-line, and see every device preview instantly.",
+                      },
+                      {
+                        tagName: "mj-button",
+                        attributes: {
+                          href: "https://example.com/editor",
+                          align: "left",
+                          padding: "0 24px 10px",
+                        },
+                        children: [],
+                        content: "Open the editor",
+                      },
+                      {
+                        tagName: "mj-button",
+                        attributes: {
+                          href: "https://example.com/templates",
+                          align: "left",
+                          padding: "0 24px",
+                          "css-class": "cta-secondary",
+                        },
+                        children: [],
+                        content: "Browse templates",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          "font-size": "12px",
+                          padding: "10px 24px 0",
+                          "css-class": "muted",
+                        },
+                        children: [],
+                        content:
+                          "Free plan available. No credit card required.",
+                      },
+                    ],
+                  },
+                  {
+                    tagName: "mj-column",
+                    attributes: {
+                      width: "45%",
+                    },
+                    children: [
+                      {
+                        tagName: "mj-image",
+                        attributes: {
+                          src: "https://images.unsplash.com/photo-1556155092-8707de31f9c4?auto=format&fit=crop&w=1200&q=60",
+                          alt: "Email editor preview",
+                          padding: "0 24px 12px",
+                          "border-radius": "12px",
+                        },
+                        children: [],
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          "font-size": "13px",
+                          padding: "0 24px",
+                          "css-class": "muted",
+                        },
+                        children: [],
+                        content:
+                          "Live preview, smart spacing, and brand tokens built in.",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            tagName: "mj-section",
+            attributes: {
+              "background-color": "#ffffff",
+              padding: "8px 0 24px",
+              "css-class": "card shadow",
+            },
+            children: [
+              {
+                tagName: "mj-column",
+                attributes: {},
+                children: [
+                  {
+                    tagName: "mj-text",
+                    attributes: {
+                      align: "center",
+                      "font-size": "12px",
+                      padding: "14px 12px 6px",
+                      "css-class": "pill",
+                    },
+                    children: [],
+                    content: "<span>NEW PROMO MODE</span>",
+                  },
+                  {
+                    tagName: "mj-text",
+                    attributes: {
+                      align: "center",
+                      "font-size": "20px",
+                      "font-weight": "600",
+                      padding: "0 24px 8px",
+                    },
+                    children: [],
+                    content: "Build a conversion-first layout in three clicks.",
+                  },
+                  {
+                    tagName: "mj-text",
+                    attributes: {
+                      align: "center",
+                      "font-size": "14px",
+                      padding: "0 24px 16px",
+                      "css-class": "muted",
+                    },
+                    children: [],
+                    content:
+                      "Swap hero images, add countdown blocks, and export clean MJML instantly.",
                   },
                 ],
               },
@@ -404,7 +364,265 @@ export default async function Page() {
             attributes: {
               "background-color": "#ffffff",
               padding: "0 0 20px",
-              "css-class": "s-image",
+            },
+            children: [
+              {
+                tagName: "mj-group",
+                attributes: {},
+                children: [
+                  {
+                    tagName: "mj-column",
+                    attributes: {},
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          align: "center",
+                          "font-size": "24px",
+                          "font-weight": "700",
+                          padding: "0 24px 4px",
+                        },
+                        children: [],
+                        content: "3x",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          align: "center",
+                          "font-size": "13px",
+                          "css-class": "muted",
+                          padding: "0 24px",
+                        },
+                        children: [],
+                        content: "faster build time",
+                      },
+                    ],
+                  },
+                  {
+                    tagName: "mj-column",
+                    attributes: {},
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          align: "center",
+                          "font-size": "24px",
+                          "font-weight": "700",
+                          padding: "0 24px 4px",
+                        },
+                        children: [],
+                        content: "40+",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          align: "center",
+                          "font-size": "13px",
+                          "css-class": "muted",
+                          padding: "0 24px",
+                        },
+                        children: [],
+                        content: "drag-and-drop blocks",
+                      },
+                    ],
+                  },
+                  {
+                    tagName: "mj-column",
+                    attributes: {},
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          align: "center",
+                          "font-size": "24px",
+                          "font-weight": "700",
+                          padding: "0 24px 4px",
+                        },
+                        children: [],
+                        content: "1",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          align: "center",
+                          "font-size": "13px",
+                          "css-class": "muted",
+                          padding: "0 24px",
+                        },
+                        children: [],
+                        content: "click publish flow",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            tagName: "mj-section",
+            attributes: {
+              "background-color": "#ffffff",
+              padding: "8px 0 24px",
+            },
+            children: [
+              {
+                tagName: "mj-group",
+                attributes: {},
+                children: [
+                  {
+                    tagName: "mj-column",
+                    attributes: {
+                      width: "33.33%",
+                    },
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          "font-size": "16px",
+                          "font-weight": "600",
+                          padding: "0 24px 6px",
+                        },
+                        children: [],
+                        content: "Visual building blocks",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          padding: "0 24px",
+                          "css-class": "muted",
+                        },
+                        children: [],
+                        content:
+                          "Hero, gallery, product grid, countdown, and CTA blocks ready to drop in.",
+                      },
+                    ],
+                  },
+                  {
+                    tagName: "mj-column",
+                    attributes: {
+                      width: "33.33%",
+                    },
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          "font-size": "16px",
+                          "font-weight": "600",
+                          padding: "0 24px 6px",
+                        },
+                        children: [],
+                        content: "Brand-safe presets",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          padding: "0 24px",
+                          "css-class": "muted",
+                        },
+                        children: [],
+                        content:
+                          "Lock fonts, colors, and spacing so every campaign feels consistent.",
+                      },
+                    ],
+                  },
+                  {
+                    tagName: "mj-column",
+                    attributes: {
+                      width: "33.33%",
+                    },
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          "font-size": "16px",
+                          "font-weight": "600",
+                          padding: "0 24px 6px",
+                        },
+                        children: [],
+                        content: "Instant previews",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          padding: "0 24px",
+                          "css-class": "muted",
+                        },
+                        children: [],
+                        content:
+                          "Mobile, tablet, and desktop views update as you edit.",
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            tagName: "mj-section",
+            attributes: {
+              "background-color": "#ffffff",
+              padding: "0 0 24px",
+            },
+            children: [
+              {
+                tagName: "mj-group",
+                attributes: {},
+                children: [
+                  {
+                    tagName: "mj-column",
+                    attributes: {
+                      width: "55%",
+                    },
+                    children: [
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          "font-size": "18px",
+                          "font-weight": "600",
+                          padding: "0 24px 6px",
+                        },
+                        children: [],
+                        content: "Build a promo in four simple steps",
+                      },
+                      {
+                        tagName: "mj-text",
+                        attributes: {
+                          padding: "0 24px",
+                          "css-class": "muted",
+                        },
+                        children: [],
+                        content:
+                          "1. Pick a promo template.<br />2. Drag blocks into place.<br />3. Swap copy and images.<br />4. Publish or export clean HTML.",
+                      },
+                    ],
+                  },
+                  {
+                    tagName: "mj-column",
+                    attributes: {
+                      width: "45%",
+                    },
+                    children: [
+                      {
+                        tagName: "mj-image",
+                        attributes: {
+                          src: "https://images.unsplash.com/photo-1529119368496-2dfda6ec2804?auto=format&fit=crop&w=1200&q=60",
+                          alt: "Email editor workflow",
+                          padding: "0 24px",
+                          "border-radius": "12px",
+                        },
+                        children: [],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            tagName: "mj-section",
+            attributes: {
+              "background-color": "#ffffff",
+              padding: "0 0 24px",
             },
             children: [
               {
@@ -416,55 +634,40 @@ export default async function Page() {
                     attributes: {
                       "font-size": "18px",
                       "font-weight": "600",
-                      padding: "0 24px 10px",
+                      padding: "0 24px 6px",
                     },
                     children: [],
-                    content: "Image application",
+                    content: "Preview the landing-style layout",
+                  },
+                  {
+                    tagName: "mj-text",
+                    attributes: {
+                      padding: "0 24px 12px",
+                      "css-class": "muted",
+                    },
+                    children: [],
+                    content:
+                      "See how the editor builds a bold promo email with stacked sections and clear calls to action.",
                   },
                   {
                     tagName: "mj-image",
                     attributes: {
-                      src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=60",
-                      alt: "Example image",
-                      padding: "0 24px",
+                      src: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=60",
+                      alt: "Promo template preview",
+                      padding: "0 24px 12px",
+                      "border-radius": "12px",
                     },
                     children: [],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "0 0 20px",
-              "css-class": "s-button",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
-                      padding: "0 24px 10px",
-                    },
-                    children: [],
-                    content: "Button application",
                   },
                   {
                     tagName: "mj-button",
                     attributes: {
-                      href: "https://example.com/action",
+                      href: "https://example.com/preview",
                       align: "left",
                       padding: "0 24px",
                     },
                     children: [],
-                    content: "Primary action",
+                    content: "Open interactive preview",
                   },
                 ],
               },
@@ -474,8 +677,7 @@ export default async function Page() {
             tagName: "mj-section",
             attributes: {
               "background-color": "#ffffff",
-              padding: "0 0 20px",
-              "css-class": "s-divider",
+              padding: "0 0 24px",
             },
             children: [
               {
@@ -490,15 +692,26 @@ export default async function Page() {
                       padding: "0 24px 8px",
                     },
                     children: [],
-                    content: "Divider application",
+                    content: "Teams ship faster with Kompaniya",
                   },
                   {
-                    tagName: "mj-divider",
+                    tagName: "mj-text",
                     attributes: {
-                      "border-color": "#e6e6e6",
                       padding: "0 24px",
+                      "css-class": "muted",
                     },
                     children: [],
+                    content:
+                      "We went from 2 days to 2 hours for our seasonal promo. The editor made it simple for marketing to own the build.",
+                  },
+                  {
+                    tagName: "mj-text",
+                    attributes: {
+                      padding: "8px 24px 0",
+                      "font-size": "14px",
+                    },
+                    children: [],
+                    content: "Jordan Lee, Lifecycle Marketing Lead",
                   },
                 ],
               },
@@ -507,9 +720,8 @@ export default async function Page() {
           {
             tagName: "mj-section",
             attributes: {
-              "background-color": "#ffffff",
-              padding: "0 0 20px",
-              "css-class": "s-spacer",
+              "background-color": "#0f172a",
+              padding: "24px 0 28px",
             },
             children: [
               {
@@ -519,349 +731,69 @@ export default async function Page() {
                   {
                     tagName: "mj-text",
                     attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
+                      align: "center",
+                      "font-size": "22px",
+                      "font-weight": "700",
+                      color: "#ffffff",
+                      padding: "0 24px 8px",
+                    },
+                    children: [],
+                    content: "Ready to launch your next promo?",
+                  },
+                  {
+                    tagName: "mj-text",
+                    attributes: {
+                      align: "center",
+                      "font-size": "14px",
+                      color: "#e2e8f0",
+                      padding: "0 24px 16px",
+                    },
+                    children: [],
+                    content:
+                      "Start with a template or import your HTML. We handle the layout.",
+                  },
+                  {
+                    tagName: "mj-button",
+                    attributes: {
+                      href: "https://example.com/start",
+                      align: "center",
+                      padding: "0 24px",
+                      "background-color": "#ffffff",
+                      color: "#0f172a",
+                    },
+                    children: [],
+                    content: "Start a free build",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            tagName: "mj-section",
+            attributes: {
+              "background-color": "#f3f4f6",
+              padding: "20px 0 12px",
+            },
+            children: [
+              {
+                tagName: "mj-column",
+                attributes: {},
+                children: [
+                  {
+                    tagName: "mj-text",
+                    attributes: {
+                      align: "center",
+                      "font-size": "13px",
+                      "css-class": "muted",
                       padding: "0 24px 6px",
                     },
                     children: [],
-                    content: "Spacer application",
-                  },
-                  {
-                    tagName: "mj-spacer",
-                    attributes: {
-                      height: "16px",
-                    },
-                    children: [],
-                  },
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      padding: "0 24px",
-                      "css-class": "muted",
-                    },
-                    children: [],
-                    content: "Spacing between blocks without extra content.",
+                    content:
+                      "Need help? Reply to this email or visit example.com/support",
                   },
                 ],
               },
             ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "0 0 20px",
-              "css-class": "s-table",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
-                      padding: "0 24px 10px",
-                    },
-                    children: [],
-                    content: "Table application",
-                  },
-                  {
-                    tagName: "mj-table",
-                    attributes: {
-                      padding: "0 24px",
-                    },
-                    children: [
-                      {
-                        tagName: "tr",
-                        attributes: {
-                          "background-color": "#f2f2f2",
-                        },
-                        children: [
-                          {
-                            tagName: "th",
-                            attributes: {
-                              padding: "8px",
-                              "font-size": "13px",
-                            },
-                            children: [],
-                            content: "Plan",
-                          },
-                          {
-                            tagName: "th",
-                            attributes: {
-                              padding: "8px",
-                              "font-size": "13px",
-                            },
-                            children: [],
-                            content: "Price",
-                          },
-                          {
-                            tagName: "th",
-                            attributes: {
-                              padding: "8px",
-                              "font-size": "13px",
-                            },
-                            children: [],
-                            content: "Seats",
-                          },
-                        ],
-                      },
-                      {
-                        tagName: "tr",
-                        attributes: {},
-                        children: [
-                          {
-                            tagName: "td",
-                            attributes: {
-                              padding: "8px",
-                            },
-                            children: [],
-                            content: "Starter",
-                          },
-                          {
-                            tagName: "td",
-                            attributes: {
-                              padding: "8px",
-                            },
-                            children: [],
-                            content: "$19",
-                          },
-                          {
-                            tagName: "td",
-                            attributes: {
-                              padding: "8px",
-                            },
-                            children: [],
-                            content: "3",
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "0 0 20px",
-              "css-class": "s-social",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
-                      padding: "0 24px 10px",
-                    },
-                    children: [],
-                    content: "Social application",
-                  },
-                  {
-                    tagName: "mj-social",
-                    attributes: {
-                      padding: "0 24px",
-                      "font-size": "14px",
-                      "icon-size": "20px",
-                      mode: "horizontal",
-                    },
-                    children: [
-                      {
-                        tagName: "mj-social-element",
-                        attributes: {
-                          name: "facebook",
-                          href: "https://example.com/facebook",
-                        },
-                        children: [],
-                        content: "Facebook",
-                      },
-                      {
-                        tagName: "mj-social-element",
-                        attributes: {
-                          name: "twitter",
-                          href: "https://example.com/x",
-                        },
-                        children: [],
-                        content: "X",
-                      },
-                      {
-                        tagName: "mj-social-element",
-                        attributes: {
-                          name: "linkedin",
-                          href: "https://example.com/linkedin",
-                        },
-                        children: [],
-                        content: "LinkedIn",
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "0 0 20px",
-              "css-class": "s-accordion",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
-                      padding: "0 24px 10px",
-                    },
-                    children: [],
-                    content: "Accordion application",
-                  },
-                  {
-                    tagName: "mj-accordion",
-                    attributes: {
-                      border: "1px solid #e6e6e6",
-                      padding: "0 24px",
-                    },
-                    children: [
-                      {
-                        tagName: "mj-accordion-element",
-                        attributes: {},
-                        children: [
-                          {
-                            tagName: "mj-accordion-title",
-                            attributes: {
-                              "font-size": "16px",
-                              padding: "12px",
-                            },
-                            children: [],
-                            content: "Accordion title",
-                          },
-                          {
-                            tagName: "mj-accordion-text",
-                            attributes: {
-                              "font-size": "14px",
-                              padding: "12px",
-                              "css-class": "muted",
-                            },
-                            children: [],
-                            content: "Accordion body text content.",
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "0 0 20px",
-              "css-class": "s-carousel",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
-                      padding: "0 24px 10px",
-                    },
-                    children: [],
-                    content: "Carousel application",
-                  },
-                  {
-                    tagName: "mj-carousel",
-                    attributes: {
-                      padding: "0 24px",
-                    },
-                    children: [
-                      {
-                        tagName: "mj-carousel-image",
-                        attributes: {
-                          src: "https://images.unsplash.com/photo-1496307653780-42ee777d4833?auto=format&fit=crop&w=1200&q=60",
-                          alt: "Slide 1",
-                          href: "https://example.com/slide-1",
-                        },
-                        children: [],
-                      },
-                      {
-                        tagName: "mj-carousel-image",
-                        attributes: {
-                          src: "https://images.unsplash.com/photo-1485217988980-11786ced9454?auto=format&fit=crop&w=1200&q=60",
-                          alt: "Slide 2",
-                          href: "https://example.com/slide-2",
-                        },
-                        children: [],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-section",
-            attributes: {
-              "background-color": "#ffffff",
-              padding: "0 0 12px",
-              "css-class": "s-raw",
-            },
-            children: [
-              {
-                tagName: "mj-column",
-                attributes: {},
-                children: [
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      "font-size": "18px",
-                      "font-weight": "600",
-                      padding: "0 24px 8px",
-                    },
-                    children: [],
-                    content: "Raw HTML application",
-                  },
-                  {
-                    tagName: "mj-text",
-                    attributes: {
-                      padding: "0 24px",
-                      "css-class": "muted",
-                    },
-                    children: [],
-                    content: "Raw HTML renders exactly as provided.",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            tagName: "mj-raw",
-            attributes: {},
-            children: [],
-            content:
-              '<div style="padding:0 24px 24px;">Raw HTML block inside the body.</div>',
           },
         ],
       },

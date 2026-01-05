@@ -14,6 +14,11 @@ export const mjSectionAttributeGroups: AttributeGroup[] = [
         ],
       },
       {
+        key: "content-width",
+        label: "Content width",
+        placeholder: "600px",
+      },
+      {
         key: "direction",
         label: "Direction",
         type: "select",

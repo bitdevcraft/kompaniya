@@ -1,5 +1,14 @@
 import { Button } from "@kompaniya/ui-common/components/button";
 import { cn } from "@kompaniya/ui-common/lib/utils";
+import {
+  Code2,
+  Eye,
+  Monitor,
+  Redo2Icon,
+  Smartphone,
+  Tablet,
+  Undo2Icon,
+} from "lucide-react";
 
 import type { ViewportMode } from "../types/viewport";
 
@@ -27,7 +36,7 @@ export function EditorHeader({
   return (
     <header className="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <p className="text-sm font-semibold">UI Builder</p>
+        <p className="text-sm font-semibold">Email UI Builder</p>
         <p className="text-xs text-muted-foreground">
           Edit components or preview HTML output
         </p>
@@ -44,7 +53,7 @@ export function EditorHeader({
             type="button"
             variant="ghost"
           >
-            Undo
+            <Undo2Icon />
           </Button>
           <Button
             aria-label="Redo (Ctrl+Y)"
@@ -56,11 +65,11 @@ export function EditorHeader({
             type="button"
             variant="ghost"
           >
-            Redo
+            <Redo2Icon />
           </Button>
         </div>
         <div className="inline-flex rounded-md border bg-muted p-1 text-xs font-semibold">
-          <button
+          <Button
             className={cn(
               "rounded px-3 py-1",
               viewMode === "editor"
@@ -68,11 +77,13 @@ export function EditorHeader({
                 : "text-muted-foreground",
             )}
             onClick={() => onViewModeChange("editor")}
+            size={"sm"}
             type="button"
+            variant="ghost"
           >
-            Editor
-          </button>
-          <button
+            <Code2 />
+          </Button>
+          <Button
             className={cn(
               "rounded px-3 py-1",
               viewMode === "preview"
@@ -80,13 +91,15 @@ export function EditorHeader({
                 : "text-muted-foreground",
             )}
             onClick={() => onViewModeChange("preview")}
+            size={"sm"}
             type="button"
+            variant="ghost"
           >
-            Live Preview
-          </button>
+            <Eye />
+          </Button>
         </div>
         <div className="inline-flex rounded-md border bg-muted p-1 text-xs font-semibold">
-          <button
+          <Button
             className={cn(
               "rounded px-3 py-1",
               viewportMode === "web"
@@ -94,11 +107,13 @@ export function EditorHeader({
                 : "text-muted-foreground",
             )}
             onClick={() => onViewportModeChange("web")}
+            size={"sm"}
             type="button"
+            variant="ghost"
           >
-            Web View
-          </button>
-          <button
+            <Monitor />
+          </Button>
+          <Button
             className={cn(
               "rounded px-3 py-1",
               viewportMode === "tablet"
@@ -106,11 +121,13 @@ export function EditorHeader({
                 : "text-muted-foreground",
             )}
             onClick={() => onViewportModeChange("tablet")}
+            size={"sm"}
             type="button"
+            variant="ghost"
           >
-            Tablet View
-          </button>
-          <button
+            <Tablet />
+          </Button>
+          <Button
             className={cn(
               "rounded px-3 py-1",
               viewportMode === "mobile"
@@ -118,10 +135,12 @@ export function EditorHeader({
                 : "text-muted-foreground",
             )}
             onClick={() => onViewportModeChange("mobile")}
+            size={"sm"}
             type="button"
+            variant="ghost"
           >
-            Mobile View
-          </button>
+            <Smartphone />
+          </Button>
         </div>
       </div>
     </header>

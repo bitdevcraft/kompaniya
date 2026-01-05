@@ -499,7 +499,9 @@ const buildNodeTree = (
       ? { height: "20px" }
       : tagName === "mj-social-element"
         ? { name: "facebook" }
-        : {};
+        : tagName === "mj-section"
+          ? { "full-width": "full-width" }
+          : {};
   const defaultContent =
     tagName === "mj-text"
       ? ""

@@ -4,19 +4,19 @@ import { APP } from "@repo/shared";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
-import { DM_Sans, Lora, Space_Mono } from "next/font/google";
+import { Geist_Mono, JetBrains_Mono, Lora } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "sonner";
 import "@kompaniya/ui-common/globals.css";
 
 import { Providers } from "./providers";
 
-const sansSerif = DM_Sans({
+const sansSerif = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-sans",
 });
 const serif = Lora({ subsets: ["latin"], variable: "--font-serif" });
-const monospace = Space_Mono({
+const monospace = JetBrains_Mono({
   variable: "--font-mono",
   weight: ["400", "700"],
 });

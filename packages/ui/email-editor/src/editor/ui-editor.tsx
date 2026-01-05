@@ -139,7 +139,7 @@ export function UiEditor({
                   className="relative mx-auto w-full"
                   style={{ maxWidth: viewportMaxWidth }}
                 >
-                  <div className="rounded-xl border bg-background shadow-md ring-1 ring-black/5">
+                  <div className="border bg-background shadow-md ring-1 ring-black/5">
                     {viewMode === "editor" ? (
                       <Canvas viewportMode={viewportMode} />
                     ) : (

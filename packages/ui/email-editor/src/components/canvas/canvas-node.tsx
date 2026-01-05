@@ -1,15 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 /* cspell:ignore renderable */
 import type { UniqueIdentifier } from "@dnd-kit/core";
 
-import {
-  horizontalListSortingStrategy,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { Button } from "@kompaniya/ui-common/components/button";
 import { cn } from "@kompaniya/ui-common/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { BuilderNodeTag } from "../../config/nodes";
 import type { ViewportMode } from "../../types/viewport";
@@ -22,7 +14,21 @@ import {
   resolveNodeAttributes,
 } from "../../utils/head-attributes";
 import { DroppableContainer } from "../droppable/droppable-container";
-import { DroppableGap } from "../droppable/droppable-gap";
+import {
+  getAlignItemsClass,
+  getJustifyClass,
+  parseCellSpacing,
+} from "./canvas-node-utils";
+import {
+  CanvasNodeCarousel,
+  type CanvasNodeChildComponent,
+  CanvasNodeColumnRow,
+  CanvasNodeDefault,
+  CanvasNodeNavbar,
+  CanvasNodeSocial,
+  CanvasNodeTable,
+  CanvasNodeTableRow,
+} from "./canvas-node-variants";
 import { getNodeStyles, renderLeafNode } from "./nodes";
 
 export function CanvasNode({
@@ -57,6 +63,11 @@ export function CanvasNode({
   if (!node) return null;
   if (isDescendantOfTag(id, data, "mj-head")) return null;
 
+  const isSelected = activeId === id;
+  const isHovered = hoverActiveId === id;
+  const isSelfDragging = id === dragActiveId;
+  const childDropDisabled = dropDisable || isSelfDragging;
+
   const renderableItems = node.items.filter(
     (childId) => !isDescendantOfTag(childId, data, "mj-head"),
   );
@@ -77,10 +88,6 @@ export function CanvasNode({
   const isTableRow = node.tagName === "tr";
   const isNavbar = node.tagName === "mj-navbar";
   const isSocial = node.tagName === "mj-social";
-  const isFullWidthSection =
-    node.tagName === "mj-section" &&
-    (attributes["full-width"] === "full-width" ||
-      attributes["full-width"] === "true");
   const emptyContainerClass = isEmptyContainer
     ? node.tagName === "mj-body"
       ? "min-h-[160px]"
@@ -111,20 +118,24 @@ export function CanvasNode({
     return "100%";
   };
 
-  const sectionInnerStyles = isColumnRow
-    ? ({
-        ...innerStyles,
-        width: "100%",
-        ...(isFullWidthSection
-          ? { maxWidth: "100%" }
-          : node.tagName === "mj-section"
-            ? {
-                maxWidth: resolveBodyWidth(node.parent ?? id),
-                margin: "0 auto",
-              }
-            : {}),
-      } as React.CSSProperties)
+  const sectionContentWidth =
+    node.tagName === "mj-section"
+      ? attributes["content-width"]?.trim() ||
+        resolveBodyWidth(node.parent ?? id)
+      : "";
+  const baseInnerStyles = isColumnRow
+    ? ({ ...innerStyles, width: "100%" } as React.CSSProperties)
     : innerStyles;
+  const sectionInnerStyles =
+    node.tagName === "mj-section"
+      ? ({
+          ...baseInnerStyles,
+          width: "100%",
+          ...(sectionContentWidth
+            ? { maxWidth: sectionContentWidth, margin: "0 auto" }
+            : {}),
+        } as React.CSSProperties)
+      : baseInnerStyles;
 
   const mergedStyle = {
     ...containerStyles,
@@ -132,12 +143,19 @@ export function CanvasNode({
     width: "100%",
   } as React.CSSProperties;
 
+  const commonChildProps = {
+    dragActiveId,
+    dropDisable: childDropDisabled,
+    headAttributes,
+    viewportMode,
+  };
+
   const leafContent = renderLeafNode(node.tagName, {
     id,
     node,
     attributes,
     contentStyles,
-    isActive: activeId === id,
+    isActive: isSelected,
     setActiveId,
     setNodeContent,
     insertSiblingAfter,
@@ -150,27 +168,12 @@ export function CanvasNode({
       )
     : 0;
   const navbarAlign = attributes["align"];
-  const navbarJustifyClass =
-    navbarAlign === "center"
-      ? "justify-center"
-      : navbarAlign === "right"
-        ? "justify-end"
-        : "justify-start";
+  const navbarJustifyClass = getJustifyClass(navbarAlign);
   const socialMode = attributes["mode"] ?? "horizontal";
   const isSocialHorizontal = socialMode !== "vertical";
   const socialAlign = attributes["align"];
-  const socialJustifyClass =
-    socialAlign === "center"
-      ? "justify-center"
-      : socialAlign === "right"
-        ? "justify-end"
-        : "justify-start";
-  const socialAlignItemsClass =
-    socialAlign === "center"
-      ? "items-center"
-      : socialAlign === "right"
-        ? "items-end"
-        : "items-start";
+  const socialJustifyClass = getJustifyClass(socialAlign);
+  const socialAlignItemsClass = getAlignItemsClass(socialAlign);
   const socialInnerStyles = innerStyles;
   const tableParentAttributes =
     isTableRow && node.parent
@@ -180,14 +183,7 @@ export function CanvasNode({
     (isTable
       ? attributes["cellspacing"]
       : tableParentAttributes?.cellspacing) ?? "";
-  const tableGapValue = (() => {
-    const trimmed = tableCellSpacing.trim();
-    if (!trimmed) return undefined;
-    const numeric = Number(trimmed);
-    return Number.isFinite(numeric) && trimmed === String(numeric)
-      ? numeric
-      : trimmed;
-  })();
+  const tableGapValue = parseCellSpacing(tableCellSpacing);
   const rowFlexStyles: React.CSSProperties = isTableRow
     ? {
         display: "flex",
@@ -201,6 +197,132 @@ export function CanvasNode({
         gap: tableGapValue,
       }
     : {};
+  const carouselIconStyles: React.CSSProperties = {
+    width: attributes["icon-width"] ?? "18px",
+    height: attributes["icon-height"] ?? "18px",
+  };
+
+  const handleSelect = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setActiveId(id);
+  };
+  const handleHoverStart = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setHoverActiveId(id);
+  };
+  const handleHoverEnd = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setHoverActiveId("");
+  };
+
+  const getNodeAttributes = (nodeId: UniqueIdentifier) =>
+    resolveNodeAttributes(nodeId, data, headAttributes);
+
+  /* eslint-disable react/prop-types */
+  const ChildNode: CanvasNodeChildComponent = ({
+    id: childId,
+    parentId: childParentId,
+    className: childClassName,
+    children: childChildren,
+  }) => (
+    <CanvasNode
+      className={childClassName}
+      id={childId}
+      parentId={childParentId}
+      {...commonChildProps}
+    >
+      {childChildren}
+    </CanvasNode>
+  );
+  /* eslint-enable react/prop-types */
+
+  let content: React.ReactNode = null;
+  if (isLeafNode) {
+    content = leafContent;
+  } else if (isCarousel) {
+    content = (
+      <CanvasNodeCarousel
+        attributes={attributes}
+        canDropHere={canDropHere}
+        carouselActiveIndex={carouselActiveIndex}
+        carouselIconStyles={carouselIconStyles}
+        carouselItems={carouselItems}
+        ChildNode={ChildNode}
+        getNodeAttributes={getNodeAttributes}
+        id={id}
+        setActiveId={setActiveId}
+      />
+    );
+  } else if (isNavbar) {
+    content = (
+      <CanvasNodeNavbar
+        canDropHere={canDropHere}
+        ChildNode={ChildNode}
+        id={id}
+        innerStyles={innerStyles}
+        navbarJustifyClass={navbarJustifyClass}
+        renderableItems={renderableItems}
+      />
+    );
+  } else if (isSocial) {
+    content = (
+      <CanvasNodeSocial
+        canDropHere={canDropHere}
+        ChildNode={ChildNode}
+        id={id}
+        isSocialHorizontal={isSocialHorizontal}
+        renderableItems={renderableItems}
+        socialAlignItemsClass={socialAlignItemsClass}
+        socialInnerStyles={socialInnerStyles}
+        socialJustifyClass={socialJustifyClass}
+      />
+    );
+  } else if (isTable) {
+    content = (
+      <CanvasNodeTable
+        appendTableColumn={appendTableColumn}
+        appendTableRow={appendTableRow}
+        canDropHere={canDropHere}
+        ChildNode={ChildNode}
+        id={id}
+        innerStyles={innerStyles}
+        isSelected={isSelected}
+        renderableItems={renderableItems}
+        tableRowsStyles={tableRowsStyles}
+      />
+    );
+  } else if (isTableRow) {
+    content = (
+      <CanvasNodeTableRow
+        canDropHere={canDropHere}
+        ChildNode={ChildNode}
+        id={id}
+        renderableItems={renderableItems}
+        rowFlexStyles={rowFlexStyles}
+      />
+    );
+  } else if (isColumnRow) {
+    content = (
+      <CanvasNodeColumnRow
+        canDropHere={canDropHere}
+        ChildNode={ChildNode}
+        getNodeAttributes={getNodeAttributes}
+        id={id}
+        renderableItems={renderableItems}
+        sectionInnerStyles={sectionInnerStyles}
+      />
+    );
+  } else {
+    content = (
+      <CanvasNodeDefault
+        canDropHere={canDropHere}
+        ChildNode={ChildNode}
+        id={id}
+        renderableItems={renderableItems}
+        sectionInnerStyles={sectionInnerStyles}
+      />
+    );
+  }
 
   return (
     <>
@@ -208,543 +330,24 @@ export function CanvasNode({
         className={cn(
           "w-full border border-transparent transition-shadow",
           emptyContainerClass,
-          activeId === id && "border-blue-400 ring-1 ring-blue-400/30",
-          hoverActiveId === id &&
-            activeId !== id &&
+          isSelected && "border-blue-400 ring-1 ring-blue-400/30",
+          isHovered &&
+            !isSelected &&
             "shadow-lg border-muted-foreground/70 ring-1 ring-blue-200/30",
           className,
         )}
         disabled={dropDisable}
         droppableGap={children}
         id={id}
-        isSelected={activeId === id}
+        isSelected={isSelected}
         items={renderableItems}
         style={mergedStyle}
         {...props}
-        onClick={(e) => {
-          e.stopPropagation();
-          setActiveId(id);
-        }}
-        onMouseEnter={(e) => {
-          e.stopPropagation();
-          setHoverActiveId(id);
-        }}
-        onMouseLeave={(e) => {
-          e.stopPropagation();
-          setHoverActiveId("");
-        }}
+        onClick={handleSelect}
+        onMouseEnter={handleHoverStart}
+        onMouseLeave={handleHoverEnd}
       >
-        {isLeafNode && leafContent}
-        {!isLeafNode &&
-          (isCarousel ? (
-            <SortableContext
-              items={carouselItems}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div className="w-full">
-                <div
-                  className="relative w-full overflow-hidden"
-                  style={{
-                    borderRadius: attributes["border-radius"],
-                    height: attributes["height"],
-                  }}
-                >
-                  <div
-                    className="flex transition-transform duration-300 ease-out"
-                    style={{
-                      transform: `translateX(-${carouselActiveIndex * 100}%)`,
-                    }}
-                  >
-                    <DroppableGap
-                      hidden={!canDropHere}
-                      id={id}
-                      index={0}
-                      isEnabled={canDropHere}
-                      orientation="horizontal"
-                    />
-                    {carouselItems.length === 0 ? (
-                      <div className="flex min-h-[120px] w-full items-center justify-center text-xs text-muted-foreground">
-                        Add carousel images
-                      </div>
-                    ) : (
-                      carouselItems.map((childId, idx) => (
-                        <div
-                          className="flex min-w-0 flex-[0_0_100%]"
-                          key={childId}
-                          style={{
-                            height: attributes["height"],
-                          }}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <CanvasNode
-                              dragActiveId={dragActiveId}
-                              dropDisable={dropDisable || id === dragActiveId}
-                              headAttributes={headAttributes}
-                              id={childId}
-                              parentId={id}
-                              viewportMode={viewportMode}
-                            />
-                          </div>
-                          <DroppableGap
-                            hidden={!canDropHere}
-                            id={id}
-                            index={idx + 1}
-                            isEnabled={canDropHere}
-                            orientation="horizontal"
-                          />
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  {carouselItems.length > 1 && (
-                    <>
-                      <button
-                        aria-label="Previous slide"
-                        className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow-sm ring-1 ring-muted-foreground/30"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          const nextIndex =
-                            carouselActiveIndex === 0
-                              ? carouselItems.length - 1
-                              : carouselActiveIndex - 1;
-                          const nextId = carouselItems[nextIndex];
-                          if (nextId) {
-                            setActiveId(nextId);
-                          }
-                        }}
-                        type="button"
-                      >
-                        {attributes["left-icon"] ? (
-                          <img
-                            alt="Previous"
-                            src={attributes["left-icon"]}
-                            style={{
-                              width: attributes["icon-width"] ?? "18px",
-                              height: attributes["icon-height"] ?? "18px",
-                            }}
-                          />
-                        ) : (
-                          <ChevronLeft
-                            style={{
-                              width: attributes["icon-width"] ?? "18px",
-                              height: attributes["icon-height"] ?? "18px",
-                            }}
-                          />
-                        )}
-                      </button>
-                      <button
-                        aria-label="Next slide"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow-sm ring-1 ring-muted-foreground/30"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          const nextIndex =
-                            carouselActiveIndex === carouselItems.length - 1
-                              ? 0
-                              : carouselActiveIndex + 1;
-                          const nextId = carouselItems[nextIndex];
-                          if (nextId) {
-                            setActiveId(nextId);
-                          }
-                        }}
-                        type="button"
-                      >
-                        {attributes["right-icon"] ? (
-                          <img
-                            alt="Next"
-                            src={attributes["right-icon"]}
-                            style={{
-                              width: attributes["icon-width"] ?? "18px",
-                              height: attributes["icon-height"] ?? "18px",
-                            }}
-                          />
-                        ) : (
-                          <ChevronRight
-                            style={{
-                              width: attributes["icon-width"] ?? "18px",
-                              height: attributes["icon-height"] ?? "18px",
-                            }}
-                          />
-                        )}
-                      </button>
-                    </>
-                  )}
-                </div>
-                {carouselItems.length > 1 && (
-                  <div
-                    className={cn(
-                      "mt-2 flex items-center gap-2",
-                      attributes["align"] === "left" && "justify-start",
-                      attributes["align"] === "right" && "justify-end",
-                      attributes["align"] !== "left" &&
-                        attributes["align"] !== "right" &&
-                        "justify-center",
-                    )}
-                  >
-                    {carouselItems.map((childId, index) => {
-                      const imageAttributes = resolveNodeAttributes(
-                        childId,
-                        data,
-                        headAttributes,
-                      );
-                      const imageSrc = imageAttributes?.src;
-                      const isActive = index === carouselActiveIndex;
-                      return (
-                        <button
-                          aria-label={`Go to slide ${index + 1}`}
-                          className={cn(
-                            "relative h-10 w-14 overflow-hidden rounded border",
-                            isActive
-                              ? "border-blue-500 ring-1 ring-blue-400"
-                              : "border-muted-foreground/30",
-                          )}
-                          key={childId}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setActiveId(childId);
-                          }}
-                          type="button"
-                        >
-                          {imageSrc ? (
-                            <img
-                              alt={imageAttributes?.alt ?? "Thumbnail"}
-                              className="h-full w-full object-cover"
-                              src={imageSrc}
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">
-                              Image
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </SortableContext>
-          ) : isNavbar ? (
-            <SortableContext
-              items={renderableItems}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div className="w-full">
-                <div
-                  className={cn(
-                    "flex flex-wrap items-center",
-                    navbarJustifyClass,
-                  )}
-                  style={innerStyles}
-                >
-                  <DroppableGap
-                    hidden={!canDropHere}
-                    id={id}
-                    index={0}
-                    isEnabled={canDropHere}
-                    orientation="horizontal"
-                  />
-                  {renderableItems.length === 0 ? (
-                    <div className="flex min-h-10 w-full items-center justify-center text-xs text-muted-foreground">
-                      Add navbar links
-                    </div>
-                  ) : (
-                    renderableItems.map((childId, idx) => (
-                      <div className="flex min-w-0" key={childId}>
-                        <CanvasNode
-                          className="w-auto"
-                          dragActiveId={dragActiveId}
-                          dropDisable={dropDisable || id === dragActiveId}
-                          headAttributes={headAttributes}
-                          id={childId}
-                          parentId={id}
-                          viewportMode={viewportMode}
-                        />
-                        <DroppableGap
-                          hidden={!canDropHere}
-                          id={id}
-                          index={idx + 1}
-                          isEnabled={canDropHere}
-                          orientation="horizontal"
-                        />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </SortableContext>
-          ) : isSocial ? (
-            <SortableContext
-              items={renderableItems}
-              strategy={
-                isSocialHorizontal
-                  ? horizontalListSortingStrategy
-                  : verticalListSortingStrategy
-              }
-            >
-              <div className="w-full">
-                <div
-                  className={cn(
-                    "flex w-full",
-                    isSocialHorizontal ? "flex-wrap items-center" : "flex-col",
-                    isSocialHorizontal
-                      ? socialJustifyClass
-                      : socialAlignItemsClass,
-                  )}
-                  style={socialInnerStyles}
-                >
-                  <DroppableGap
-                    hidden={!canDropHere}
-                    id={id}
-                    index={0}
-                    isEnabled={canDropHere}
-                    orientation={isSocialHorizontal ? "horizontal" : undefined}
-                  />
-                  {renderableItems.length === 0 ? (
-                    <div className="flex min-h-10 w-full items-center justify-center text-xs text-muted-foreground">
-                      Add social links
-                    </div>
-                  ) : (
-                    renderableItems.map((childId, idx) => (
-                      <div
-                        className={cn(
-                          "flex min-w-0",
-                          isSocialHorizontal ? "w-auto" : "w-full",
-                        )}
-                        key={childId}
-                      >
-                        <CanvasNode
-                          className={isSocialHorizontal ? "w-auto" : "w-full"}
-                          dragActiveId={dragActiveId}
-                          dropDisable={dropDisable || id === dragActiveId}
-                          headAttributes={headAttributes}
-                          id={childId}
-                          parentId={id}
-                          viewportMode={viewportMode}
-                        />
-                        <DroppableGap
-                          hidden={!canDropHere}
-                          id={id}
-                          index={idx + 1}
-                          isEnabled={canDropHere}
-                          orientation={
-                            isSocialHorizontal ? "horizontal" : undefined
-                          }
-                        />
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </SortableContext>
-          ) : isTable ? (
-            <SortableContext
-              items={renderableItems}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="w-full">
-                {activeId === id && (
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Button
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        appendTableRow(id);
-                      }}
-                      size="sm"
-                      type="button"
-                      variant="secondary"
-                    >
-                      Add row
-                    </Button>
-                    <Button
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        appendTableColumn(id);
-                      }}
-                      size="sm"
-                      type="button"
-                      variant="secondary"
-                    >
-                      Add column
-                    </Button>
-                  </div>
-                )}
-                <div
-                  className="w-full"
-                  style={{ ...innerStyles, ...tableRowsStyles }}
-                >
-                  {renderableItems.map((childId, idx) => (
-                    <div key={childId}>
-                      {idx === 0 ? (
-                        <DroppableGap
-                          hidden={!canDropHere}
-                          id={id}
-                          index={idx}
-                          isEnabled={canDropHere}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                      <CanvasNode
-                        dragActiveId={dragActiveId}
-                        dropDisable={dropDisable || id === dragActiveId}
-                        headAttributes={headAttributes}
-                        id={childId}
-                        parentId={id}
-                        viewportMode={viewportMode}
-                      >
-                        <DroppableGap
-                          hidden={!canDropHere}
-                          id={id}
-                          index={idx + 1}
-                          isEnabled={canDropHere}
-                        />
-                      </CanvasNode>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </SortableContext>
-          ) : isTableRow ? (
-            <SortableContext
-              items={renderableItems}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div className="w-full" style={rowFlexStyles}>
-                <DroppableGap
-                  hidden={!canDropHere}
-                  id={id}
-                  index={0}
-                  isEnabled={canDropHere}
-                  orientation="horizontal"
-                />
-                {renderableItems.length === 0 ? (
-                  <div className="flex min-h-8 w-full items-center justify-center text-xs text-muted-foreground">
-                    Add table cells
-                  </div>
-                ) : (
-                  renderableItems.map((childId, idx) => (
-                    <div className="flex min-w-0 flex-1" key={childId}>
-                      <CanvasNode
-                        dragActiveId={dragActiveId}
-                        dropDisable={dropDisable || id === dragActiveId}
-                        headAttributes={headAttributes}
-                        id={childId}
-                        parentId={id}
-                        viewportMode={viewportMode}
-                      />
-                      <DroppableGap
-                        hidden={!canDropHere}
-                        id={id}
-                        index={idx + 1}
-                        isEnabled={canDropHere}
-                        orientation="horizontal"
-                      />
-                    </div>
-                  ))
-                )}
-              </div>
-            </SortableContext>
-          ) : isColumnRow ? (
-            <SortableContext
-              items={renderableItems}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div
-                className="flex w-full items-stretch"
-                style={sectionInnerStyles}
-              >
-                <DroppableGap
-                  hidden={!canDropHere}
-                  id={id}
-                  index={0}
-                  isEnabled={canDropHere}
-                  orientation="horizontal"
-                />
-                {renderableItems.map((childId, idx) => {
-                  const columnAttributes = resolveNodeAttributes(
-                    childId,
-                    data,
-                    headAttributes,
-                  );
-                  const columnWidth = columnAttributes?.width;
-                  const verticalAlign = columnAttributes?.["vertical-align"];
-                  const columnStyle: React.CSSProperties = {
-                    flex: columnWidth ? `0 0 ${columnWidth}` : "1 1 0",
-                    maxWidth: columnWidth,
-                    width: columnWidth,
-                  };
-
-                  if (verticalAlign === "middle") {
-                    columnStyle.alignSelf = "center";
-                  } else if (verticalAlign === "bottom") {
-                    columnStyle.alignSelf = "flex-end";
-                  }
-
-                  return (
-                    <div
-                      className="flex min-w-0"
-                      key={childId}
-                      style={columnStyle}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <CanvasNode
-                          dragActiveId={dragActiveId}
-                          dropDisable={dropDisable || id === dragActiveId}
-                          headAttributes={headAttributes}
-                          id={childId}
-                          parentId={id}
-                          viewportMode={viewportMode}
-                        />
-                      </div>
-                      <DroppableGap
-                        hidden={!canDropHere}
-                        id={id}
-                        index={idx + 1}
-                        isEnabled={canDropHere}
-                        orientation="horizontal"
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </SortableContext>
-          ) : (
-            <SortableContext
-              items={renderableItems}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="w-full" style={sectionInnerStyles}>
-                {renderableItems.map((childId, idx) => (
-                  <div key={childId}>
-                    {idx === 0 ? (
-                      <DroppableGap
-                        hidden={!canDropHere}
-                        id={id}
-                        index={idx}
-                        isEnabled={canDropHere}
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    <CanvasNode
-                      dragActiveId={dragActiveId}
-                      dropDisable={dropDisable || id === dragActiveId}
-                      headAttributes={headAttributes}
-                      id={childId}
-                      parentId={id}
-                      viewportMode={viewportMode}
-                    >
-                      <DroppableGap
-                        hidden={!canDropHere}
-                        id={id}
-                        index={idx + 1}
-                        isEnabled={canDropHere}
-                      />
-                    </CanvasNode>
-                  </div>
-                ))}
-              </div>
-            </SortableContext>
-          ))}
+        {content}
       </DroppableContainer>
     </>
   );

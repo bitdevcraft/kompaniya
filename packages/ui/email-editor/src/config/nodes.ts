@@ -183,6 +183,14 @@ const NODE_CHILD_RULES: Record<BuilderParentTag, BuilderNodeTag[]> = {
   tr: ["td", "th"],
   td: [],
   th: [],
+  "mj-all": [],
+  "mj-class": [],
+  "mj-breakpoint": [],
+  "mj-font": [],
+  "mj-html-attribute": [],
+  "mj-preview": [],
+  "mj-style": [],
+  "mj-title": [],
 };
 
 export const getAllowedChildTags = (parentTag: string): BuilderNodeTag[] => {
