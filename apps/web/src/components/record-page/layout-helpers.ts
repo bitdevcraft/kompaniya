@@ -35,6 +35,7 @@ export function createDefaultValuesForLayout<
       case "text":
       case "textarea":
       case "html":
+      case "mjml":
       default: {
         defaults[field.id] = "" as TFieldValues[typeof field.id];
         break;
@@ -124,6 +125,7 @@ export function normalizeValueForForm(
     }
     case "phone":
     case "html":
+    case "mjml":
     case "textarea":
     default: {
       if (value === null || value === undefined) return "";
@@ -175,6 +177,7 @@ export function normalizeValueForSubmission<TFieldValues extends FieldValues>(
     }
     case "picklist":
     case "html":
+    case "mjml":
     case "phone":
     case "lookup":
     case "text":

@@ -13,6 +13,7 @@ export interface BaseRecordFieldProps<TValue> {
   onChange?: (value: TValue) => void;
   placeholder?: string;
   options?: RecordFieldOption[];
+  record?: Record<string, unknown>;
   value?: TValue;
 }
 

@@ -31,7 +31,6 @@ import { OrgDataTableActionBar } from "./data-table-action-bar";
 import { DataTableCard } from "./data-table-card";
 import { useDataTableColumns } from "./data-table-columns";
 import { ImportButton } from "./new/import-button";
-import { NewButton } from "./new/new-button";
 
 interface OrgDataTableProps {
   search: SearchParamsSchema;
@@ -122,7 +121,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
             <DataTableAdvancedToolbar hideViewColumns table={table}>
               <div className="flex gap-4">
                 <ButtonGroup>
-                  <NewButton />
+                  {/* <NewButton /> */}
                   <Button asChild size={"sm"} variant={"outline"}>
                     <Link href={"/marketing/email-templates/new"}>
                       <Plus />

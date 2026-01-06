@@ -12,7 +12,11 @@ export function OutputPanel({
   htmlOutput: string;
 }) {
   return (
-    <Accordion defaultValue={["json"]} type="multiple">
+    <Accordion
+      className="rounded-md border bg-background p-4"
+      defaultValue={["json"]}
+      type="multiple"
+    >
       <OutputAccordionItem
         content={jsonOutput}
         title="JSON Output"

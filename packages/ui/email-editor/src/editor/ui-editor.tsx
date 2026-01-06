@@ -157,7 +157,7 @@ export function UiEditor({
               </div>
             </main>
             <Sidebar
-              className="min-h-0 shrink-0 overflow-hidden rounded-lg border"
+              className="min-h-0 shrink-0 overflow-hidden rounded-lg"
               collapsible="none"
               side="right"
             >

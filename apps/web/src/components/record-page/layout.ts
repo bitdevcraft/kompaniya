@@ -30,6 +30,7 @@ export type RecordFieldDataType =
   | "multipicklist"
   | "phone"
   | "html"
+  | "mjml"
   | "lookup";
 
 export interface RecordFieldOption {
@@ -112,6 +113,10 @@ export interface RecordLayoutSectionColumns<
 export interface RecordLayoutSectionGroup<
   TFieldValues extends FieldValues = FieldValues,
 > {
+  /**
+   * Default grid columns for fields inside this section group.
+   */
+  fieldsGridColumns?: 1 | 2 | 3 | 4;
   sections: RecordLayoutSection<TFieldValues>[];
 }
 

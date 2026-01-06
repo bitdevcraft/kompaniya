@@ -6,8 +6,8 @@ import { authClient } from "@/lib/auth/client";
 export type tableType = OrgEmailCampaign;
 
 export const model = {
-  name: "campaign",
-  plural: "campaigns",
+  name: "email-campaign",
+  plural: "email-campaigns",
 };
 
 export type OrganizationModel = ReturnType<

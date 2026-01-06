@@ -51,6 +51,7 @@ import {
   normalizeValueForSubmission,
 } from "./layout-helpers";
 import { LookupRecordField } from "./lookup-record-field";
+import { MjmlRecordField } from "./mjml-record-field";
 import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
 import { PhoneRecordField } from "./phone-record-field";
@@ -88,6 +89,7 @@ type FieldComponent = (props: {
   onChange?: (value: unknown) => void;
   placeholder?: string;
   options?: RecordFieldOption[];
+  record?: Record<string, unknown>;
   value?: unknown;
 }) => React.ReactNode | null;
 
@@ -120,6 +122,7 @@ interface RecordLayoutRendererProps<
 }
 
 interface SectionProps<TFieldValues extends FieldValues> {
+  columnsOverride?: 1 | 2 | 3 | 4;
   form: UseFormReturn<TFieldValues>;
   isEditing: boolean;
   record: Record<string, unknown>;
@@ -296,6 +299,7 @@ const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
   date: DateRecordField as FieldComponent,
   datetime: DatetimeRecordField as FieldComponent,
   html: HtmlRecordField as FieldComponent,
+  mjml: MjmlRecordField as FieldComponent,
   lookup: LookupRecordField as FieldComponent,
   multipicklist: MultipicklistRecordField as FieldComponent,
   number: NumberRecordField as FieldComponent,
@@ -370,6 +374,7 @@ function FieldRenderer<TFieldValues extends FieldValues>({
             onChange={(value) => controllerField.onChange(value)}
             options={field.options}
             placeholder={field.placeholder}
+            record={record}
             value={controllerField.value}
           />
         )}
@@ -384,6 +389,7 @@ function FieldRenderer<TFieldValues extends FieldValues>({
       label={field.label}
       lookup={field.lookup}
       options={field.options}
+      record={record}
       value={record[field.id as string]}
     />
   );
@@ -503,8 +509,9 @@ function getColumnSpanClass(colSpan?: number) {
   return `col-span-1 md:col-span-${colSpan}`;
 }
 
-function getGridClass(columns: number) {
-  switch (columns) {
+function getGridClass(columns?: number) {
+  const resolved = columns ?? 2;
+  switch (resolved) {
     case 1:
       return "grid-cols-1";
     case 3:
@@ -734,8 +741,12 @@ function renderLayoutSections<TFieldValues extends FieldValues>(
   context: SectionRenderContext<TFieldValues>,
 ) {
   const { form, isEditing, record } = context;
-  const renderSection = (section: RecordLayoutSection<TFieldValues>) => (
+  const renderSection = (
+    section: RecordLayoutSection<TFieldValues>,
+    columnsOverride?: 1 | 2 | 3 | 4,
+  ) => (
     <Section
+      columnsOverride={columnsOverride}
       form={form}
       isEditing={isEditing}
       key={section.id}
@@ -755,7 +766,9 @@ function renderLayoutSections<TFieldValues extends FieldValues>(
     if (headerSections.length > 0) {
       blocks.push(
         <div className="space-y-6" key="header">
-          {headerSections.map(renderSection)}
+          {headerSections.map((section) =>
+            renderSection(section, sectionColumns.header?.fieldsGridColumns),
+          )}
         </div>,
       );
     }
@@ -770,17 +783,32 @@ function renderLayoutSections<TFieldValues extends FieldValues>(
           key="columns"
         >
           <div className="space-y-6">
-            {firstColumnSections.map(renderSection)}
+            {firstColumnSections.map((section) =>
+              renderSection(
+                section,
+                sectionColumns.firstColumn?.fieldsGridColumns,
+              ),
+            )}
           </div>
           <div className="space-y-6">
-            {secondColumnSections.map(renderSection)}
+            {secondColumnSections.map((section) =>
+              renderSection(
+                section,
+                sectionColumns.secondColumn?.fieldsGridColumns,
+              ),
+            )}
           </div>
         </div>,
       );
     } else if (firstColumnSections.length > 0) {
       blocks.push(
         <div className="space-y-6" key="first-column">
-          {firstColumnSections.map(renderSection)}
+          {firstColumnSections.map((section) =>
+            renderSection(
+              section,
+              sectionColumns.firstColumn?.fieldsGridColumns,
+            ),
+          )}
         </div>,
       );
     }
@@ -797,7 +825,7 @@ function renderLayoutSections<TFieldValues extends FieldValues>(
     return null;
   }
 
-  return sections.map(renderSection);
+  return sections.map((section) => renderSection(section));
 }
 
 function resolveFieldValue<TFieldValues extends FieldValues>(
@@ -819,12 +847,13 @@ function resolveFieldValue<TFieldValues extends FieldValues>(
 }
 
 function Section<TFieldValues extends FieldValues>({
+  columnsOverride,
   form,
   isEditing,
   record,
   section,
 }: SectionProps<TFieldValues>) {
-  const gridClass = getGridClass(section.columns ?? 2);
+  const gridClass = getGridClass(section.columns ?? columnsOverride);
 
   return (
     <Card className="border-border/60">

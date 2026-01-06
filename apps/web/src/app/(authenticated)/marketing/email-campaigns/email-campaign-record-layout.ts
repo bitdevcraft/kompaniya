@@ -59,10 +59,6 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
             id: "campaign-basics",
             title: "Campaign details",
           },
-        ],
-      },
-      firstColumn: {
-        sections: [
           {
             description:
               "Connect the campaign to approved domains, templates, and test recipients before sending.",
@@ -111,33 +107,47 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
                 id: "targetCategories",
                 label: "Target categories",
                 options: AUDIENCE_OPTIONS,
-                placeholder: "Add categories…",
+                placeholder: "Add categories.",
                 type: "multipicklist",
               },
             ],
             id: "campaign-audience",
             title: "Audience",
           },
-        ],
-      },
-      secondColumn: {
-        sections: [
           {
             description:
               "Compose the HTML content for the campaign and preview the final output.",
             fields: [
               {
                 description:
-                  "Switch between code and preview to fine-tune the message before scheduling.",
-                id: "body",
+                  "Use the visual editor to craft the email content and preview the HTML output.",
+                id: "mjmlJsonContent",
                 label: "Email body",
-                type: "html",
+                type: "mjml",
               },
             ],
             id: "campaign-content",
             title: "Content",
+            columns: 1,
           },
         ],
       },
     },
+    supplementalFields: [
+      {
+        id: "htmlContent",
+        label: "HTML content",
+        type: "html",
+      },
+      {
+        id: "mjmlContent",
+        label: "MJML content",
+        type: "text",
+      },
+      {
+        id: "body",
+        label: "Email body",
+        type: "html",
+      },
+    ],
   };

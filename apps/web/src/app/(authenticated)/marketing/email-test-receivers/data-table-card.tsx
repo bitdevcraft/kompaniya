@@ -16,6 +16,7 @@ import {
 import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
 import { Row } from "@tanstack/react-table";
 import { Edit, Ellipsis, Trash2 } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 import { DataTableActionType } from "@/types/data-table-actions";
@@ -42,7 +43,14 @@ export function DataTableCard({
         data-state={row.getIsSelected() ? "selected" : undefined}
       >
         <CardHeader className="">
-          <CardTitle className="flex gap-4 mt-2">{row.original.name}</CardTitle>
+          <CardTitle className="flex gap-4 mt-2">
+            <Link
+              className="hover:underline"
+              href={`/marketing/email-test-receivers/r/${row.original.id}`}
+            >
+              {row.original.name}
+            </Link>
+          </CardTitle>
           <CardAction className="flex gap-2 items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

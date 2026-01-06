@@ -39,8 +39,14 @@ export class EmailCampaignController {
     @Session() session: UserSession,
     @Body() createEmailCampaignDto: CreateEmailCampaignDto,
   ) {
+    const body =
+      createEmailCampaignDto.body ?? createEmailCampaignDto.htmlContent;
+    const htmlContent =
+      createEmailCampaignDto.htmlContent ?? createEmailCampaignDto.body;
     const record: NewOrgEmailCampaign = {
       ...createEmailCampaignDto,
+      body,
+      htmlContent,
       organizationId: organization.id,
     };
 
@@ -132,10 +138,20 @@ export class EmailCampaignController {
 
     await this.emailCampaignService.deleteCacheById(record.id, organization.id);
 
+    const updatePayload: UpdateEmailCampaignDto = { ...updateEmailCampaignDto };
+
+    if (updatePayload.body && !updatePayload.htmlContent) {
+      updatePayload.htmlContent = updatePayload.body;
+    }
+
+    if (updatePayload.htmlContent && !updatePayload.body) {
+      updatePayload.body = updatePayload.htmlContent;
+    }
+
     return await this.emailCampaignService.updateRecordById(
       id,
       organization.id,
-      updateEmailCampaignDto,
+      updatePayload,
     );
   }
 }
