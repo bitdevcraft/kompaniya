@@ -17,4 +17,5 @@ export * from "./org-real-estate-booking-buyers";
 export * from "./org-real-estate-bookings";
 export * from "./org-real-estate-projects";
 export * from "./org-real-estate-properties";
+export * from "./org-tags";
 export * from "./org-tasks";

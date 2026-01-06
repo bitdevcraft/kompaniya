@@ -28,6 +28,7 @@ import { DatetimeRecordField } from "./datetime-record-field";
 import { HtmlRecordField } from "./html-record-field";
 import { getCreateLayoutFields } from "./layout-helpers";
 import { LookupRecordField } from "./lookup-record-field";
+import { MjmlRecordField } from "./mjml-record-field";
 import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
 import { PhoneRecordField } from "./phone-record-field";
@@ -64,6 +65,7 @@ const CREATE_FIELD_COMPONENTS: Record<
   picklist: PicklistRecordField as FieldComponent,
   text: TextRecordField as FieldComponent,
   textarea: TextareaRecordField as FieldComponent,
+  mjml: MjmlRecordField as FieldComponent,
 };
 
 export interface RecordCreateFormProps<TFieldValues extends FieldValues> {

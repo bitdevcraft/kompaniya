@@ -17,18 +17,23 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { CreateLeadDto } from './dto/create-lead.dto';
+import { type DeleteLeadsDto } from './dto/delete-leads.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadService } from './lead.service';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/lead')
 export class LeadController {
-  constructor(private readonly leadService: LeadService) {}
+  constructor(
+    private readonly leadService: LeadService,
+    private readonly drizzleErrorService: DrizzleErrorService,
+  ) {}
 
   @Post()
   async create(
@@ -95,6 +100,31 @@ export class LeadController {
     );
 
     return await this.leadService.deleteRecordById(id, organization.id);
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteLeadsDto: DeleteLeadsDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteLeadsDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.leadService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.leadService.deleteRecordsByIds(ids, organization.id);
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

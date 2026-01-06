@@ -5,7 +5,7 @@ import {
   OrgRealEstateBooking,
   orgRealEstateBookingsTable,
 } from '@repo/database/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -66,6 +66,29 @@ export class RealEstateBookingService {
         and(
           eq(orgRealEstateBookingsTable.id, id),
           eq(orgRealEstateBookingsTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
+  }
+
+  async deleteRecordsByIds(
+    ids: string[],
+    organizationId: string,
+  ): Promise<OrgRealEstateBooking[]> {
+    if (ids.length === 0) return [];
+
+    const uniqueIds = [...new Set(ids)];
+
+    await Promise.all(
+      uniqueIds.map((id) => this.deleteCacheById(id, organizationId)),
+    );
+
+    return await this.db
+      .delete(orgRealEstateBookingsTable)
+      .where(
+        and(
+          eq(orgRealEstateBookingsTable.organizationId, organizationId),
+          inArray(orgRealEstateBookingsTable.id, uniqueIds),
         ),
       )
       .returning();

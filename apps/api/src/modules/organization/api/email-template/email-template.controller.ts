@@ -20,18 +20,23 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { CreateTemplateDto } from './dto/create-template.dto';
+import { type DeleteEmailTemplatesDto } from './dto/delete-email-templates.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
 import { EmailTemplateService } from './email-template.service';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/email-template')
 export class EmailTemplateController {
-  constructor(private readonly emailTemplateService: EmailTemplateService) {}
+  constructor(
+    private readonly emailTemplateService: EmailTemplateService,
+    private readonly drizzleErrorService: DrizzleErrorService,
+  ) {}
 
   @Post()
   async add(
@@ -114,6 +119,34 @@ export class EmailTemplateController {
       id,
       organization.id,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteEmailTemplatesDto: DeleteEmailTemplatesDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteEmailTemplatesDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.emailTemplateService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.emailTemplateService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

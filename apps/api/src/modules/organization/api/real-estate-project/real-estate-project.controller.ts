@@ -20,11 +20,13 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreateRealEstateProjectDto } from './dto/create-real-estate-project.dto';
+import { type DeleteRealEstateProjectsDto } from './dto/delete-real-estate-projects.dto';
 import { type UpdateRealEstateProjectDto } from './dto/update-real-estate-project.dto';
 import { RealEstateProjectService } from './real-estate-project.service';
 
@@ -33,6 +35,7 @@ import { RealEstateProjectService } from './real-estate-project.service';
 export class RealEstateProjectController {
   constructor(
     private readonly realEstateProjectService: RealEstateProjectService,
+    private readonly drizzleErrorService: DrizzleErrorService,
   ) {}
 
   @Post()
@@ -109,6 +112,34 @@ export class RealEstateProjectController {
       id,
       organization.id,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteRealEstateProjectsDto: DeleteRealEstateProjectsDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteRealEstateProjectsDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.realEstateProjectService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.realEstateProjectService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

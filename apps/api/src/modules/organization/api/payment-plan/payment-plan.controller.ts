@@ -20,18 +20,23 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreatePaymentPlanDto } from './dto/create-payment-plan.dto';
+import { type DeletePaymentPlansDto } from './dto/delete-payment-plans.dto';
 import { type UpdatePaymentPlanDto } from './dto/update-payment-plan.dto';
 import { PaymentPlanService } from './payment-plan.service';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/payment-plan')
 export class PaymentPlanController {
-  constructor(private readonly paymentPlanService: PaymentPlanService) {}
+  constructor(
+    private readonly paymentPlanService: PaymentPlanService,
+    private readonly drizzleErrorService: DrizzleErrorService,
+  ) {}
 
   @Post()
   async create(
@@ -106,6 +111,34 @@ export class PaymentPlanController {
     await this.paymentPlanService.deleteCacheById(record.id, organization.id);
 
     return await this.paymentPlanService.deleteRecordById(id, organization.id);
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deletePaymentPlansDto: DeletePaymentPlansDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deletePaymentPlansDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.paymentPlanService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.paymentPlanService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

@@ -5,7 +5,7 @@ import {
   OrgEmailCampaign,
   orgEmailCampaignsTable,
 } from '@repo/database/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -66,6 +66,29 @@ export class EmailCampaignService {
         and(
           eq(orgEmailCampaignsTable.id, id),
           eq(orgEmailCampaignsTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
+  }
+
+  async deleteRecordsByIds(
+    ids: string[],
+    organizationId: string,
+  ): Promise<OrgEmailCampaign[]> {
+    if (ids.length === 0) return [];
+
+    const uniqueIds = [...new Set(ids)];
+
+    await Promise.all(
+      uniqueIds.map((id) => this.deleteCacheById(id, organizationId)),
+    );
+
+    return await this.db
+      .delete(orgEmailCampaignsTable)
+      .where(
+        and(
+          eq(orgEmailCampaignsTable.organizationId, organizationId),
+          inArray(orgEmailCampaignsTable.id, uniqueIds),
         ),
       )
       .returning();

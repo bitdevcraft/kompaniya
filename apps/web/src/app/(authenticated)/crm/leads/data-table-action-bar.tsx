@@ -7,12 +7,17 @@ import {
   DataTableActionBarSelection,
 } from "@kompaniya/ui-data-table/components/data-table-action-bar";
 import { exportTableToCSV } from "@kompaniya/ui-data-table/lib/export";
+import { useQueryClient } from "@tanstack/react-query";
 import { Table } from "@tanstack/react-table";
+import axios from "axios";
 import { Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { toast } from "sonner";
 
-import { tableType } from "./config";
+import { authClient } from "@/lib/auth/client";
+
+import { model, modelEndpoint, tableType } from "./config";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = ["export", "delete"] as const;
@@ -25,6 +30,9 @@ interface OrgDataTableActionBarProps {
 
 export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const activeOrganization = authClient.useActiveOrganization();
+  const organizationId = activeOrganization?.data?.id;
   const rows = table.getFilteredSelectedRowModel().rows;
   const [isPending, startTransition] = React.useTransition();
   const [currentAction, setCurrentAction] = React.useState<Action | null>(null);
@@ -49,11 +57,32 @@ export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {
   }, [table]);
 
   const onDataRowDelete = React.useCallback(() => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+
+    if (selectedRows.length === 0) return;
+
     setCurrentAction("delete");
     startTransition(async () => {
-      table.toggleAllRowsSelected(false);
+      const ids = selectedRows.map((row) => row.original.id);
+
+      try {
+        await axios.delete(`${modelEndpoint}/bulk`, {
+          data: { ids },
+          withCredentials: true,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: [`${model.plural}-${organizationId}`],
+        });
+        table.toggleAllRowsSelected(false);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast.error(error.response?.data?.message || error.message);
+        } else {
+          toast.error("Failed to delete records.");
+        }
+      }
     });
-  }, [table]);
+  }, [organizationId, queryClient, table]);
 
   return (
     <DataTableActionBar table={table} visible={rows.length > 0}>

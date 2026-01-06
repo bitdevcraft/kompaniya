@@ -5,7 +5,7 @@ import {
   OrgContact,
   orgContactsTable,
 } from '@repo/database/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -57,6 +57,29 @@ export class ContactService {
         and(
           eq(orgContactsTable.id, id),
           eq(orgContactsTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
+  }
+
+  async deleteRecordsByIds(
+    ids: string[],
+    organizationId: string,
+  ): Promise<OrgContact[]> {
+    if (ids.length === 0) return [];
+
+    const uniqueIds = [...new Set(ids)];
+
+    await Promise.all(
+      uniqueIds.map((id) => this.deleteCacheById(id, organizationId)),
+    );
+
+    return await this.db
+      .delete(orgContactsTable)
+      .where(
+        and(
+          eq(orgContactsTable.organizationId, organizationId),
+          inArray(orgContactsTable.id, uniqueIds),
         ),
       )
       .returning();

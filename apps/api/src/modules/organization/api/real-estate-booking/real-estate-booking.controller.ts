@@ -20,11 +20,13 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreateRealEstateBookingDto } from './dto/create-real-estate-booking.dto';
+import { type DeleteRealEstateBookingsDto } from './dto/delete-real-estate-bookings.dto';
 import { type UpdateRealEstateBookingDto } from './dto/update-real-estate-booking.dto';
 import { RealEstateBookingService } from './real-estate-booking.service';
 
@@ -33,7 +35,9 @@ import { RealEstateBookingService } from './real-estate-booking.service';
 export class RealEstateBookingController {
   constructor(
     private readonly realEstateBookingService: RealEstateBookingService,
+    private readonly drizzleErrorService: DrizzleErrorService,
   ) {}
+
   @Post()
   async create(
     @ActiveOrganization() organization: Organization,
@@ -112,6 +116,34 @@ export class RealEstateBookingController {
       id,
       organization.id,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteRealEstateBookingsDto: DeleteRealEstateBookingsDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteRealEstateBookingsDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.realEstateBookingService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.realEstateBookingService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

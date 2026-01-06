@@ -20,11 +20,13 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreateRealEstatePropertyDto } from './dto/create-real-estate-property.dto';
+import { type DeleteRealEstatePropertiesDto } from './dto/delete-real-estate-properties.dto';
 import { type UpdateRealEstatePropertyDto } from './dto/update-real-estate-property.dto';
 import { RealEstatePropertyService } from './real-estate-property.service';
 
@@ -33,6 +35,7 @@ import { RealEstatePropertyService } from './real-estate-property.service';
 export class RealEstatePropertyController {
   constructor(
     private readonly realEstatePropertyService: RealEstatePropertyService,
+    private readonly drizzleErrorService: DrizzleErrorService,
   ) {}
 
   @Post()
@@ -109,6 +112,34 @@ export class RealEstatePropertyController {
       id,
       organization.id,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteRealEstatePropertiesDto: DeleteRealEstatePropertiesDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteRealEstatePropertiesDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.realEstatePropertyService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.realEstatePropertyService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

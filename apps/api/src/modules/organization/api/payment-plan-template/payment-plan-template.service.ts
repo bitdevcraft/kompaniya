@@ -5,7 +5,7 @@ import {
   OrgPaymentPlanTemplate,
   orgPaymentPlanTemplatesTable,
 } from '@repo/database/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -66,6 +66,29 @@ export class PaymentPlanTemplateService {
         and(
           eq(orgPaymentPlanTemplatesTable.id, id),
           eq(orgPaymentPlanTemplatesTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
+  }
+
+  async deleteRecordsByIds(
+    ids: string[],
+    organizationId: string,
+  ): Promise<OrgPaymentPlanTemplate[]> {
+    if (ids.length === 0) return [];
+
+    const uniqueIds = [...new Set(ids)];
+
+    await Promise.all(
+      uniqueIds.map((id) => this.deleteCacheById(id, organizationId)),
+    );
+
+    return await this.db
+      .delete(orgPaymentPlanTemplatesTable)
+      .where(
+        and(
+          eq(orgPaymentPlanTemplatesTable.organizationId, organizationId),
+          inArray(orgPaymentPlanTemplatesTable.id, uniqueIds),
         ),
       )
       .returning();

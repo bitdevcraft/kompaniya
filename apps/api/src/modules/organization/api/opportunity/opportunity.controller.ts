@@ -20,18 +20,23 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreateOpportunityDto } from './dto/create-opportunity.dto';
+import { type DeleteOpportunitiesDto } from './dto/delete-opportunities.dto';
 import { type UpdateOpportunityDto } from './dto/update-opportunity.dto';
 import { OpportunityService } from './opportunity.service';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/opportunity')
 export class OpportunityController {
-  constructor(private readonly opportunityService: OpportunityService) {}
+  constructor(
+    private readonly opportunityService: OpportunityService,
+    private readonly drizzleErrorService: DrizzleErrorService,
+  ) {}
 
   @Post()
   async create(
@@ -104,6 +109,34 @@ export class OpportunityController {
     );
 
     return await this.opportunityService.deleteRecordById(id, organization.id);
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteOpportunitiesDto: DeleteOpportunitiesDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteOpportunitiesDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.opportunityService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.opportunityService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

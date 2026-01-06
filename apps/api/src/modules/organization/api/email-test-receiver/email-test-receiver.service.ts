@@ -5,7 +5,7 @@ import {
   OrgEmailTestReceiver,
   orgEmailTestReceiversTable,
 } from '@repo/database/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -66,6 +66,29 @@ export class EmailTestReceiverService {
         and(
           eq(orgEmailTestReceiversTable.id, id),
           eq(orgEmailTestReceiversTable.organizationId, organizationId),
+        ),
+      )
+      .returning();
+  }
+
+  async deleteRecordsByIds(
+    ids: string[],
+    organizationId: string,
+  ): Promise<OrgEmailTestReceiver[]> {
+    if (ids.length === 0) return [];
+
+    const uniqueIds = [...new Set(ids)];
+
+    await Promise.all(
+      uniqueIds.map((id) => this.deleteCacheById(id, organizationId)),
+    );
+
+    return await this.db
+      .delete(orgEmailTestReceiversTable)
+      .where(
+        and(
+          eq(orgEmailTestReceiversTable.organizationId, organizationId),
+          inArray(orgEmailTestReceiversTable.id, uniqueIds),
         ),
       )
       .returning();

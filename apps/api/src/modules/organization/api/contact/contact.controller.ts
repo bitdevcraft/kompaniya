@@ -17,18 +17,23 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { ContactService } from './contact.service';
 import { type CreateContactDto } from './dto/create-contact.dto';
+import { type DeleteContactsDto } from './dto/delete-contacts.dto';
 import { type UpdateContactDto } from './dto/update-contact.dto';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/contact')
 export class ContactController {
-  constructor(private readonly contactService: ContactService) {}
+  constructor(
+    private readonly contactService: ContactService,
+    private readonly drizzleErrorService: DrizzleErrorService,
+  ) {}
 
   @Post()
   async create(
@@ -97,6 +102,31 @@ export class ContactController {
       organization.id,
       query,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteContactsDto: DeleteContactsDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteContactsDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.contactService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.contactService.deleteRecordsByIds(ids, organization.id);
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

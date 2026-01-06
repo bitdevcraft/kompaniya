@@ -5,7 +5,7 @@ import {
   OrgEmailDomain,
   orgEmailDomainsTable,
 } from '@repo/database/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -117,6 +117,29 @@ export class DomainService {
     await this.cacheService.delete(
       Keys.Domain.paginatedList(userId, organizationId),
     );
+  }
+
+  async deleteRecordsByIds(
+    ids: string[],
+    organizationId: string,
+  ): Promise<OrgEmailDomain[]> {
+    if (ids.length === 0) return [];
+
+    const uniqueIds = [...new Set(ids)];
+
+    const records = await this.db
+      .delete(orgEmailDomainsTable)
+      .where(
+        and(
+          eq(orgEmailDomainsTable.organizationId, organizationId),
+          inArray(orgEmailDomainsTable.id, uniqueIds),
+        ),
+      )
+      .returning();
+
+    await Promise.all(records.map((record) => this.deleteDomainCache(record)));
+
+    return records;
   }
 
   async getDataTable(

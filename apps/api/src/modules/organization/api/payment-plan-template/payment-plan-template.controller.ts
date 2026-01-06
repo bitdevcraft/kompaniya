@@ -20,11 +20,13 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreatePaymentPlanTemplateDto } from './dto/create-payment-plan-template.dto';
+import { type DeletePaymentPlanTemplatesDto } from './dto/delete-payment-plan-templates.dto';
 import { type UpdatePaymentPlanTemplateDto } from './dto/update-payment-plan-template.dto';
 import { PaymentPlanTemplateService } from './payment-plan-template.service';
 
@@ -33,6 +35,7 @@ import { PaymentPlanTemplateService } from './payment-plan-template.service';
 export class PaymentPlanTemplateController {
   constructor(
     private readonly paymentPlanTemplateService: PaymentPlanTemplateService,
+    private readonly drizzleErrorService: DrizzleErrorService,
   ) {}
 
   @Post()
@@ -114,6 +117,34 @@ export class PaymentPlanTemplateController {
       id,
       organization.id,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deletePaymentPlanTemplatesDto: DeletePaymentPlanTemplatesDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deletePaymentPlanTemplatesDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.paymentPlanTemplateService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.paymentPlanTemplateService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

@@ -20,18 +20,23 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreateEmailCampaignDto } from './dto/create-email-campaign.dto';
+import { type DeleteEmailCampaignsDto } from './dto/delete-email-campaigns.dto';
 import { type UpdateEmailCampaignDto } from './dto/update-email-campaign.dto';
 import { EmailCampaignService } from './email-campaign.service';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/email-campaign')
 export class EmailCampaignController {
-  constructor(private readonly emailCampaignService: EmailCampaignService) {}
+  constructor(
+    private readonly emailCampaignService: EmailCampaignService,
+    private readonly drizzleErrorService: DrizzleErrorService,
+  ) {}
 
   @Post()
   async create(
@@ -113,6 +118,34 @@ export class EmailCampaignController {
       id,
       organization.id,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteEmailCampaignsDto: DeleteEmailCampaignsDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteEmailCampaignsDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.emailCampaignService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.emailCampaignService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')

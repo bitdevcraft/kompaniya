@@ -20,11 +20,13 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreateEmailTestReceiverDto } from './dto/create-email-test-receiver.dto';
+import { type DeleteEmailTestReceiversDto } from './dto/delete-email-test-receivers.dto';
 import { type UpdateEmailTestReceiverDto } from './dto/update-email-test-receiver.dto';
 import { EmailTestReceiverService } from './email-test-receiver.service';
 
@@ -33,6 +35,7 @@ import { EmailTestReceiverService } from './email-test-receiver.service';
 export class EmailTestReceiverController {
   constructor(
     private readonly emailTestReceiverService: EmailTestReceiverService,
+    private readonly drizzleErrorService: DrizzleErrorService,
   ) {}
 
   @Post()
@@ -109,6 +112,34 @@ export class EmailTestReceiverController {
       id,
       organization.id,
     );
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteEmailTestReceiversDto: DeleteEmailTestReceiversDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteEmailTestReceiversDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.emailTestReceiverService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.emailTestReceiverService.deleteRecordsByIds(
+        ids,
+        organization.id,
+      );
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')
