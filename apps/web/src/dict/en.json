@@ -106,6 +106,22 @@
           "description": "Enter the email to verify that corresponds to the domain you want to register"
         }
       }
+    },
+    "tag": {
+      "form": {
+        "new": {
+          "title": "Create Tag",
+          "submit": "Submit"
+        },
+        "name": {
+          "label": "Name",
+          "description": "Give the tag a clear name"
+        },
+        "relatedType": {
+          "label": "Related Type",
+          "description": "Select what this tag applies to"
+        }
+      }
     }
   },
 

@@ -253,4 +253,18 @@ export const Keys = {
       return `payment-plan-template:id:${id}-${organizationId}`;
     },
   },
+  Tag: {
+    paginated(userId: string, organizationId: string) {
+      return `tag:paginated:${userId}:${organizationId}`;
+    },
+    paginatedList(userId: string, organizationId: string) {
+      return `tag:paginated-list:${userId}:${organizationId}`;
+    },
+    id(id: string) {
+      return `tag:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `tag:id:${id}-${organizationId}`;
+    },
+  },
 };

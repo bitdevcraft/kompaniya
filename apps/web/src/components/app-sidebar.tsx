@@ -150,6 +150,10 @@ const data = {
           url: "/settings/email-setup/domains",
         },
         {
+          title: "Tags",
+          url: "/settings/tags",
+        },
+        {
           title: "Import Data",
           url: "/settings/data-importer",
         },

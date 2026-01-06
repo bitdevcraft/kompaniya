@@ -16,6 +16,7 @@ import { RealEstateBookingModule } from './api/real-estate-booking/real-estate-b
 import { RealEstateProjectModule } from './api/real-estate-project/real-estate-project.module';
 import { RealEstatePropertyModule } from './api/real-estate-property/real-estate-property.module';
 import { SystemAdminModule } from './api/system-admin/system-admin.module';
+import { TagModule } from './api/tag/tag.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { SystemAdminModule } from './api/system-admin/system-admin.module';
     RealEstateBookingModule,
     PaymentPlanModule,
     PaymentPlanTemplateModule,
+    TagModule,
   ],
 })
 export class OrganizationModule {}

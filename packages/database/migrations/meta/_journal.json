@@ -8,6 +8,13 @@
       "when": 1767615821787,
       "tag": "0000_flippant_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1767728836703,
+      "tag": "0001_kind_captain_universe",
+      "breakpoints": true
     }
   ]
 }
