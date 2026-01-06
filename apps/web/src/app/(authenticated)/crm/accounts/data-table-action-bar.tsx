@@ -8,11 +8,13 @@ import {
 import { exportTableToCSV } from "@kompaniya/ui-data-table/lib/export";
 import { Separator } from "@radix-ui/react-separator";
 import { Table } from "@tanstack/react-table";
+import axios from "axios";
 import { Download, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { toast } from "sonner";
 
-import { tableType } from "./config";
+import { modelEndpoint, tableType } from "./config";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const actions = ["export", "delete"] as const;
@@ -49,9 +51,27 @@ export function OrgDataTableActionBar({ table }: OrgDataTableActionBarProps) {
   }, [table]);
 
   const onDataRowDelete = React.useCallback(() => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+
+    if (selectedRows.length === 0) return;
+
     setCurrentAction("delete");
     startTransition(async () => {
-      table.toggleAllRowsSelected(false);
+      const ids = selectedRows.map((row) => row.original.id);
+
+      try {
+        await axios.delete(`${modelEndpoint}/bulk`, {
+          data: { ids },
+          withCredentials: true,
+        });
+        table.toggleAllRowsSelected(false);
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast.error(error.response?.data?.message || error.message);
+        } else {
+          toast.error("Failed to delete accounts.");
+        }
+      }
     });
   }, [table]);
 

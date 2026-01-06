@@ -17,18 +17,23 @@ import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
+import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { AccountService } from './account.service';
 import { type CreateAccountDto } from './dto/create-account.dto';
+import { type DeleteAccountsDto } from './dto/delete-accounts.dto';
 import { type UpdateAccountDto } from './dto/update-account.dto';
 
 @UseGuards(ActiveOrganizationGuard)
 @Controller('api/organization/account')
 export class AccountController {
-  constructor(private readonly accountService: AccountService) {}
+  constructor(
+    private readonly accountService: AccountService,
+    private readonly drizzleErrorService: DrizzleErrorService,
+  ) {}
 
   @Post()
   async create(
@@ -94,7 +99,39 @@ export class AccountController {
       organization.id,
     );
 
-    return await this.accountService.deleteRecordById(id, organization.id);
+    try {
+      return await this.accountService.deleteRecordById(id, organization.id);
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
+  }
+
+  @Delete('bulk')
+  async removeBulk(
+    @Body() deleteAccountsDto: DeleteAccountsDto,
+    @Session() session: UserSession,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const ids = deleteAccountsDto?.ids ?? [];
+
+    if (ids.length === 0) return [];
+
+    await this.accountService.deletePaginatedCache(
+      session.user.id,
+      organization.id,
+    );
+
+    try {
+      return await this.accountService.deleteRecordsByIds(ids, organization.id);
+    } catch (error) {
+      if (this.drizzleErrorService.isDatabaseError(error)) {
+        this.drizzleErrorService.handleDrizzleError(error);
+      }
+      throw error;
+    }
   }
 
   @Patch('r/:id')
