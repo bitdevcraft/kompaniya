@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 
-import type { LookupFieldConfig, RecordFieldOption } from "./layout";
+import type {
+  LookupFieldConfig,
+  RecordFieldOption,
+  TagFieldConfig,
+} from "./layout";
 
 export interface BaseRecordFieldProps<TValue> {
   description?: string;
@@ -14,6 +18,7 @@ export interface BaseRecordFieldProps<TValue> {
   placeholder?: string;
   options?: RecordFieldOption[];
   record?: Record<string, unknown>;
+  tag?: TagFieldConfig;
   value?: TValue;
 }
 

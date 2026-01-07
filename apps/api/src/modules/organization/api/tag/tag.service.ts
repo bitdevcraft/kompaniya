@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
 import { NewOrgTag, OrgTag, orgTagsTable } from '@repo/database/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -122,6 +122,21 @@ export class TagService {
             eq(orgTagsTable.organizationId, organizationId),
           ),
         }),
+    });
+  }
+
+  async getRecordsByRelatedType(
+    organizationId: string,
+    relatedType: string,
+  ): Promise<OrgTag[]> {
+    if (!relatedType) return [];
+
+    return await this.db.query.orgTagsTable.findMany({
+      orderBy: asc(orgTagsTable.name),
+      where: and(
+        eq(orgTagsTable.organizationId, organizationId),
+        eq(orgTagsTable.relatedType, relatedType),
+      ),
     });
   }
 

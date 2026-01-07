@@ -33,6 +33,7 @@ import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
 import { PhoneRecordField } from "./phone-record-field";
 import { PicklistRecordField } from "./picklist-record-field";
+import { TagRecordField } from "./tag-record-field";
 import { TextRecordField } from "./text-record-field";
 import { TextareaRecordField } from "./textarea-record-field";
 
@@ -47,6 +48,7 @@ type FieldComponent = (props: {
   onChange?: (value: unknown) => void;
   placeholder?: string;
   options?: RecordLayoutField["options"];
+  tag?: RecordLayoutField["tag"];
   value?: unknown;
 }) => React.ReactNode | null;
 
@@ -63,6 +65,7 @@ const CREATE_FIELD_COMPONENTS: Record<
   number: NumberRecordField as FieldComponent,
   phone: PhoneRecordField as FieldComponent,
   picklist: PicklistRecordField as FieldComponent,
+  tag: TagRecordField as FieldComponent,
   text: TextRecordField as FieldComponent,
   textarea: TextareaRecordField as FieldComponent,
   mjml: MjmlRecordField as FieldComponent,
@@ -325,6 +328,7 @@ function CreateField<TFieldValues extends FieldValues>({
           onChange={(value) => controllerField.onChange(value)}
           options={field.options}
           placeholder={field.placeholder}
+          tag={field.tag}
           value={controllerField.value}
         />
       )}

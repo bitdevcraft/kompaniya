@@ -56,6 +56,7 @@ import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
 import { PhoneRecordField } from "./phone-record-field";
 import { PicklistRecordField } from "./picklist-record-field";
+import { TagRecordField } from "./tag-record-field";
 import { TextRecordField } from "./text-record-field";
 import { TextareaRecordField } from "./textarea-record-field";
 import { formatDateTime, formatScore, getInitials, renderLink } from "./utils";
@@ -90,6 +91,7 @@ type FieldComponent = (props: {
   placeholder?: string;
   options?: RecordFieldOption[];
   record?: Record<string, unknown>;
+  tag?: RecordLayoutField["tag"];
   value?: unknown;
 }) => React.ReactNode | null;
 
@@ -305,6 +307,7 @@ const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
   number: NumberRecordField as FieldComponent,
   phone: PhoneRecordField as FieldComponent,
   picklist: PicklistRecordField as FieldComponent,
+  tag: TagRecordField as FieldComponent,
   text: TextRecordField as FieldComponent,
   textarea: TextareaRecordField as FieldComponent,
 };
@@ -375,6 +378,7 @@ function FieldRenderer<TFieldValues extends FieldValues>({
             options={field.options}
             placeholder={field.placeholder}
             record={record}
+            tag={field.tag}
             value={controllerField.value}
           />
         )}
@@ -390,6 +394,7 @@ function FieldRenderer<TFieldValues extends FieldValues>({
       lookup={field.lookup}
       options={field.options}
       record={record}
+      tag={field.tag}
       value={record[field.id as string]}
     />
   );
@@ -493,6 +498,11 @@ function formatValue<TFieldValues extends FieldValues>(
           ))}
         </div>
       );
+    }
+    case "tag": {
+      const values = normalizeMultipicklistValue(rawValue);
+      if (values.length === 0) return null;
+      return values.join(", ");
     }
     default: {
       if (rawValue === null || rawValue === undefined) return null;

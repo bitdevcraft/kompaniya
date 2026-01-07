@@ -68,6 +68,17 @@ export class TagController {
     return record;
   }
 
+  @Get()
+  async list(
+    @Query('relatedType') relatedType: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    return await this.tagService.getRecordsByRelatedType(
+      organization.id,
+      relatedType,
+    );
+  }
+
   @Get('paginated')
   async paginatedData(
     @Query(new ZodValidationPipe(paginationQueryParserSchema))

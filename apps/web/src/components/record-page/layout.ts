@@ -28,6 +28,7 @@ export type RecordFieldDataType =
   | "boolean"
   | "picklist"
   | "multipicklist"
+  | "tag"
   | "phone"
   | "html"
   | "mjml"
@@ -53,6 +54,7 @@ export interface RecordLayoutField<
   options?: RecordFieldOption[];
   placeholder?: string;
   readOnly?: boolean;
+  tag?: TagFieldConfig;
   type: RecordFieldDataType;
 }
 
@@ -140,4 +142,8 @@ export interface RecordPageLayout<
   sectionColumns?: RecordLayoutSectionColumns<TFieldValues>;
   sections?: RecordLayoutSection<TFieldValues>[];
   supplementalFields?: RecordLayoutField<TFieldValues>[];
+}
+
+export interface TagFieldConfig {
+  relatedType: string;
 }

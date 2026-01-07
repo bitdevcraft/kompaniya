@@ -22,7 +22,8 @@ export function createDefaultValuesForLayout<
         defaults[field.id] = false as TFieldValues[typeof field.id];
         break;
       }
-      case "multipicklist": {
+      case "multipicklist":
+      case "tag": {
         defaults[field.id] = [] as TFieldValues[typeof field.id];
         break;
       }
@@ -103,7 +104,8 @@ export function normalizeValueForForm(
     case "datetime": {
       return toDateTimeInputValue(value);
     }
-    case "multipicklist": {
+    case "multipicklist":
+    case "tag": {
       if (Array.isArray(value)) {
         return value.filter((entry) => typeof entry === "string");
       }
@@ -161,7 +163,8 @@ export function normalizeValueForSubmission<TFieldValues extends FieldValues>(
       }
       return null;
     }
-    case "multipicklist": {
+    case "multipicklist":
+    case "tag": {
       if (Array.isArray(value)) {
         return value.filter(
           (entry): entry is string => typeof entry === "string",

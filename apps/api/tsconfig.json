@@ -6,5 +6,8 @@
     "paths": {
       "~/*": ["src/*"]
     }
+  },
+  "watchOptions": {
+    "watchFile": "fixedPollingInterval"
   }
 }

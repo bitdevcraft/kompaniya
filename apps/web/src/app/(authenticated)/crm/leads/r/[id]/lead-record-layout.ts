@@ -112,8 +112,10 @@ export const leadRecordLayout: RecordPageLayout<LeadRecordFormValues> = {
               id: "tags",
               label: "Tags",
               placeholder: "Add tags…",
-              options: DEFAULT_SEGMENTATION_OPTIONS,
-              type: "multipicklist",
+              tag: {
+                relatedType: "lead",
+              },
+              type: "tag",
             },
             {
               description: "Categories control nurture tracks and reporting.",

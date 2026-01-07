@@ -125,8 +125,10 @@ export const contactRecordLayout: RecordPageLayout<ContactRecordFormValues> = {
               id: "tags",
               label: "Tags",
               placeholder: "Add tags…",
-              options: DEFAULT_SEGMENTATION_OPTIONS,
-              type: "multipicklist",
+              tag: {
+                relatedType: "contact",
+              },
+              type: "tag",
             },
             {
               colSpan: 2,

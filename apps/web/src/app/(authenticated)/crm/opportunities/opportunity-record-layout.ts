@@ -193,7 +193,10 @@ export const opportunityRecordLayout: RecordPageLayout<OpportunityRecordFormValu
                 id: "tags",
                 label: "Tags",
                 placeholder: "Add tags…",
-                type: "multipicklist",
+                tag: {
+                  relatedType: "opportunity",
+                },
+                type: "tag",
               },
             ],
             id: "opportunity-tags",

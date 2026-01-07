@@ -77,9 +77,11 @@ export const accountRecordLayout: RecordPageLayout<AccountRecordFormValues> = {
               description: "Use tags to power workflows and reporting.",
               id: "tags",
               label: "Tags",
-              options: DEFAULT_SEGMENTATION_OPTIONS,
               placeholder: "Add tags…",
-              type: "multipicklist",
+              tag: {
+                relatedType: "account",
+              },
+              type: "tag",
             },
             {
               colSpan: 2,
