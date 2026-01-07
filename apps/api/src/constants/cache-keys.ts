@@ -267,4 +267,15 @@ export const Keys = {
       return `tag:id:${id}-${organizationId}`;
     },
   },
+  CustomField: {
+    definitionsByEntity(organizationId: string, entityType: string) {
+      return `custom-field:definitions:${organizationId}:${entityType}`;
+    },
+    id(id: string) {
+      return `custom-field:id:${id}`;
+    },
+    idByOrg(id: string, organizationId: string) {
+      return `custom-field:id:${id}-${organizationId}`;
+    },
+  },
 };

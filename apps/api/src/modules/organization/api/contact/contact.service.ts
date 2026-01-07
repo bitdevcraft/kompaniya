@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
 import {
   NewOrgContact,
@@ -11,6 +11,7 @@ import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
 import { PaginationQueryParserType } from '~/lib/pagination/pagination-query-parser';
 import { CacheService } from '~/modules/core/cache/cache.service';
+import { CustomFieldValidationService } from '~/modules/core/custom-fields/custom-field-validation.service';
 import { PaginationRepositoryService } from '~/modules/core/database/repository/pagination-repository/pagination-repository.service';
 
 @Injectable()
@@ -19,9 +20,32 @@ export class ContactService {
     @Inject(DRIZZLE_DB) private readonly db: Db,
     private readonly paginationRepositoryService: PaginationRepositoryService,
     private readonly cacheService: CacheService,
+    private readonly customFieldValidation: CustomFieldValidationService,
   ) {}
 
   async createNewRecord(record: NewOrgContact): Promise<OrgContact[]> {
+    // Validate custom fields before creating
+    if (record.customFields && Object.keys(record.customFields).length > 0) {
+      if (!record.organizationId) {
+        throw new BadRequestException('organizationId is required');
+      }
+      const validation = await this.customFieldValidation.validateCustomFields(
+        record.organizationId,
+        'org_contacts',
+        record.customFields,
+      );
+
+      if (!validation.success) {
+        throw new BadRequestException({
+          message: 'Custom field validation failed',
+          errors: validation.errors,
+        });
+      }
+
+      // Use normalized values
+      record.customFields = validation.normalized;
+    }
+
     return await this.db.insert(orgContactsTable).values(record).returning();
   }
 
@@ -134,6 +158,25 @@ export class ContactService {
     organizationId: string,
     record: Partial<NewOrgContact>,
   ): Promise<OrgContact[]> {
+    // Validate custom fields before updating
+    if (record.customFields && Object.keys(record.customFields).length > 0) {
+      const validation = await this.customFieldValidation.validateCustomFields(
+        organizationId,
+        'org_contacts',
+        record.customFields,
+      );
+
+      if (!validation.success) {
+        throw new BadRequestException({
+          message: 'Custom field validation failed',
+          errors: validation.errors,
+        });
+      }
+
+      // Use normalized values
+      record.customFields = validation.normalized;
+    }
+
     return await this.db
       .update(orgContactsTable)
       .set(record)

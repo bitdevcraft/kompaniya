@@ -15,6 +15,13 @@
       "when": 1767728836703,
       "tag": "0001_kind_captain_universe",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767787238840,
+      "tag": "0002_spotty_hemingway",
+      "breakpoints": true
     }
   ]
 }
