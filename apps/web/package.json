@@ -8,7 +8,7 @@
     "build:cf": "next build && next-on-pages",
     "start": "next start --port 3001",
     "deploy:cf": "pnpm run build:cf && wrangler pages deploy",
-    "lint": "eslint --max-warnings=0 src"
+    "lint": "eslint --max-warnings=0 src --fix"
   },
   "dependencies": {
     "@hookform/resolvers": "catalog:",

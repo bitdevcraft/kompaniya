@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { db, seedOrgModels } from '@repo/database';
 import { OrganizationData, organizationSchema } from '@repo/shared';
 import {
   AfterHook,
@@ -57,12 +58,13 @@ export class SignInHook {
       });
     }
 
-    await this.createNewOrganization(ctx, organization.data);
+    await this.createNewOrganization(ctx, organization.data, session.user.id);
   }
 
   private async createNewOrganization(
     ctx: AuthHookContext,
     organization: OrganizationData,
+    userId: string,
   ) {
     const newOrg = await this.authService.api.createOrganization({
       body: {
@@ -75,6 +77,11 @@ export class SignInHook {
     });
 
     if (newOrg) {
+      await seedOrgModels(db, {
+        organizationId: newOrg.id,
+        userId,
+      });
+
       await this.authService.api.setActiveOrganization({
         body: {
           organizationId: newOrg.id,

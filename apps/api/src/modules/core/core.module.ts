@@ -5,6 +5,7 @@ import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { DatabaseModule } from './database/database.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { QueueModule } from './queue/queue.module';
+import { RecordLayoutsModule } from './record-layouts/record-layouts.module';
 
 @Global()
 @Module({
@@ -14,6 +15,7 @@ import { QueueModule } from './queue/queue.module';
     QueueModule,
     FileUploadModule,
     CustomFieldsModule,
+    RecordLayoutsModule,
   ],
   exports: [
     CacheModule,
@@ -21,6 +23,7 @@ import { QueueModule } from './queue/queue.module';
     QueueModule,
     FileUploadModule,
     CustomFieldsModule,
+    RecordLayoutsModule,
   ],
 })
 export class CoreModule {}

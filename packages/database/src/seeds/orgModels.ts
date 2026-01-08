@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 
 import { db, Db } from "@/db";
+import { DEFAULT_RECORD_LAYOUTS } from "@/defaults/record-layouts";
 import {
   NewOrgOpportunity,
   orgAccountsTable,
@@ -19,7 +20,11 @@ import {
   orgRealEstateBookingsTable,
   orgRealEstateProjectsTable,
   orgRealEstatePropertiesTable,
+  orgRecordLayoutsTable,
   orgTasksTable,
+  RecordLayoutEntityType,
+  RecordLayoutHeader,
+  RecordLayoutSectionColumns,
 } from "@/schema";
 
 export interface SeedOrgModelsOptions {
@@ -440,6 +445,28 @@ export async function seedOrgModels(
       ])
       .returning();
 
+    // Seed default record layouts for all entity types
+    const recordLayouts = await tx
+      .insert(orgRecordLayoutsTable)
+      .values(
+        Object.entries(DEFAULT_RECORD_LAYOUTS).map(([entityType, layout]) => ({
+          organizationId,
+          entityType: entityType as RecordLayoutEntityType,
+          header: layout.header as RecordLayoutHeader,
+          sectionColumns: layout.sectionColumns as RecordLayoutSectionColumns,
+          sections: ("sections" in layout ? layout.sections : undefined) as
+            | unknown[]
+            | undefined,
+          supplementalFields: layout.supplementalFields as unknown[],
+          autoIncludeCustomFields: true,
+          isCustomized: false,
+          isDeleted: false,
+          createdBy: userId,
+          updatedBy: userId,
+        })),
+      )
+      .returning();
+
     return {
       activities,
       accounts,
@@ -458,6 +485,7 @@ export async function seedOrgModels(
       realEstateProjects,
       realEstateProperties,
       realEstateBookings,
+      recordLayouts,
     };
   });
 }

@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { ContactRecordFormValues } from "./contact-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { contactRecordLayout } from "./contact-record-layout";
 import {
   contactRecordSchema,
   createContactFormDefaults,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_contacts",
+  ) as RecordPageLayout<ContactRecordFormValues>;
 
   const queryKey = useMemo(() => contactRecordQueryKey(recordId), [recordId]);
 
@@ -67,11 +72,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record
-        ? createContactFormDefaults(record, contactRecordLayout)
-        : undefined,
-    [record],
+    () => (record ? createContactFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<ContactRecordFormValues>({
@@ -81,16 +83,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(createContactFormDefaults(record, contactRecordLayout));
+      form.reset(createContactFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateContact = useMutation({
     mutationFn: (payload: Partial<OrgContact>) =>
       updateContactRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createContactFormDefaults(updated, contactRecordLayout));
+      form.reset(createContactFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Contact updated");
     },
@@ -106,11 +108,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = contactRecordSchema.parse(values);
-    const payload = createContactUpdatePayload(
-      record,
-      parsed,
-      contactRecordLayout,
-    );
+    const payload = createContactUpdatePayload(record, parsed, layout);
 
     try {
       await updateContact.mutateAsync(payload);
@@ -142,9 +140,7 @@ export function RecordViewPage({
           <Button
             disabled={updateContact.isPending}
             onClick={() => {
-              form.reset(
-                createContactFormDefaults(record, contactRecordLayout),
-              );
+              form.reset(createContactFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -183,7 +179,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={contactRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

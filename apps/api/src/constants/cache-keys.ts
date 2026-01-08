@@ -278,4 +278,9 @@ export const Keys = {
       return `custom-field:id:${id}-${organizationId}`;
     },
   },
+  RecordLayout: {
+    layout(organizationId: string, entityType: string) {
+      return `record-layout:layout:${organizationId}:${entityType}`;
+    },
+  },
 };
