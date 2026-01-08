@@ -12,7 +12,8 @@ export type FieldCategory =
   | "address"
   | "consent"
   | "activity"
-  | "metadata";
+  | "metadata"
+  | "custom";
 
 /**
  * Extended field definition interface for the UI builder
@@ -33,4 +34,10 @@ export interface NativeFieldDefinition extends RecordLayoutField {
   sortOrder?: number;
   /** Default value for the field */
   defaultValue?: unknown;
+  /** Whether this is a custom field (vs native field) */
+  isCustom?: boolean;
+  /** The key of the custom field (from custom_field_definitions.key) */
+  _customFieldKey?: string;
+  /** The field type from custom_field_definitions (string, number, etc.) */
+  _customFieldType?: string;
 }

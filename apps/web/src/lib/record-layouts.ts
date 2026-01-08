@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import type { NativeFieldDefinition } from "@/lib/field-definitions";
+
 import { env } from "@/env/client";
 
 export interface RecordLayoutResponse {
@@ -36,6 +38,27 @@ export async function fetchAllRecordLayouts(
     return await response.json();
   } catch (error) {
     console.error("Error fetching record layouts:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch custom fields for layout builder
+ * Returns custom fields in the format needed by the field palette
+ */
+export async function fetchCustomFieldsForBuilder(
+  entityType: string,
+): Promise<NativeFieldDefinition[]> {
+  try {
+    const response = await axios.get(
+      `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/record-layouts/${entityType}/custom-fields`,
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch {
+    // Return empty array if fetch fails
     return [];
   }
 }

@@ -9,6 +9,7 @@ import { cn } from "@kompaniya/ui-common/lib/utils";
 import { GripVertical, X } from "lucide-react";
 
 import type { RecordLayoutField } from "@/components/record-page/layout";
+import type { NativeFieldDefinition } from "@/lib/field-definitions";
 
 const FIELD_TYPE_COLORS: Record<string, string> = {
   text: "bg-blue-100 text-blue-800",
@@ -26,11 +27,15 @@ const FIELD_TYPE_COLORS: Record<string, string> = {
 };
 
 export interface FieldItemProps {
-  field: RecordLayoutField;
+  field: RecordLayoutField | NativeFieldDefinition;
   index: number;
   onRemove: () => void;
   sectionId: string;
   columnKey: "header" | "firstColumn" | "secondColumn";
+  onUpdateField?: (
+    fieldId: string,
+    updates: Partial<RecordLayoutField>,
+  ) => void;
 }
 
 export function FieldItem({
@@ -39,6 +44,7 @@ export function FieldItem({
   onRemove,
   sectionId,
   columnKey,
+  onUpdateField,
 }: FieldItemProps) {
   const { active } = useDndContext();
   const activeType = active?.data.current?.type;
@@ -88,8 +94,8 @@ export function FieldItem({
         >
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </button>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-medium">{field.label}</span>
             <Badge
               className={FIELD_TYPE_COLORS[field.type] || "bg-gray-100"}
@@ -97,8 +103,35 @@ export function FieldItem({
             >
               {field.type}
             </Badge>
+            {/* availableOnCreate toggle for non-system fields */}
+            {!("isSystem" in field && field.isSystem) && onUpdateField && (
+              <button
+                className={cn(
+                  "text-xs px-2 py-0.5 rounded border transition-colors cursor-pointer",
+                  field.availableOnCreate === false
+                    ? "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    : "bg-green-100 text-green-800 hover:bg-green-200",
+                )}
+                onClick={() =>
+                  onUpdateField(field.id, {
+                    availableOnCreate:
+                      field.availableOnCreate === false ? true : false,
+                  })
+                }
+                title={
+                  field.availableOnCreate === false
+                    ? "Update only - Click to show on create"
+                    : "Available on create - Click to hide"
+                }
+                type="button"
+              >
+                {field.availableOnCreate === false ? "Update" : "Create"}
+              </button>
+            )}
           </div>
-          <div className="text-xs text-muted-foreground">{field.id}</div>
+          <div className="text-xs text-muted-foreground truncate">
+            {field.id}
+          </div>
         </div>
       </div>
       <Button

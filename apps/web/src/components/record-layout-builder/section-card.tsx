@@ -204,6 +204,9 @@ export function SectionCard({
               index={fieldIndex}
               key={field.id}
               onRemove={() => handleRemoveField(field.id)}
+              onUpdateField={(fieldId, updates) =>
+                actions.updateField(section.id, columnKey, fieldId, updates)
+              }
               sectionId={section.id}
             />
           ))}

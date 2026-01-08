@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type {
   RecordLayoutField,
@@ -11,6 +11,7 @@ import type { NativeFieldDefinition } from "@/lib/field-definitions";
 import type { RecordLayoutResponse } from "@/lib/record-layouts";
 
 import { getFieldDefinitions } from "@/lib/field-definitions";
+import { fetchCustomFieldsForBuilder } from "@/lib/record-layouts";
 
 /**
  * Actions for modifying the layout
@@ -85,6 +86,7 @@ export interface BuilderState {
   isDirty: boolean;
   selectedSectionId: string | null;
   selectedFieldId: string | null;
+  isLoadingFields: boolean;
 }
 
 /**
@@ -99,34 +101,62 @@ export function useRecordLayoutBuilder(
   entityType: string,
   initialLayout: RecordLayoutResponse,
 ): { state: BuilderState; actions: BuilderActions } {
-  // Get available fields from registry
-  const availableFields = useMemo(
-    () => getFieldDefinitions(entityType),
-    [entityType],
-  );
+  const [availableFields, setAvailableFields] = useState<
+    NativeFieldDefinition[]
+  >([]);
+  const [isLoadingFields, setIsLoadingFields] = useState(true);
 
-  // Parse initial layout
-  const initialParsedState = useMemo<BuilderState>(
+  // Load fields (native + custom) asynchronously
+  useEffect(() => {
+    async function loadFields() {
+      setIsLoadingFields(true);
+      try {
+        const [nativeFields, customFields] = await Promise.all([
+          Promise.resolve(getFieldDefinitions(entityType)),
+          fetchCustomFieldsForBuilder(entityType),
+        ]);
+        setAvailableFields([...nativeFields, ...customFields]);
+      } catch {
+        // Fallback to native fields only if fetch fails
+        setAvailableFields(getFieldDefinitions(entityType));
+      } finally {
+        setIsLoadingFields(false);
+      }
+    }
+    loadFields();
+  }, [entityType]);
+
+  // Parse initial layout (memoized based on initialLayout only)
+  const parsedLayout = useMemo<RecordPageLayout>(
     () => ({
-      entityType,
-      layout: {
-        header: initialLayout.header as RecordPageLayout["header"],
-        sectionColumns:
-          initialLayout.sectionColumns as RecordPageLayout["sectionColumns"],
-        sections: initialLayout.sections as RecordLayoutSection[] | undefined,
-        supplementalFields: initialLayout.supplementalFields as
-          | RecordLayoutField[]
-          | undefined,
-      },
-      availableFields,
-      isDirty: false,
-      selectedSectionId: null,
-      selectedFieldId: null,
+      header: initialLayout.header as RecordPageLayout["header"],
+      sectionColumns:
+        initialLayout.sectionColumns as RecordPageLayout["sectionColumns"],
+      sections: initialLayout.sections as RecordLayoutSection[] | undefined,
+      supplementalFields: initialLayout.supplementalFields as
+        | RecordLayoutField[]
+        | undefined,
     }),
-    [entityType, initialLayout, availableFields],
+    [initialLayout],
   );
 
-  const [state, setState] = useState<BuilderState>(initialParsedState);
+  // Initial state template (without availableFields since it's loaded separately)
+  const getInitialState = (): BuilderState => ({
+    entityType,
+    layout: parsedLayout,
+    availableFields,
+    isDirty: false,
+    selectedSectionId: null,
+    selectedFieldId: null,
+    isLoadingFields,
+  });
+
+  const [state, setState] = useState<BuilderState>(getInitialState);
+
+  // Update availableFields in state when they change
+  useEffect(() => {
+    setState((prev) => ({ ...prev, availableFields, isLoadingFields }));
+  }, [availableFields, isLoadingFields]);
 
   // Actions
   const actions: BuilderActions = {
@@ -493,7 +523,7 @@ export function useRecordLayoutBuilder(
 
     // Reset to initial state
     reset: () => {
-      setState(initialParsedState);
+      setState(getInitialState());
     },
 
     // Set selected section

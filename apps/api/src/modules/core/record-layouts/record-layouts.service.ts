@@ -57,6 +57,38 @@ export class RecordLayoutsService {
   }
 
   /**
+   * Get custom fields for layout builder
+   * Returns custom fields in the format needed by the field palette
+   */
+  async getCustomFieldsForLayout(
+    organizationId: string,
+    entityType: string,
+  ): Promise<unknown[]> {
+    const customFields = await this.customFieldService.getByEntityType(
+      organizationId,
+      entityType,
+    );
+
+    return customFields.map((cf) => ({
+      id: `customFields.${cf.key}`,
+      label: cf.label,
+      description: cf.description,
+      type: CUSTOM_FIELD_TYPE_MAPPING[cf.fieldType] || 'text',
+      category: 'custom',
+      isRequired: cf.isRequired,
+      isCustom: true,
+      _customFieldKey: cf.key,
+      _customFieldType: cf.fieldType,
+      options: cf.choices?.map((c: { label: string; value: string }) => ({
+        label: c.label,
+        value: c.value,
+      })),
+      availableOnCreate: true,
+      readOnly: false,
+    }));
+  }
+
+  /**
    * Get layout for organization and entity type
    * Returns customized layout if exists, otherwise returns default
    */

@@ -242,6 +242,7 @@ export function RecordLayoutBuilder({
       }
 
       if (
+        overData.type === "section" &&
         activeData.sectionId === overData.sectionId &&
         activeData.columnKey === toColumnKey
       ) {

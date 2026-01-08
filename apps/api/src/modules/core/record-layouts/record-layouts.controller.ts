@@ -117,6 +117,21 @@ export class RecordLayoutsController {
   }
 
   /**
+   * Get custom fields for a specific entity type
+   * Returns custom fields in the format needed by the layout builder
+   */
+  @Get(':entityType/custom-fields')
+  async getCustomFields(
+    @Param('entityType') entityType: string,
+    @ActiveOrganization() organization: { id: string },
+  ) {
+    return await this.layoutsService.getCustomFieldsForLayout(
+      organization.id,
+      entityType,
+    );
+  }
+
+  /**
    * Get layout for a specific entity type
    */
   @Get(':entityType')

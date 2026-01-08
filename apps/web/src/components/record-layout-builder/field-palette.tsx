@@ -53,6 +53,7 @@ export function FieldPalette({ fields }: FieldPaletteProps) {
       activity: [],
       system: [],
       metadata: [],
+      custom: [],
     };
 
     filtered.forEach((field) => {
@@ -111,6 +112,8 @@ function FieldCard({ field }: { field: RecordLayoutField }) {
     id: `palette-${field.id}`,
   });
 
+  const isCustom = (field as NativeFieldDefinition).isCustom === true;
+
   return (
     <div
       className={cn(
@@ -123,13 +126,20 @@ function FieldCard({ field }: { field: RecordLayoutField }) {
     >
       <div className="flex items-center justify-between gap-2">
         <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium truncate">{field.label}</span>
+        <span className="text-sm font-medium truncate flex-1">
+          {field.label}
+        </span>
         <Badge
           className={FIELD_TYPE_COLORS[field.type] || "bg-gray-100"}
           variant="secondary"
         >
           {field.type}
         </Badge>
+        {isCustom ? (
+          <Badge className="text-xs shrink-0" variant="outline">
+            Custom
+          </Badge>
+        ) : null}
       </div>
       <div className="text-xs text-muted-foreground mt-1 pl-6">{field.id}</div>
     </div>
