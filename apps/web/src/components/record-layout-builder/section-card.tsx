@@ -1,9 +1,17 @@
 "use client";
 
+import { useDndContext, useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@kompaniya/ui-common/components/button";
 import { Card } from "@kompaniya/ui-common/components/card";
 import { Input } from "@kompaniya/ui-common/components/input";
-import { GripVertical, Trash2 } from "lucide-react";
+import { cn } from "@kompaniya/ui-common/lib/utils";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
 import React from "react";
 
 import type { RecordLayoutSection } from "@/components/record-page/layout";
@@ -23,12 +31,57 @@ export interface SectionCardProps {
 export function SectionCard({
   section,
   columnKey,
+  index,
   actions,
   isSelected,
   onSelect,
 }: SectionCardProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [title, setTitle] = React.useState(section.title);
+
+  const { active } = useDndContext();
+  const activeType = active?.data.current?.type;
+  const showFieldDrop = activeType === "field" || activeType === "palette";
+
+  // Make the section draggable and sortable
+  const {
+    attributes: dragAttributes,
+    listeners: dragListeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    data: {
+      columnKey,
+      index,
+      label: section.title,
+      sectionId: section.id,
+      type: "section",
+    },
+    disabled: showFieldDrop,
+    id: `section-${section.id}`,
+  });
+
+  // Make the field list droppable
+  const { setNodeRef: setFieldDropNodeRef, isOver: isFieldOver } = useDroppable(
+    {
+      data: {
+        columnKey,
+        sectionId: section.id,
+        type: "section-drop",
+      },
+      disabled: !showFieldDrop,
+      id: `section-drop-${section.id}`,
+    },
+  );
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+  const isFieldDropActive = showFieldDrop && isFieldOver;
 
   const handleSaveTitle = () => {
     actions.updateSection(section.id, columnKey, { title });
@@ -47,15 +100,27 @@ export function SectionCard({
 
   return (
     <Card
-      className={`p-4 cursor-pointer transition-colors ${
-        isSelected ? "ring-2 ring-primary" : ""
-      }`}
+      className={cn(
+        "relative p-4 cursor-pointer transition-all",
+        isSelected && "ring-2 ring-primary",
+        isDragging && "opacity-50",
+      )}
       onClick={onSelect}
+      ref={setNodeRef}
+      style={style}
     >
       {/* Section Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 flex-1">
-          <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+          <button
+            className="cursor-grab active:cursor-grabbing"
+            ref={setActivatorNodeRef}
+            {...dragAttributes}
+            {...dragListeners}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </button>
           {isEditing ? (
             <div
               className="flex items-center gap-2 flex-1"
@@ -119,21 +184,60 @@ export function SectionCard({
       )}
 
       {/* Section Fields */}
-      <div className="space-y-2">
-        {section.fields.map((field) => (
-          <FieldItem
-            field={field}
-            key={field.id}
-            onRemove={() => handleRemoveField(field.id)}
-          />
-        ))}
+      <SortableContext
+        items={section.fields.map((field) => `field-${section.id}-${field.id}`)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          className={cn(
+            "relative space-y-2 rounded-md p-2 -m-2 transition-colors",
+            showFieldDrop &&
+              "border-2 border-dashed border-muted-foreground/40",
+            isFieldDropActive && "border-primary bg-primary/10",
+          )}
+          ref={setFieldDropNodeRef}
+        >
+          {section.fields.map((field, fieldIndex) => (
+            <FieldItem
+              columnKey={columnKey}
+              field={field}
+              index={fieldIndex}
+              key={field.id}
+              onRemove={() => handleRemoveField(field.id)}
+              sectionId={section.id}
+            />
+          ))}
 
-        {section.fields.length === 0 && (
-          <div className="text-center py-4 text-sm text-muted-foreground border-2 border-dashed rounded">
-            No fields in this section
-          </div>
-        )}
-      </div>
+          {section.fields.length === 0 && (
+            <div
+              className={cn(
+                "text-center py-4 text-sm border-2 border-dashed rounded transition-colors",
+                isFieldDropActive
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-muted-foreground/30 text-muted-foreground",
+              )}
+            >
+              {isFieldDropActive ? (
+                <>
+                  <Plus className="h-5 w-5 mx-auto mb-1" />
+                  <span>Drop field here</span>
+                </>
+              ) : (
+                "No fields in this section"
+              )}
+            </div>
+          )}
+
+          {isFieldDropActive && section.fields.length > 0 && (
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 text-primary">
+                <Plus className="h-6 w-6" />
+                <span className="font-medium">Drop field here</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </SortableContext>
 
       {/* Section Settings */}
       <div className="mt-3 pt-3 border-t flex items-center justify-between text-sm">

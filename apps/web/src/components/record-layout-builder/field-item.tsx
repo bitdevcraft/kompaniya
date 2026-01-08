@@ -1,7 +1,11 @@
 "use client";
 
+import { useDndContext } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Badge } from "@kompaniya/ui-common/components/badge";
 import { Button } from "@kompaniya/ui-common/components/button";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { GripVertical, X } from "lucide-react";
 
 import type { RecordLayoutField } from "@/components/record-page/layout";
@@ -23,18 +27,74 @@ const FIELD_TYPE_COLORS: Record<string, string> = {
 
 export interface FieldItemProps {
   field: RecordLayoutField;
+  index: number;
   onRemove: () => void;
+  sectionId: string;
+  columnKey: "header" | "firstColumn" | "secondColumn";
 }
 
-export function FieldItem({ field, onRemove }: FieldItemProps) {
+export function FieldItem({
+  field,
+  index,
+  onRemove,
+  sectionId,
+  columnKey,
+}: FieldItemProps) {
+  const { active } = useDndContext();
+  const activeType = active?.data.current?.type;
+  const disableFieldSort = activeType === "section";
+
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({
+    data: {
+      columnKey,
+      fieldId: field.id,
+      index,
+      label: field.label,
+      sectionId,
+      type: "field",
+    },
+    disabled: disableFieldSort,
+    id: `field-${sectionId}-${field.id}`,
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+
   return (
-    <div className="flex items-center justify-between p-2 bg-muted/50 rounded group">
+    <div
+      className={cn(
+        "flex items-center justify-between p-2 bg-muted/50 rounded group",
+        isDragging && "opacity-50 shadow-lg",
+      )}
+      ref={setNodeRef}
+      style={style}
+    >
       <div className="flex items-center gap-2 flex-1">
-        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+        <button
+          className="cursor-grab active:cursor-grabbing"
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+        </button>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">{field.label}</span>
-            <Badge className={FIELD_TYPE_COLORS[field.type] || "bg-gray-100"}>
+            <Badge
+              className={FIELD_TYPE_COLORS[field.type] || "bg-gray-100"}
+              variant="secondary"
+            >
               {field.type}
             </Badge>
           </div>

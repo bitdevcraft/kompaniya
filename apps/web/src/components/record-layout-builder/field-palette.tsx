@@ -1,9 +1,11 @@
 "use client";
 
+import { useDraggable } from "@dnd-kit/core";
 import { Badge } from "@kompaniya/ui-common/components/badge";
 import { Input } from "@kompaniya/ui-common/components/input";
 import { ScrollArea } from "@kompaniya/ui-common/components/scroll-area";
-import { Search } from "lucide-react";
+import { cn } from "@kompaniya/ui-common/lib/utils";
+import { GripVertical, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import type { RecordLayoutField } from "@/components/record-page/layout";
@@ -78,7 +80,7 @@ export function FieldPalette({ fields }: FieldPaletteProps) {
         />
       </div>
 
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 h-[calc(100vh-500px)]">
         <div className="space-y-4 pr-4">
           {Object.entries(groupedFields).map(([category, categoryFields]) =>
             categoryFields.length > 0 ? (
@@ -101,15 +103,35 @@ export function FieldPalette({ fields }: FieldPaletteProps) {
 }
 
 function FieldCard({ field }: { field: RecordLayoutField }) {
+  const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
+    data: {
+      field,
+      type: "palette",
+    },
+    id: `palette-${field.id}`,
+  });
+
   return (
-    <div className="p-2 border rounded bg-card hover:bg-accent cursor-grab">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">{field.label}</span>
-        <Badge className={FIELD_TYPE_COLORS[field.type] || "bg-gray-100"}>
+    <div
+      className={cn(
+        "p-2 border rounded bg-card hover:bg-accent cursor-grab",
+        isDragging && "opacity-50",
+      )}
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+        <span className="text-sm font-medium truncate">{field.label}</span>
+        <Badge
+          className={FIELD_TYPE_COLORS[field.type] || "bg-gray-100"}
+          variant="secondary"
+        >
           {field.type}
         </Badge>
       </div>
-      <div className="text-xs text-muted-foreground mt-1">{field.id}</div>
+      <div className="text-xs text-muted-foreground mt-1 pl-6">{field.id}</div>
     </div>
   );
 }

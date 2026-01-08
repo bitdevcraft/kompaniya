@@ -1,7 +1,13 @@
 "use client";
 
+import { useDndContext, useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Button } from "@kompaniya/ui-common/components/button";
 import { Card } from "@kompaniya/ui-common/components/card";
+import { cn } from "@kompaniya/ui-common/lib/utils";
 import { Plus } from "lucide-react";
 
 import type { RecordLayoutSection } from "@/components/record-page/layout";
@@ -141,6 +147,18 @@ function ColumnContainer({
   onSelectSection: (sectionId: string | null) => void;
 }) {
   const sectionsList = sections || [];
+  const { active } = useDndContext();
+  const activeType = active?.data.current?.type;
+  const showSectionDrop = activeType === "section";
+
+  const { setNodeRef, isOver } = useDroppable({
+    data: {
+      columnKey,
+      type: "column",
+    },
+    disabled: !showSectionDrop,
+    id: `column-${columnKey}`,
+  });
 
   const handleAddSection = () => {
     const newSection = {
@@ -152,7 +170,25 @@ function ColumnContainer({
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-card">
+    <div
+      className={cn(
+        "border rounded-lg p-4 bg-card transition-all relative",
+        showSectionDrop && "border-dashed border-primary/40",
+        isOver &&
+          showSectionDrop &&
+          "ring-2 ring-dashed ring-primary/50 bg-primary/5",
+      )}
+      ref={setNodeRef}
+    >
+      {isOver && showSectionDrop && (
+        <div className="absolute inset-0 -m-4 flex items-center justify-center pointer-events-none">
+          <div className="flex flex-col items-center gap-2 text-primary">
+            <Plus className="h-8 w-8" />
+            <span className="font-medium">Drop section here</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold">{title}</h3>
         <Button onClick={handleAddSection} size="sm" variant="ghost">
@@ -161,34 +197,46 @@ function ColumnContainer({
         </Button>
       </div>
 
-      <div className="space-y-4">
-        {sectionsList.map((section, index) => (
-          <SectionCard
-            actions={actions}
-            columnKey={columnKey}
-            index={index}
-            isSelected={selectedSectionId === section.id}
-            key={section.id}
-            onSelect={() => onSelectSection(section.id)}
-            section={section}
-          />
-        ))}
+      <SortableContext
+        items={sectionsList.map((section) => `section-${section.id}`)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          className={cn("space-y-4", isOver && showSectionDrop && "opacity-30")}
+        >
+          {sectionsList.map((section, index) => (
+            <SectionCard
+              actions={actions}
+              columnKey={columnKey}
+              index={index}
+              isSelected={selectedSectionId === section.id}
+              key={section.id}
+              onSelect={() => onSelectSection(section.id)}
+              section={section}
+            />
+          ))}
 
-        {sectionsList.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
-            <p className="text-sm">No sections yet</p>
-            <Button
-              className="mt-2"
-              onClick={handleAddSection}
-              size="sm"
-              variant="outline"
+          {sectionsList.length === 0 && (
+            <div
+              className={cn(
+                "text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg",
+                showSectionDrop && "border-primary/50 text-primary/70",
+              )}
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Section
-            </Button>
-          </div>
-        )}
-      </div>
+              <p className="text-sm">No sections yet</p>
+              <Button
+                className="mt-2"
+                onClick={handleAddSection}
+                size="sm"
+                variant="outline"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Section
+              </Button>
+            </div>
+          )}
+        </div>
+      </SortableContext>
     </div>
   );
 }
