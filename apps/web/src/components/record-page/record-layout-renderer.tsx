@@ -409,6 +409,19 @@ function formatHeaderText<TFieldValues extends FieldValues>(
 ) {
   const field = fieldMap.get(item.fieldId);
   const rawValue = resolveFieldValue(record, form, item.fieldId);
+
+  // For phone fields, return the raw string value since the chip will handle linking
+  if (field?.type === "phone" && typeof rawValue === "string") {
+    const value = rawValue.trim().length > 0 ? rawValue : null;
+    if (!value && allowFallback) {
+      return item.fallback ?? "";
+    }
+    if (!value) {
+      return item.fallback ?? "";
+    }
+    return `${item.prefix ?? ""}${value}${item.suffix ?? ""}`;
+  }
+
   const formatted = field
     ? formatValue(field, rawValue)
     : fallbackFormat(rawValue, item.type);

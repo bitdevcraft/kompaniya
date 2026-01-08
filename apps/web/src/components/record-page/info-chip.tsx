@@ -15,9 +15,6 @@ export function InfoChip({ icon: Icon, label, linkType }: InfoChipProps) {
       ? label
       : undefined;
 
-  console.log(href);
-  console.log(label);
-
   const content = (
     <span className="inline-flex items-center gap-2">
       <Icon className="size-4 text-muted-foreground" />

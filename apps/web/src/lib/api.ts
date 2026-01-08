@@ -8,7 +8,7 @@ const FORWARD = ["authorization", "accept-language", "user-agent"] as const;
 
 export async function api(): Promise<AxiosInstance> {
   const h = await nextHeaders();
-  const c = cookies();
+  const c = await cookies();
 
   const out: Record<string, string> = {};
   for (const name of FORWARD) {
