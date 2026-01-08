@@ -23,7 +23,11 @@
     "./components/*": "./src/components/*.tsx",
     "./config/*": "./src/config/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
-    "./lib/*": "./src/lib/*.ts",
+    "./lib/custom-field-columns": "./src/lib/custom-field-columns.tsx",
+    "./lib/*": [
+      "./src/lib/*.ts",
+      "./src/lib/*.tsx"
+    ],
     "./types/*": "./src/types/*.ts",
     "./utils/*": "./src/utils/*.ts"
   },

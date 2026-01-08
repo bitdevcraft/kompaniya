@@ -5,14 +5,44 @@ import {
   OrgContact,
   orgContactsTable,
 } from '@repo/database/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  type SQL,
+} from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
+import {
+  filterColumns,
+  getCustomFieldKey,
+  isCustomFieldId,
+  separateFilters,
+} from '~/lib/pagination/filter-columns';
 import { PaginationQueryParserType } from '~/lib/pagination/pagination-query-parser';
 import { CacheService } from '~/modules/core/cache/cache.service';
+import { CustomFieldQueryService } from '~/modules/core/custom-fields/custom-field-query.service';
 import { CustomFieldValidationService } from '~/modules/core/custom-fields/custom-field-validation.service';
 import { PaginationRepositoryService } from '~/modules/core/database/repository/pagination-repository/pagination-repository.service';
+
+type CustomFieldFilterOperator =
+  | 'exists'
+  | 'eq'
+  | 'neq'
+  | 'in'
+  | 'not_in'
+  | 'contains'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'array_contains';
 
 @Injectable()
 export class ContactService {
@@ -21,6 +51,7 @@ export class ContactService {
     private readonly paginationRepositoryService: PaginationRepositoryService,
     private readonly cacheService: CacheService,
     private readonly customFieldValidation: CustomFieldValidationService,
+    private readonly customFieldQueryService: CustomFieldQueryService,
   ) {}
 
   async createNewRecord(record: NewOrgContact): Promise<OrgContact[]> {
@@ -114,26 +145,98 @@ export class ContactService {
     organizationId: string,
     query: PaginationQueryParserType,
   ) {
-    const cacheKey = `${Keys.Contact.paginated(userId, organizationId)}-${JSON.stringify(query)}`;
+    return await this.cacheService.wrapCache({
+      key: `${Keys.Contact.paginated(userId, organizationId)}-${JSON.stringify(query)}`,
+      fn: async () => {
+        // Separate regular and custom field filters
+        const { regularFilters, customFieldFilters } = separateFilters(
+          // @ts-expect-error id-union
+          query.filters ?? [],
+        );
 
-    let paginationCache = await this.cacheService.get<string[]>(
-      Keys.Contact.paginatedList(userId, organizationId),
-    );
+        // Map custom field filters to CustomFieldQueryService format
+        const customFieldFilterItems = customFieldFilters.map((filter) => ({
+          key: getCustomFieldKey(filter.id),
+          operator: this.mapFilterOperator(filter.operator),
+          value: filter.value,
+        }));
 
-    paginationCache = paginationCache
-      ? [...paginationCache, cacheKey]
-      : [cacheKey];
+        // Build filter conditions
+        const regularWhere = filterColumns({
+          filters: regularFilters,
+          joinOperator: query.joinOperator,
+          table: orgContactsTable,
+        });
 
-    await this.cacheService.set(
-      Keys.Contact.paginatedList(userId, organizationId),
-      paginationCache,
-    );
+        // Build custom field filter condition
+        let customFieldWhere: SQL | undefined = undefined;
+        if (customFieldFilterItems.length > 0) {
+          customFieldWhere =
+            await this.customFieldQueryService.translateFilters(
+              orgContactsTable,
+              organizationId,
+              'org_contacts',
+              customFieldFilterItems,
+            );
+        }
 
-    return await this.paginationRepositoryService.getPaginatedDataTable({
-      table: orgContactsTable,
-      cacheKey,
-      query,
-      organizationId,
+        // Combine conditions
+        const baseConditions = [
+          isNull(orgContactsTable.deletedAt),
+          eq(orgContactsTable.organizationId, organizationId),
+          query.name
+            ? ilike(orgContactsTable.name, `%${query.name}%`)
+            : undefined,
+        ];
+
+        const where = and(
+          ...baseConditions,
+          ...[regularWhere, customFieldWhere].filter(Boolean),
+        );
+
+        // Build orderBy with custom field support
+        const offset = (query.page - 1) * query.perPage;
+        const orderBy =
+          query.sort.length > 0
+            ? query.sort.map((item) => {
+                if (isCustomFieldId(item.id)) {
+                  const key = getCustomFieldKey(item.id);
+                  return this.customFieldQueryService.buildSortCondition(
+                    orgContactsTable,
+                    key,
+                    item.desc ? 'desc' : 'asc',
+                  );
+                }
+
+                return item.desc
+                  ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    desc(orgContactsTable[item.id])
+                  : // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    asc(orgContactsTable[item.id]);
+              })
+            : [asc(orgContactsTable.createdAt)];
+
+        // Fetch data
+        const data = await this.db
+          .select()
+          .from(orgContactsTable)
+          .where(where)
+          .limit(query.perPage)
+          .offset(offset)
+          .orderBy(...orderBy);
+
+        // Fetch total count
+        const totalResult = await this.db
+          .select({ count: count() })
+          .from(orgContactsTable)
+          .where(where)
+          .execute();
+
+        const total = totalResult[0]?.count ?? 0;
+        const pageCount = Math.ceil(total / query.perPage);
+
+        return { data, pageCount };
+      },
     });
   }
 
@@ -187,5 +290,26 @@ export class ContactService {
         ),
       )
       .returning();
+  }
+
+  /**
+   * Map filter operators from frontend to CustomFieldQueryService format
+   */
+  private mapFilterOperator(operator: string): CustomFieldFilterOperator {
+    const operatorMap: Record<string, CustomFieldFilterOperator> = {
+      iLike: 'contains',
+      eq: 'eq',
+      ne: 'neq',
+      inArray: 'in',
+      notInArray: 'not_in',
+      lt: 'lt',
+      lte: 'lte',
+      gt: 'gt',
+      gte: 'gte',
+      isEmpty: 'exists',
+      isNotEmpty: 'exists',
+      arrayIncludesAny: 'array_contains',
+    };
+    return operatorMap[operator] ?? 'eq';
   }
 }

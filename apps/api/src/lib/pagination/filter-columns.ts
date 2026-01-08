@@ -40,6 +40,12 @@ export function filterColumns<T extends Table>({
   const joinFn = joinOperator === 'and' ? and : or;
 
   const conditions = filters.map((filter) => {
+    // Skip custom field filters - they should be handled separately
+    // by the service layer using CustomFieldQueryService
+    if (isCustomFieldId(filter.id)) {
+      return undefined;
+    }
+
     const column = getColumn(table, filter.id);
 
     switch (filter.operator) {
@@ -305,6 +311,11 @@ export function filterQueries<T extends Table>({
   filters: ExtendedColumnFilter<T>[];
 }): SQL[] | undefined {
   const conditions = filters.map((filter) => {
+    // Skip custom field filters - they should be handled separately
+    if (isCustomFieldId(filter.id)) {
+      return undefined;
+    }
+
     const column = getColumn(table, filter.id);
 
     switch (filter.operator) {
@@ -565,6 +576,21 @@ export function getColumn<T extends Table>(
   return table[columnKey] as AnyColumn;
 }
 
+/**
+ * Extract the custom field key from a filter ID
+ * @example getCustomFieldKey('customFields.employeeId') => 'employeeId'
+ */
+export function getCustomFieldKey(id: string): string {
+  return id.replace('customFields.', '');
+}
+
+/**
+ * Check if a filter ID is a custom field (format: customFields.fieldName)
+ */
+export function isCustomFieldId(id: string): boolean {
+  return id.startsWith('customFields.');
+}
+
 export function isEmpty(column: AnyColumn) {
   return sql<boolean>`
     case
@@ -575,4 +601,27 @@ export function isEmpty(column: AnyColumn) {
       else false
     end
   `;
+}
+
+/**
+ * Separate filters into regular column filters and custom field filters
+ */
+export function separateFilters<TData>(
+  filters: ExtendedColumnFilter<TData>[],
+): {
+  regularFilters: ExtendedColumnFilter<TData>[];
+  customFieldFilters: ExtendedColumnFilter<TData>[];
+} {
+  const regularFilters: ExtendedColumnFilter<TData>[] = [];
+  const customFieldFilters: ExtendedColumnFilter<TData>[] = [];
+
+  for (const filter of filters) {
+    if (isCustomFieldId(filter.id)) {
+      customFieldFilters.push(filter);
+    } else {
+      regularFilters.push(filter);
+    }
+  }
+
+  return { regularFilters, customFieldFilters };
 }

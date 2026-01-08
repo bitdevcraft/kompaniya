@@ -10,6 +10,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@kompaniya/ui-common/components/command";
 import {
   Popover,
@@ -38,6 +39,22 @@ export function DataTableViewOptions<TData>({
     [table],
   );
 
+  // Separate columns into standard and custom fields
+  const { standardColumns, customFieldColumns } = React.useMemo(() => {
+    const standard: typeof columns = [];
+    const customFields: typeof columns = [];
+
+    for (const column of columns) {
+      if (column.columnDef.meta?.isCustomField) {
+        customFields.push(column);
+      } else {
+        standard.push(column);
+      }
+    }
+
+    return { standardColumns: standard, customFieldColumns: customFields };
+  }, [columns]);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -53,31 +70,62 @@ export function DataTableViewOptions<TData>({
           <ChevronsUpDown className="ml-auto opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-44 p-0">
+      <PopoverContent align="end" className="w-52 p-0">
         <Command>
           <CommandInput placeholder="Search columns..." />
           <CommandList>
             <CommandEmpty>No columns found.</CommandEmpty>
-            <CommandGroup>
-              {columns.map((column) => (
-                <CommandItem
-                  key={column.id}
-                  onSelect={() =>
-                    column.toggleVisibility(!column.getIsVisible())
-                  }
-                >
-                  <span className="truncate">
-                    {column.columnDef.meta?.label ?? column.id}
-                  </span>
-                  <Check
-                    className={cn(
-                      "ml-auto size-4 shrink-0",
-                      column.getIsVisible() ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
+
+            {/* Standard Columns */}
+            {standardColumns.length > 0 && (
+              <CommandGroup heading="Standard Columns">
+                {standardColumns.map((column) => (
+                  <CommandItem
+                    key={column.id}
+                    onSelect={() =>
+                      column.toggleVisibility(!column.getIsVisible())
+                    }
+                  >
+                    <span className="truncate">
+                      {column.columnDef.meta?.label ?? column.id}
+                    </span>
+                    <Check
+                      className={cn(
+                        "ml-auto size-4 shrink-0",
+                        column.getIsVisible() ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
+            {/* Custom Fields */}
+            {customFieldColumns.length > 0 && (
+              <>
+                {standardColumns.length > 0 && <CommandSeparator />}
+                <CommandGroup heading="Custom Fields">
+                  {customFieldColumns.map((column) => (
+                    <CommandItem
+                      key={column.id}
+                      onSelect={() =>
+                        column.toggleVisibility(!column.getIsVisible())
+                      }
+                    >
+                      <span className="truncate">
+                        {column.columnDef.meta?.label ?? column.id}
+                      </span>
+                      <Check
+                        className={cn(
+                          "ml-auto size-4 shrink-0",
+                          column.getIsVisible() ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

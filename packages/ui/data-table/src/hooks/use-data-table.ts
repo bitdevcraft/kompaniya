@@ -63,6 +63,8 @@ interface UseDataTableProps<TData>
   scroll?: boolean;
   shallow?: boolean;
   startTransition?: React.TransitionStartFunction;
+  /** Maximum number of custom field columns visible by default */
+  maxCustomFieldsVisible?: number;
 }
 
 export function useDataTable<TData>(props: UseDataTableProps<TData>) {
@@ -78,6 +80,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     scroll = false,
     shallow = true,
     startTransition,
+    maxCustomFieldsVisible = 3,
     ...tableProps
   } = props;
 
@@ -103,12 +106,6 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
       startTransition,
     ],
   );
-
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
-    initialState?.rowSelection ?? {},
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(initialState?.columnVisibility ?? {});
 
   const [page, setPage] = useQueryState(
     PAGE_KEY,
@@ -147,6 +144,35 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
       columns.map((column) => column.id).filter(Boolean) as string[],
     );
   }, [columns]);
+
+  // Compute initial column visibility with custom field limits
+  const initialColumnVisibility = React.useMemo(() => {
+    const baseVisibility = initialState?.columnVisibility ?? {};
+    const visibility: VisibilityState = { ...baseVisibility };
+
+    // Find all custom field columns
+    const customFieldColumns = columns.filter((col) => {
+      const colId = col.id as string | undefined;
+      return colId?.startsWith("customFields.");
+    });
+
+    // Hide excess custom field columns (beyond maxCustomFieldsVisible)
+    customFieldColumns.slice(maxCustomFieldsVisible).forEach((col) => {
+      const colId = col.id as string;
+      // Only hide if not explicitly set to visible in initial state
+      if (visibility[colId] !== true) {
+        visibility[colId] = false;
+      }
+    });
+
+    return visibility;
+  }, [columns, initialState?.columnVisibility, maxCustomFieldsVisible]);
+
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>(
+    initialState?.rowSelection ?? {},
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>(initialColumnVisibility);
 
   const [sorting, setSorting] = useQueryState(
     SORT_KEY,
@@ -267,7 +293,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     ],
   );
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 API returns non-memoizable functions
   const table = useReactTable({
     ...tableProps,
     columns,

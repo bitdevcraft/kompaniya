@@ -5,15 +5,21 @@ import { AnyPgColumn } from 'drizzle-orm/pg-core';
 import { AnyPgTable } from 'drizzle-orm/pg-core';
 
 import { DRIZZLE_DB } from '~/constants/provider';
-import { filterColumns } from '~/lib/pagination/filter-columns';
+import {
+  filterColumns,
+  getCustomFieldKey,
+  isCustomFieldId,
+} from '~/lib/pagination/filter-columns';
 import { PaginationQueryParserType } from '~/lib/pagination/pagination-query-parser';
 import { CacheService } from '~/modules/core/cache/cache.service';
+import { CustomFieldQueryService } from '~/modules/core/custom-fields/custom-field-query.service';
 
 @Injectable()
 export class PaginationRepositoryService {
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: Db,
     private readonly cacheService: CacheService,
+    private readonly customFieldQueryService: CustomFieldQueryService,
   ) {}
 
   async getPaginatedDataTable<
@@ -40,20 +46,29 @@ export class PaginationRepositoryService {
         const offset = (query.page - 1) * query.perPage;
         const where = filterColumns({
           // @ts-expect-error id-union
-          filters: query.filters,
+          filters: query.filters ?? [],
           joinOperator: query.joinOperator,
           table,
         });
 
+        // Build orderBy array - handle both regular columns and custom fields
         const orderBy =
           query.sort.length > 0
-            ? query.sort.map((item) =>
-                item.desc
-                  ? // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    desc(table[item.id])
-                  : // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    asc(table[item.id]),
-              )
+            ? query.sort.map((item) => {
+                // Check if this is a custom field sort
+                if (isCustomFieldId(item.id)) {
+                  // Use CustomFieldQueryService for custom field sorting
+                  const key = getCustomFieldKey(item.id);
+                  return this.customFieldQueryService.buildSortCondition(
+                    table,
+                    key,
+                    item.desc ? 'desc' : 'asc',
+                  );
+                }
+                // Regular column sort
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                return item.desc ? desc(table[item.id]) : asc(table[item.id]);
+              })
             : [asc(table.createdAt)];
 
         const data = await this.db
