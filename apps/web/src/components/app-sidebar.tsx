@@ -154,6 +154,10 @@ const data = {
           url: "/settings/custom-attributes",
         },
         {
+          title: "Record Layouts",
+          url: "/settings/record-layouts",
+        },
+        {
           title: "Tags",
           url: "/settings/tags",
         },

@@ -145,8 +145,8 @@ export class RecordLayoutsService {
     layout: {
       header: unknown;
       sectionColumns?: unknown;
-      sections?: unknown[];
-      supplementalFields?: unknown[];
+      sections?: unknown[] | null;
+      supplementalFields?: unknown[] | null;
       autoIncludeCustomFields?: boolean;
     },
     userId: string,

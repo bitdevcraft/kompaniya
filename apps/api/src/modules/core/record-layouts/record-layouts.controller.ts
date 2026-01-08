@@ -18,23 +18,59 @@ import { RecordLayoutsService } from './record-layouts.service';
 
 /**
  * Schema for validating layout updates
+ * Matches the TypeScript interfaces from RecordPageLayout
  */
 const updateLayoutSchema = z.object({
   header: z.object({
-    title: z.object({ fieldId: z.string() }),
+    title: z.object({
+      fieldId: z.string(),
+      fallback: z.string().optional(),
+      prefix: z.string().optional(),
+      suffix: z.string().optional(),
+      type: z.enum(['text', 'number', 'date', 'datetime']).optional(),
+    }),
     avatar: z
       .object({
         fallbackFieldId: z.string().optional(),
         imageFieldId: z.string().optional(),
       })
       .optional(),
-    chips: z.array(z.any()).optional(),
-    metadata: z.array(z.any()).optional(),
-    subtitle: z.array(z.any()).optional(),
+    chips: z
+      .array(
+        z.object({
+          fieldId: z.string(),
+          id: z.string(),
+          icon: z.string().optional(),
+          linkType: z.enum(['mailto', 'tel', 'url']).optional(),
+          prefix: z.string().optional(),
+          suffix: z.string().optional(),
+        }),
+      )
+      .optional(),
+    metadata: z
+      .array(
+        z.object({
+          fieldId: z.string(),
+          id: z.string(),
+          label: z.string(),
+          type: z.enum(['text', 'number', 'date', 'datetime']).optional(),
+        }),
+      )
+      .optional(),
+    subtitle: z
+      .array(
+        z.object({
+          fieldId: z.string(),
+          prefix: z.string().optional(),
+          suffix: z.string().optional(),
+          type: z.enum(['text', 'number', 'date', 'datetime']).optional(),
+        }),
+      )
+      .optional(),
   }),
   sectionColumns: z.any().optional(),
-  sections: z.array(z.any()).optional(),
-  supplementalFields: z.array(z.any()).optional(),
+  sections: z.array(z.any()).optional().nullable(),
+  supplementalFields: z.array(z.any()).optional().nullable(),
   autoIncludeCustomFields: z.boolean().optional(),
 });
 
