@@ -48,7 +48,9 @@ import { HtmlRecordField } from "./html-record-field";
 import { InfoChip } from "./info-chip";
 import {
   getAllLayoutFields,
+  getValueAtPath,
   normalizeValueForSubmission,
+  setValueAtPath,
 } from "./layout-helpers";
 import { LookupRecordField } from "./lookup-record-field";
 import { MjmlRecordField } from "./mjml-record-field";
@@ -141,8 +143,15 @@ export function extractEditableValues<TFieldValues extends FieldValues>(
   const data: Record<string, unknown> = {};
 
   for (const field of editableFields) {
-    const rawValue = values[field.id];
-    data[field.id as string] = normalizeValueForSubmission(field, rawValue);
+    const rawValue = getValueAtPath(
+      values as Record<string, unknown>,
+      field.id as string,
+    );
+    setValueAtPath(
+      data,
+      field.id as string,
+      normalizeValueForSubmission(field, rawValue),
+    );
   }
 
   return data;
@@ -395,7 +404,7 @@ function FieldRenderer<TFieldValues extends FieldValues>({
       options={field.options}
       record={record}
       tag={field.tag}
-      value={record[field.id as string]}
+      value={resolveFieldValue(record, form, field.id)}
     />
   );
 }
@@ -866,7 +875,7 @@ function resolveFieldValue<TFieldValues extends FieldValues>(
     }
   }
 
-  return record[fieldId as string];
+  return getValueAtPath(record, fieldId as string);
 }
 
 function Section<TFieldValues extends FieldValues>({

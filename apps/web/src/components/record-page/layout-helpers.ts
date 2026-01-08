@@ -9,7 +9,7 @@ import type {
 export function createDefaultValuesForLayout<
   TFieldValues extends FieldValues = FieldValues,
 >(layout: RecordPageLayout<TFieldValues>) {
-  const defaults: Partial<TFieldValues> = {};
+  const defaults: Record<string, unknown> = {};
   const fields = getAllLayoutFields(layout);
 
   for (const field of fields) {
@@ -19,12 +19,12 @@ export function createDefaultValuesForLayout<
 
     switch (field.type) {
       case "boolean": {
-        defaults[field.id] = false as TFieldValues[typeof field.id];
+        setValueAtPath(defaults, field.id as string, false);
         break;
       }
       case "multipicklist":
       case "tag": {
-        defaults[field.id] = [] as TFieldValues[typeof field.id];
+        setValueAtPath(defaults, field.id as string, []);
         break;
       }
       case "lookup":
@@ -38,7 +38,7 @@ export function createDefaultValuesForLayout<
       case "html":
       case "mjml":
       default: {
-        defaults[field.id] = "" as TFieldValues[typeof field.id];
+        setValueAtPath(defaults, field.id as string, "");
         break;
       }
     }
@@ -55,8 +55,15 @@ export function extractCreateValues<TFieldValues extends FieldValues>(
   const data: Record<string, unknown> = {};
 
   for (const field of fields) {
-    const rawValue = values[field.id];
-    data[field.id as string] = normalizeValueForSubmission(field, rawValue);
+    const rawValue = getValueAtPath(
+      values as Record<string, unknown>,
+      field.id as string,
+    );
+    setValueAtPath(
+      data,
+      field.id as string,
+      normalizeValueForSubmission(field, rawValue),
+    );
   }
 
   return data;
@@ -84,6 +91,24 @@ export function getEditableLayoutFields<TFieldValues extends FieldValues>(
   layout: RecordPageLayout<TFieldValues>,
 ): RecordLayoutField<TFieldValues>[] {
   return getAllLayoutFields(layout).filter((field) => !field.readOnly);
+}
+
+export function getValueAtPath(source: Record<string, unknown>, path: string) {
+  if (!path.includes(".")) {
+    return source[path];
+  }
+
+  const parts = path.split(".");
+  let current: unknown = source;
+
+  for (const part of parts) {
+    if (!isRecord(current)) {
+      return undefined;
+    }
+    current = current[part];
+  }
+
+  return current;
 }
 
 export function normalizeValueForForm(
@@ -199,6 +224,36 @@ export function normalizeValueForSubmission<TFieldValues extends FieldValues>(
   }
 }
 
+export function setValueAtPath(
+  target: Record<string, unknown>,
+  path: string,
+  value: unknown,
+) {
+  if (!path.includes(".")) {
+    target[path] = value;
+    return;
+  }
+
+  const parts = path.split(".");
+  let current: Record<string, unknown> = target;
+
+  for (let index = 0; index < parts.length; index += 1) {
+    const part = parts[index];
+    const isLast = index === parts.length - 1;
+
+    if (isLast) {
+      current[part] = value;
+      return;
+    }
+
+    const next = current[part];
+    if (!isRecord(next)) {
+      current[part] = {};
+    }
+    current = current[part] as Record<string, unknown>;
+  }
+}
+
 export function toDateInputValue(value: unknown) {
   if (!value) return "";
 
@@ -248,6 +303,10 @@ function collectAllSections<TFieldValues extends FieldValues>(
   }
 
   return sections;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizeDate(value: unknown) {

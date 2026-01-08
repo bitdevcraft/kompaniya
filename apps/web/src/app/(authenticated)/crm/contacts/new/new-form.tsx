@@ -4,17 +4,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
+
+import type { RecordPageLayout } from "@/components/record-page/layout";
 
 import {
   createDefaultValuesForLayout,
   extractCreateValues,
 } from "@/components/record-page/layout-helpers";
 import { RecordCreateForm } from "@/components/record-page/record-create-form";
+import { useLayout } from "@/components/record-page/use-layout";
 import { authClient } from "@/lib/auth/client";
 
 import { dictTranslation, model, modelEndpoint } from "../config";
-import { contactRecordLayout } from "../r/[id]/contact-record-layout";
 import {
   ContactRecordFormValues,
   contactRecordSchema,
@@ -41,16 +44,31 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   const t = useTranslations(dictTranslation);
   const queryClient = useQueryClient();
   const { data: activeOrganization } = authClient.useActiveOrganization();
+  const layout = useLayout(
+    "org_contacts",
+  ) as RecordPageLayout<ContactRecordFormValues>;
+
+  const formDefaults = useMemo(
+    () => createDefaultValuesForLayout(layout),
+    [layout],
+  );
 
   const form = useForm<ContactRecordFormValues>({
     resolver: zodResolver(contactRecordSchema),
-    defaultValues: createDefaultValuesForLayout(contactRecordLayout),
+    defaultValues: formDefaults,
   });
+  const isDirty = form.formState.isDirty;
+
+  useEffect(() => {
+    if (!isDirty) {
+      form.reset(formDefaults);
+    }
+  }, [form, formDefaults, isDirty]);
 
   const submit = useSubmit();
 
   const onSubmit = (values: ContactRecordFormValues) => {
-    const payload = extractCreateValues(values, contactRecordLayout);
+    const payload = extractCreateValues(values, layout);
 
     submit.mutate(payload as ContactRecordSubmitValues, {
       onSuccess: () => {
@@ -77,7 +95,7 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
     <RecordCreateForm
       form={form}
       isSubmitting={submit.isPending}
-      layout={contactRecordLayout}
+      layout={layout}
       onCancel={onFinish}
       onSubmit={onSubmit}
       submitLabel={t("form.new.submit")}

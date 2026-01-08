@@ -6,9 +6,13 @@ import { RecordPageLayout } from "@/components/record-page/layout";
 import {
   getAllLayoutFields,
   getEditableLayoutFields,
+  getValueAtPath,
   normalizeValueForForm,
   normalizeValueForSubmission,
+  setValueAtPath,
 } from "@/components/record-page/layout-helpers";
+
+const CUSTOM_FIELDS_PREFIX = "customFields.";
 
 export const contactRecordSchema = z.object({
   annualRevenueBand: z.string().optional(),
@@ -63,6 +67,7 @@ export const contactRecordSchema = z.object({
   twitterHandle: z.string().optional(),
   updatedAt: z.string().optional(),
   websiteUrl: z.string().optional(),
+  customFields: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type ContactRecordFormValues = z.input<typeof contactRecordSchema>;
@@ -72,18 +77,19 @@ export function createContactFormDefaults(
   record: OrgContact,
   layout: RecordPageLayout<ContactRecordFormValues>,
 ): ContactRecordFormValues {
-  const defaults: Partial<ContactRecordFormValues> = {};
+  const defaults: Record<string, unknown> = {};
 
   for (const field of getAllLayoutFields(layout)) {
-    const value = (record as Record<string, unknown>)[field.id as string];
+    const value = getValueAtPath(
+      record as Record<string, unknown>,
+      field.id as string,
+    );
     const normalized = normalizeValueForForm(field, value);
     if (field.type === "multipicklist" && normalized === "") {
-      // @ts-expect-error todo fix-types
-      defaults[field.id] = [] as ContactRecordFormValues[typeof field.id];
+      setValueAtPath(defaults, field.id as string, []);
       continue;
     }
-    // @ts-expect-error todo fix-types
-    defaults[field.id] = normalized as ContactRecordFormValues[typeof field.id];
+    setValueAtPath(defaults, field.id as string, normalized);
   }
 
   return defaults as ContactRecordFormValues;
@@ -95,20 +101,41 @@ export function createContactUpdatePayload(
   layout: RecordPageLayout<ContactRecordFormValues>,
 ): Partial<OrgContact> {
   const updates: Partial<OrgContact> = {};
+  const customFieldUpdates: Record<string, unknown> = {};
   const editable = getEditableLayoutFields(layout);
 
   for (const field of editable) {
-    // @ts-expect-error todo fix-types
-    const value = values[field.id];
-    // @ts-expect-error todo fix-types
-    updates[field.id as keyof OrgContact] = normalizeValueForSubmission(
-      field,
-      value,
-    ) as OrgContact[keyof OrgContact];
+    const fieldId = field.id as string;
+    const value = getValueAtPath(values as Record<string, unknown>, fieldId);
+    const normalized = normalizeValueForSubmission(field, value);
+
+    if (fieldId.startsWith(CUSTOM_FIELDS_PREFIX)) {
+      const customKey = fieldId.slice(CUSTOM_FIELDS_PREFIX.length);
+      if (customKey) {
+        customFieldUpdates[customKey] = normalized;
+      }
+      continue;
+    }
+
+    (updates as Record<string, unknown>)[fieldId] = normalized;
+  }
+
+  if (Object.keys(customFieldUpdates).length > 0) {
+    const existingCustomFields = isRecord(record.customFields)
+      ? record.customFields
+      : {};
+    updates.customFields = {
+      ...existingCustomFields,
+      ...customFieldUpdates,
+    };
   }
 
   return {
     ...updates,
     id: record.id,
   };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
