@@ -1,5 +1,6 @@
 import { boolean, pgTable, unique, uuid } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -14,6 +15,7 @@ export const orgRealEstateBookingBuyersTable = pgTable(
     ...baseTimestampModel,
     ...baseOrganizationModel,
     ...baseOwnerModel,
+    ...baseCustomFieldModel,
 
     bookingId: uuid("bookingId").references(
       () => orgRealEstateBookingsTable.id,

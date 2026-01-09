@@ -1,5 +1,6 @@
 import { pgTable, text, varchar } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -10,6 +11,7 @@ export const orgEmailTestReceiversTable = pgTable("org_email_test_receivers", {
   ...baseTimestampModel,
   ...baseOrganizationModel,
   ...baseOwnerModel,
+  ...baseCustomFieldModel,
 
   name: varchar("name", { length: 255 }),
   emails: text("emails").array(),

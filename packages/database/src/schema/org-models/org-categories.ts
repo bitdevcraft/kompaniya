@@ -1,6 +1,7 @@
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { unique } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -13,6 +14,7 @@ export const orgCategoriesTable = pgTable(
     ...baseTimestampModel,
     ...baseOrganizationModel,
     ...baseOwnerModel,
+    ...baseCustomFieldModel,
 
     name: text("name").notNull(),
   },

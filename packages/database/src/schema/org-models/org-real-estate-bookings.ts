@@ -8,6 +8,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -30,6 +31,7 @@ export const orgRealEstateBookingsTable = pgTable("org_real_estate_bookings", {
   ...baseTimestampModel,
   ...baseOrganizationModel,
   ...baseOwnerModel,
+  ...baseCustomFieldModel,
 
   name: varchar("name", { length: 255 }),
   referenceCode: varchar("reference_code", { length: 100 }),

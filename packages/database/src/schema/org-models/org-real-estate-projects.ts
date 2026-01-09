@@ -1,5 +1,6 @@
 import { integer, pgEnum, pgTable, text, varchar } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -15,6 +16,7 @@ export const orgRealEstateProjectsTable = pgTable("org_real_estate_projects", {
   ...baseTimestampModel,
   ...baseOrganizationModel,
   ...baseOwnerModel,
+  ...baseCustomFieldModel,
 
   name: varchar("name", { length: 255 }),
   description: text("description"),

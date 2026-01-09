@@ -7,6 +7,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -64,6 +65,8 @@ export const orgAccountsTable = pgTable("org_accounts", {
   billingCountryCode: char("billing_country_code", { length: 3 }),
   billingLatitude: numeric("billing_latitude", { precision: 9, scale: 6 }),
   billingLongitude: numeric("billing_longitude", { precision: 9, scale: 6 }),
+
+  ...baseCustomFieldModel,
 });
 
 export type NewOrgAccount = typeof orgAccountsTable.$inferInsert;

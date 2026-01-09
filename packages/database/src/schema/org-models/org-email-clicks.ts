@@ -1,5 +1,6 @@
 import { pgTable, text, uuid } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -12,6 +13,7 @@ export const orgEmailClicksTable = pgTable("org_email_clicks", {
   ...baseTimestampModel,
   ...baseOrganizationModel,
   ...baseOwnerModel,
+  ...baseCustomFieldModel,
 
   link: text("link"),
   orgEmailId: uuid("org_email_id").references(() => orgEmailsTable.id, {

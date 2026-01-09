@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -146,6 +147,8 @@ export const orgPaymentPlanTemplatesTable = pgTable(
     ...baseTimestampModel,
     ...baseOrganizationModel,
     ...baseOwnerModel,
+    ...baseCustomFieldModel,
+
     code: varchar("code", { length: 100 }).notNull().unique(),
     name: text("name").notNull(),
     description: text("description"),

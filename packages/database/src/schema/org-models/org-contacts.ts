@@ -11,6 +11,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
+import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
@@ -21,6 +22,7 @@ export const orgContactsTable = pgTable("org_contacts", {
   ...baseTimestampModel,
   ...baseOrganizationModel,
   ...baseOwnerModel,
+  ...baseCustomFieldModel,
 
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
@@ -87,7 +89,6 @@ export const orgContactsTable = pgTable("org_contacts", {
   // System & hygiene
   dedupeKey: text("dedupe_key"),
   externalIds: jsonb("external_ids").$type<Record<string, string | number>>(),
-  customFields: jsonb("custom_fields").$type<Record<string, unknown>>(),
 
   // Enrichments
   linkedinUrl: text("linkedin_url"),
