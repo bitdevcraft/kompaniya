@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { LeadRecordFormValues } from "./lead-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { leadRecordLayout } from "./lead-record-layout";
 import {
   createLeadFormDefaults,
   createLeadUpdatePayload,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_leads",
+  ) as RecordPageLayout<LeadRecordFormValues>;
 
   const queryKey = useMemo(() => leadRecordQueryKey(recordId), [recordId]);
 
@@ -67,9 +72,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record ? createLeadFormDefaults(record, leadRecordLayout) : undefined,
-    [record],
+    () => (record ? createLeadFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<LeadRecordFormValues>({
@@ -79,16 +83,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(createLeadFormDefaults(record, leadRecordLayout));
+      form.reset(createLeadFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateLead = useMutation({
     mutationFn: (payload: Partial<OrgLead>) =>
       updateLeadRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createLeadFormDefaults(updated, leadRecordLayout));
+      form.reset(createLeadFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Lead updated");
     },
@@ -104,7 +108,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = leadRecordSchema.parse(values);
-    const payload = createLeadUpdatePayload(record, parsed, leadRecordLayout);
+    const payload = createLeadUpdatePayload(record, parsed, layout);
 
     try {
       await updateLead.mutateAsync(payload);
@@ -134,7 +138,7 @@ export function RecordViewPage({
           <Button
             disabled={updateLead.isPending}
             onClick={() => {
-              form.reset(createLeadFormDefaults(record, leadRecordLayout));
+              form.reset(createLeadFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -173,7 +177,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={leadRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

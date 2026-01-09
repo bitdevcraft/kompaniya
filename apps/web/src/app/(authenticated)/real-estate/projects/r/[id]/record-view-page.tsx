@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { ProjectRecordFormValues } from "./project-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { projectRecordLayout } from "./project-record-layout";
 import {
   createProjectFormDefaults,
   createProjectUpdatePayload,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_real_estate_projects",
+  ) as RecordPageLayout<ProjectRecordFormValues>;
 
   const queryKey = useMemo(() => projectRecordQueryKey(recordId), [recordId]);
 
@@ -67,11 +72,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record
-        ? createProjectFormDefaults(record, projectRecordLayout)
-        : undefined,
-    [record],
+    () => (record ? createProjectFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<ProjectRecordFormValues>({
@@ -81,16 +83,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(createProjectFormDefaults(record, projectRecordLayout));
+      form.reset(createProjectFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateProject = useMutation({
     mutationFn: (payload: Partial<OrgRealEstateProject>) =>
       updateProjectRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createProjectFormDefaults(updated, projectRecordLayout));
+      form.reset(createProjectFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Project updated");
     },
@@ -106,11 +108,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = projectRecordSchema.parse(values);
-    const payload = createProjectUpdatePayload(
-      record,
-      parsed,
-      projectRecordLayout,
-    );
+    const payload = createProjectUpdatePayload(record, parsed, layout);
 
     try {
       await updateProject.mutateAsync(payload);
@@ -142,9 +140,7 @@ export function RecordViewPage({
           <Button
             disabled={updateProject.isPending}
             onClick={() => {
-              form.reset(
-                createProjectFormDefaults(record, projectRecordLayout),
-              );
+              form.reset(createProjectFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -186,7 +182,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={projectRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

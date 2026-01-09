@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { PropertyRecordFormValues } from "./property-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { propertyRecordLayout } from "./property-record-layout";
 import {
   createPropertyFormDefaults,
   createPropertyUpdatePayload,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_real_estate_properties",
+  ) as RecordPageLayout<PropertyRecordFormValues>;
 
   const queryKey = useMemo(() => propertyRecordQueryKey(recordId), [recordId]);
 
@@ -67,11 +72,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record
-        ? createPropertyFormDefaults(record, propertyRecordLayout)
-        : undefined,
-    [record],
+    () => (record ? createPropertyFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<PropertyRecordFormValues>({
@@ -81,16 +83,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(createPropertyFormDefaults(record, propertyRecordLayout));
+      form.reset(createPropertyFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateProperty = useMutation({
     mutationFn: (payload: Partial<OrgRealEstateProperty>) =>
       updatePropertyRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createPropertyFormDefaults(updated, propertyRecordLayout));
+      form.reset(createPropertyFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Property updated");
     },
@@ -106,11 +108,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = propertyRecordSchema.parse(values);
-    const payload = createPropertyUpdatePayload(
-      record,
-      parsed,
-      propertyRecordLayout,
-    );
+    const payload = createPropertyUpdatePayload(record, parsed, layout);
 
     try {
       await updateProperty.mutateAsync(payload);
@@ -142,9 +140,7 @@ export function RecordViewPage({
           <Button
             disabled={updateProperty.isPending}
             onClick={() => {
-              form.reset(
-                createPropertyFormDefaults(record, propertyRecordLayout),
-              );
+              form.reset(createPropertyFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -186,7 +182,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={propertyRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

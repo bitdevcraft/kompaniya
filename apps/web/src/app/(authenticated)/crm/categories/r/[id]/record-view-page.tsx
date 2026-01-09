@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrgAccount } from "@repo/database/schema";
+import type { OrgCategory } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@kompaniya/ui-common/components/button";
@@ -13,28 +13,27 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { RecordPageLayout } from "@/components/record-page/layout";
-
+import { type RecordPageLayout } from "@/components/record-page/layout";
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
 import { useLayout } from "@/components/record-page/use-layout";
 
-import type { AccountRecordFormValues } from "../../account-record-schema";
+import type { CategoryRecordFormValues } from "./categories-record-schema";
 
-import {
-  accountRecordSchema,
-  createAccountFormDefaults,
-  createAccountUpdatePayload,
-} from "../../account-record-schema";
 import { modelEndpoint } from "../../config";
+import {
+  categoryRecordSchema,
+  createCategoryFormDefaults,
+  createCategoryUpdatePayload,
+} from "./categories-record-schema";
 
 interface RecordViewPageProps {
-  initialRecord?: OrgAccount;
+  initialRecord?: OrgCategory;
 
   recordId: string;
 }
 
-const accountRecordQueryKey = (recordId: string) =>
-  ["account-record", recordId] as const;
+const categoryRecordQueryKey = (recordId: string) =>
+  ["category-record", recordId] as const;
 
 export function RecordViewPage({
   initialRecord,
@@ -44,10 +43,10 @@ export function RecordViewPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const layout = useLayout(
-    "org_accounts",
-  ) as RecordPageLayout<AccountRecordFormValues>;
+    "org_categories",
+  ) as RecordPageLayout<CategoryRecordFormValues>;
 
-  const queryKey = useMemo(() => accountRecordQueryKey(recordId), [recordId]);
+  const queryKey = useMemo(() => categoryRecordQueryKey(recordId), [recordId]);
 
   const {
     data: record,
@@ -55,7 +54,7 @@ export function RecordViewPage({
     isLoading,
   } = useQuery({
     queryKey,
-    queryFn: () => fetchAccountRecord(recordId),
+    queryFn: () => fetchCategoryRecord(recordId),
     initialData: initialRecord,
     retry: false,
   });
@@ -72,29 +71,29 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () => (record ? createAccountFormDefaults(record, layout) : undefined),
+    () => (record ? createCategoryFormDefaults(record, layout) : undefined),
     [layout, record],
   );
 
-  const form = useForm<AccountRecordFormValues>({
+  const form = useForm<CategoryRecordFormValues>({
     defaultValues: formDefaults,
-    resolver: zodResolver(accountRecordSchema),
+    resolver: zodResolver(categoryRecordSchema),
   });
 
   useEffect(() => {
     if (record) {
-      form.reset(createAccountFormDefaults(record, layout));
+      form.reset(createCategoryFormDefaults(record, layout));
     }
   }, [form, layout, record]);
 
-  const updateAccount = useMutation({
-    mutationFn: (payload: Partial<OrgAccount>) =>
-      updateAccountRecord(recordId, payload),
+  const updateCategory = useMutation({
+    mutationFn: (payload: Partial<OrgCategory>) =>
+      updateCategoryRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createAccountFormDefaults(updated, layout));
+      form.reset(createCategoryFormDefaults(updated, layout));
       setIsEditing(false);
-      toast.success("Account updated");
+      toast.success("Category updated");
     },
     onError: () => {
       toast.error("We couldn't save your changes. Please try again.");
@@ -107,11 +106,11 @@ export function RecordViewPage({
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!record) return;
 
-    const parsed = accountRecordSchema.parse(values);
-    const payload = createAccountUpdatePayload(record, parsed, layout);
+    const parsed = categoryRecordSchema.parse(values);
+    const payload = createCategoryUpdatePayload(record, parsed, layout);
 
     try {
-      await updateAccount.mutateAsync(payload);
+      await updateCategory.mutateAsync(payload);
     } catch (_error) {
       // handled by mutation onError
     }
@@ -128,7 +127,7 @@ export function RecordViewPage({
   if (!record) {
     return (
       <div className="text-destructive">
-        Unable to load this account record.
+        Unable to load this category record.
       </div>
     );
   }
@@ -138,9 +137,9 @@ export function RecordViewPage({
       {isEditing ? (
         <>
           <Button
-            disabled={updateAccount.isPending}
+            disabled={updateCategory.isPending}
             onClick={() => {
-              form.reset(createAccountFormDefaults(record, layout));
+              form.reset(createCategoryFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -148,8 +147,8 @@ export function RecordViewPage({
           >
             Cancel
           </Button>
-          <Button disabled={updateAccount.isPending} type="submit">
-            {updateAccount.isPending ? (
+          <Button disabled={updateCategory.isPending} type="submit">
+            {updateCategory.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : null}
             Save changes
@@ -167,9 +166,12 @@ export function RecordViewPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost">
-          <Link className="inline-flex items-center gap-2" href="/crm/accounts">
+          <Link
+            className="inline-flex items-center gap-2"
+            href="/crm/categories"
+          >
             <ArrowLeft className="size-4" />
-            Back to accounts
+            Back to categories
           </Link>
         </Button>
       </div>
@@ -187,8 +189,8 @@ export function RecordViewPage({
   );
 }
 
-async function fetchAccountRecord(recordId: string) {
-  const { data } = await axios.get<OrgAccount>(
+async function fetchCategoryRecord(recordId: string) {
+  const { data } = await axios.get<OrgCategory>(
     `${modelEndpoint}/r/${recordId}`,
     {
       withCredentials: true,
@@ -198,11 +200,11 @@ async function fetchAccountRecord(recordId: string) {
   return data;
 }
 
-async function updateAccountRecord(
+async function updateCategoryRecord(
   recordId: string,
-  payload: Partial<OrgAccount>,
+  payload: Partial<OrgCategory>,
 ) {
-  const { data } = await axios.patch<OrgAccount>(
+  const { data } = await axios.patch<OrgCategory>(
     `${modelEndpoint}/r/${recordId}`,
     payload,
     {

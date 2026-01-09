@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { PaymentPlanRecordFormValues } from "./payment-plan-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { paymentPlanRecordLayout } from "./payment-plan-record-layout";
 import {
   createPaymentPlanFormDefaults,
   createPaymentPlanUpdatePayload,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_payment_plans",
+  ) as RecordPageLayout<PaymentPlanRecordFormValues>;
 
   const queryKey = useMemo(
     () => paymentPlanRecordQueryKey(recordId),
@@ -70,11 +75,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record
-        ? createPaymentPlanFormDefaults(record, paymentPlanRecordLayout)
-        : undefined,
-    [record],
+    () => (record ? createPaymentPlanFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<PaymentPlanRecordFormValues>({
@@ -84,20 +86,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(
-        createPaymentPlanFormDefaults(record, paymentPlanRecordLayout),
-      );
+      form.reset(createPaymentPlanFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updatePaymentPlan = useMutation({
     mutationFn: (payload: Partial<OrgPaymentPlan>) =>
       updatePaymentPlanRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(
-        createPaymentPlanFormDefaults(updated, paymentPlanRecordLayout),
-      );
+      form.reset(createPaymentPlanFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Payment plan updated");
     },
@@ -113,11 +111,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = paymentPlanRecordSchema.parse(values);
-    const payload = createPaymentPlanUpdatePayload(
-      record,
-      parsed,
-      paymentPlanRecordLayout,
-    );
+    const payload = createPaymentPlanUpdatePayload(record, parsed, layout);
 
     try {
       await updatePaymentPlan.mutateAsync(payload);
@@ -149,9 +143,7 @@ export function RecordViewPage({
           <Button
             disabled={updatePaymentPlan.isPending}
             onClick={() => {
-              form.reset(
-                createPaymentPlanFormDefaults(record, paymentPlanRecordLayout),
-              );
+              form.reset(createPaymentPlanFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -193,7 +185,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={paymentPlanRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

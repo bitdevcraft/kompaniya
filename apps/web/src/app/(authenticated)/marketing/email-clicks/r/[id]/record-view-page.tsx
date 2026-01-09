@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrgAccount } from "@repo/database/schema";
+import type { OrgEmailClick } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@kompaniya/ui-common/components/button";
@@ -13,28 +13,27 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { RecordPageLayout } from "@/components/record-page/layout";
-
+import { type RecordPageLayout } from "@/components/record-page/layout";
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
 import { useLayout } from "@/components/record-page/use-layout";
 
-import type { AccountRecordFormValues } from "../../account-record-schema";
+import type { EmailClickRecordFormValues } from "./email-clicks-record-schema";
 
-import {
-  accountRecordSchema,
-  createAccountFormDefaults,
-  createAccountUpdatePayload,
-} from "../../account-record-schema";
 import { modelEndpoint } from "../../config";
+import {
+  createEmailClickFormDefaults,
+  createEmailClickUpdatePayload,
+  emailClickRecordSchema,
+} from "./email-clicks-record-schema";
 
 interface RecordViewPageProps {
-  initialRecord?: OrgAccount;
+  initialRecord?: OrgEmailClick;
 
   recordId: string;
 }
 
-const accountRecordQueryKey = (recordId: string) =>
-  ["account-record", recordId] as const;
+const emailClickRecordQueryKey = (recordId: string) =>
+  ["email-click-record", recordId] as const;
 
 export function RecordViewPage({
   initialRecord,
@@ -44,10 +43,13 @@ export function RecordViewPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const layout = useLayout(
-    "org_accounts",
-  ) as RecordPageLayout<AccountRecordFormValues>;
+    "org_email_clicks",
+  ) as RecordPageLayout<EmailClickRecordFormValues>;
 
-  const queryKey = useMemo(() => accountRecordQueryKey(recordId), [recordId]);
+  const queryKey = useMemo(
+    () => emailClickRecordQueryKey(recordId),
+    [recordId],
+  );
 
   const {
     data: record,
@@ -55,7 +57,7 @@ export function RecordViewPage({
     isLoading,
   } = useQuery({
     queryKey,
-    queryFn: () => fetchAccountRecord(recordId),
+    queryFn: () => fetchEmailClickRecord(recordId),
     initialData: initialRecord,
     retry: false,
   });
@@ -72,29 +74,29 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () => (record ? createAccountFormDefaults(record, layout) : undefined),
+    () => (record ? createEmailClickFormDefaults(record, layout) : undefined),
     [layout, record],
   );
 
-  const form = useForm<AccountRecordFormValues>({
+  const form = useForm<EmailClickRecordFormValues>({
     defaultValues: formDefaults,
-    resolver: zodResolver(accountRecordSchema),
+    resolver: zodResolver(emailClickRecordSchema),
   });
 
   useEffect(() => {
     if (record) {
-      form.reset(createAccountFormDefaults(record, layout));
+      form.reset(createEmailClickFormDefaults(record, layout));
     }
   }, [form, layout, record]);
 
-  const updateAccount = useMutation({
-    mutationFn: (payload: Partial<OrgAccount>) =>
-      updateAccountRecord(recordId, payload),
+  const updateEmailClick = useMutation({
+    mutationFn: (payload: Partial<OrgEmailClick>) =>
+      updateEmailClickRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createAccountFormDefaults(updated, layout));
+      form.reset(createEmailClickFormDefaults(updated, layout));
       setIsEditing(false);
-      toast.success("Account updated");
+      toast.success("Email click updated");
     },
     onError: () => {
       toast.error("We couldn't save your changes. Please try again.");
@@ -107,11 +109,11 @@ export function RecordViewPage({
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!record) return;
 
-    const parsed = accountRecordSchema.parse(values);
-    const payload = createAccountUpdatePayload(record, parsed, layout);
+    const parsed = emailClickRecordSchema.parse(values);
+    const payload = createEmailClickUpdatePayload(record, parsed, layout);
 
     try {
-      await updateAccount.mutateAsync(payload);
+      await updateEmailClick.mutateAsync(payload);
     } catch (_error) {
       // handled by mutation onError
     }
@@ -128,7 +130,7 @@ export function RecordViewPage({
   if (!record) {
     return (
       <div className="text-destructive">
-        Unable to load this account record.
+        Unable to load this email click record.
       </div>
     );
   }
@@ -138,9 +140,9 @@ export function RecordViewPage({
       {isEditing ? (
         <>
           <Button
-            disabled={updateAccount.isPending}
+            disabled={updateEmailClick.isPending}
             onClick={() => {
-              form.reset(createAccountFormDefaults(record, layout));
+              form.reset(createEmailClickFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -148,8 +150,8 @@ export function RecordViewPage({
           >
             Cancel
           </Button>
-          <Button disabled={updateAccount.isPending} type="submit">
-            {updateAccount.isPending ? (
+          <Button disabled={updateEmailClick.isPending} type="submit">
+            {updateEmailClick.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : null}
             Save changes
@@ -167,9 +169,12 @@ export function RecordViewPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost">
-          <Link className="inline-flex items-center gap-2" href="/crm/accounts">
+          <Link
+            className="inline-flex items-center gap-2"
+            href="/marketing/email-clicks"
+          >
             <ArrowLeft className="size-4" />
-            Back to accounts
+            Back to email clicks
           </Link>
         </Button>
       </div>
@@ -187,8 +192,8 @@ export function RecordViewPage({
   );
 }
 
-async function fetchAccountRecord(recordId: string) {
-  const { data } = await axios.get<OrgAccount>(
+async function fetchEmailClickRecord(recordId: string) {
+  const { data } = await axios.get<OrgEmailClick>(
     `${modelEndpoint}/r/${recordId}`,
     {
       withCredentials: true,
@@ -198,11 +203,11 @@ async function fetchAccountRecord(recordId: string) {
   return data;
 }
 
-async function updateAccountRecord(
+async function updateEmailClickRecord(
   recordId: string,
-  payload: Partial<OrgAccount>,
+  payload: Partial<OrgEmailClick>,
 ) {
-  const { data } = await axios.patch<OrgAccount>(
+  const { data } = await axios.patch<OrgEmailClick>(
     `${modelEndpoint}/r/${recordId}`,
     payload,
     {

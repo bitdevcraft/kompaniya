@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { OpportunityRecordFormValues } from "../../opportunity-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { opportunityRecordLayout } from "../../opportunity-record-layout";
 import {
   createOpportunityFormDefaults,
   createOpportunityUpdatePayload,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_opportunities",
+  ) as RecordPageLayout<OpportunityRecordFormValues>;
 
   const queryKey = useMemo(
     () => opportunityRecordQueryKey(recordId),
@@ -70,11 +75,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record
-        ? createOpportunityFormDefaults(record, opportunityRecordLayout)
-        : undefined,
-    [record],
+    () => (record ? createOpportunityFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<OpportunityRecordFormValues>({
@@ -84,20 +86,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(
-        createOpportunityFormDefaults(record, opportunityRecordLayout),
-      );
+      form.reset(createOpportunityFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateOpportunity = useMutation({
     mutationFn: (payload: Partial<OrgOpportunity>) =>
       updateOpportunityRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(
-        createOpportunityFormDefaults(updated, opportunityRecordLayout),
-      );
+      form.reset(createOpportunityFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Opportunity updated");
     },
@@ -113,11 +111,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = opportunityRecordSchema.parse(values);
-    const payload = createOpportunityUpdatePayload(
-      record,
-      parsed,
-      opportunityRecordLayout,
-    );
+    const payload = createOpportunityUpdatePayload(record, parsed, layout);
 
     try {
       await updateOpportunity.mutateAsync(payload);
@@ -149,9 +143,7 @@ export function RecordViewPage({
           <Button
             disabled={updateOpportunity.isPending}
             onClick={() => {
-              form.reset(
-                createOpportunityFormDefaults(record, opportunityRecordLayout),
-              );
+              form.reset(createOpportunityFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -193,7 +185,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={opportunityRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

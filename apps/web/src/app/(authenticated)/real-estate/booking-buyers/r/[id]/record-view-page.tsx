@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrgAccount } from "@repo/database/schema";
+import type { OrgRealEstateBookingBuyer } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@kompaniya/ui-common/components/button";
@@ -13,28 +13,27 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { RecordPageLayout } from "@/components/record-page/layout";
-
+import { type RecordPageLayout } from "@/components/record-page/layout";
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
 import { useLayout } from "@/components/record-page/use-layout";
 
-import type { AccountRecordFormValues } from "../../account-record-schema";
+import type { BookingBuyerRecordFormValues } from "./booking-buyers-record-schema";
 
-import {
-  accountRecordSchema,
-  createAccountFormDefaults,
-  createAccountUpdatePayload,
-} from "../../account-record-schema";
 import { modelEndpoint } from "../../config";
+import {
+  bookingBuyerRecordSchema,
+  createBookingBuyerFormDefaults,
+  createBookingBuyerUpdatePayload,
+} from "./booking-buyers-record-schema";
 
 interface RecordViewPageProps {
-  initialRecord?: OrgAccount;
+  initialRecord?: OrgRealEstateBookingBuyer;
 
   recordId: string;
 }
 
-const accountRecordQueryKey = (recordId: string) =>
-  ["account-record", recordId] as const;
+const bookingBuyerRecordQueryKey = (recordId: string) =>
+  ["booking-buyer-record", recordId] as const;
 
 export function RecordViewPage({
   initialRecord,
@@ -44,10 +43,13 @@ export function RecordViewPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const layout = useLayout(
-    "org_accounts",
-  ) as RecordPageLayout<AccountRecordFormValues>;
+    "org_real_estate_booking_buyers",
+  ) as RecordPageLayout<BookingBuyerRecordFormValues>;
 
-  const queryKey = useMemo(() => accountRecordQueryKey(recordId), [recordId]);
+  const queryKey = useMemo(
+    () => bookingBuyerRecordQueryKey(recordId),
+    [recordId],
+  );
 
   const {
     data: record,
@@ -55,7 +57,7 @@ export function RecordViewPage({
     isLoading,
   } = useQuery({
     queryKey,
-    queryFn: () => fetchAccountRecord(recordId),
+    queryFn: () => fetchBookingBuyerRecord(recordId),
     initialData: initialRecord,
     retry: false,
   });
@@ -72,29 +74,29 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () => (record ? createAccountFormDefaults(record, layout) : undefined),
+    () => (record ? createBookingBuyerFormDefaults(record, layout) : undefined),
     [layout, record],
   );
 
-  const form = useForm<AccountRecordFormValues>({
+  const form = useForm<BookingBuyerRecordFormValues>({
     defaultValues: formDefaults,
-    resolver: zodResolver(accountRecordSchema),
+    resolver: zodResolver(bookingBuyerRecordSchema),
   });
 
   useEffect(() => {
     if (record) {
-      form.reset(createAccountFormDefaults(record, layout));
+      form.reset(createBookingBuyerFormDefaults(record, layout));
     }
   }, [form, layout, record]);
 
-  const updateAccount = useMutation({
-    mutationFn: (payload: Partial<OrgAccount>) =>
-      updateAccountRecord(recordId, payload),
+  const updateBookingBuyer = useMutation({
+    mutationFn: (payload: Partial<OrgRealEstateBookingBuyer>) =>
+      updateBookingBuyerRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createAccountFormDefaults(updated, layout));
+      form.reset(createBookingBuyerFormDefaults(updated, layout));
       setIsEditing(false);
-      toast.success("Account updated");
+      toast.success("Booking buyer updated");
     },
     onError: () => {
       toast.error("We couldn't save your changes. Please try again.");
@@ -107,11 +109,11 @@ export function RecordViewPage({
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!record) return;
 
-    const parsed = accountRecordSchema.parse(values);
-    const payload = createAccountUpdatePayload(record, parsed, layout);
+    const parsed = bookingBuyerRecordSchema.parse(values);
+    const payload = createBookingBuyerUpdatePayload(record, parsed, layout);
 
     try {
-      await updateAccount.mutateAsync(payload);
+      await updateBookingBuyer.mutateAsync(payload);
     } catch (_error) {
       // handled by mutation onError
     }
@@ -128,7 +130,7 @@ export function RecordViewPage({
   if (!record) {
     return (
       <div className="text-destructive">
-        Unable to load this account record.
+        Unable to load this booking buyer record.
       </div>
     );
   }
@@ -138,9 +140,9 @@ export function RecordViewPage({
       {isEditing ? (
         <>
           <Button
-            disabled={updateAccount.isPending}
+            disabled={updateBookingBuyer.isPending}
             onClick={() => {
-              form.reset(createAccountFormDefaults(record, layout));
+              form.reset(createBookingBuyerFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -148,8 +150,8 @@ export function RecordViewPage({
           >
             Cancel
           </Button>
-          <Button disabled={updateAccount.isPending} type="submit">
-            {updateAccount.isPending ? (
+          <Button disabled={updateBookingBuyer.isPending} type="submit">
+            {updateBookingBuyer.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : null}
             Save changes
@@ -167,9 +169,12 @@ export function RecordViewPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost">
-          <Link className="inline-flex items-center gap-2" href="/crm/accounts">
+          <Link
+            className="inline-flex items-center gap-2"
+            href="/real-estate/booking-buyers"
+          >
             <ArrowLeft className="size-4" />
-            Back to accounts
+            Back to booking buyers
           </Link>
         </Button>
       </div>
@@ -187,8 +192,8 @@ export function RecordViewPage({
   );
 }
 
-async function fetchAccountRecord(recordId: string) {
-  const { data } = await axios.get<OrgAccount>(
+async function fetchBookingBuyerRecord(recordId: string) {
+  const { data } = await axios.get<OrgRealEstateBookingBuyer>(
     `${modelEndpoint}/r/${recordId}`,
     {
       withCredentials: true,
@@ -198,11 +203,11 @@ async function fetchAccountRecord(recordId: string) {
   return data;
 }
 
-async function updateAccountRecord(
+async function updateBookingBuyerRecord(
   recordId: string,
-  payload: Partial<OrgAccount>,
+  payload: Partial<OrgRealEstateBookingBuyer>,
 ) {
-  const { data } = await axios.patch<OrgAccount>(
+  const { data } = await axios.patch<OrgRealEstateBookingBuyer>(
     `${modelEndpoint}/r/${recordId}`,
     payload,
     {

@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrgAccount } from "@repo/database/schema";
+import type { OrgTask } from "@repo/database/schema";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@kompaniya/ui-common/components/button";
@@ -13,28 +13,27 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { RecordPageLayout } from "@/components/record-page/layout";
-
+import { type RecordPageLayout } from "@/components/record-page/layout";
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
 import { useLayout } from "@/components/record-page/use-layout";
 
-import type { AccountRecordFormValues } from "../../account-record-schema";
+import type { TaskRecordFormValues } from "./tasks-record-schema";
 
-import {
-  accountRecordSchema,
-  createAccountFormDefaults,
-  createAccountUpdatePayload,
-} from "../../account-record-schema";
 import { modelEndpoint } from "../../config";
+import {
+  createTaskFormDefaults,
+  createTaskUpdatePayload,
+  taskRecordSchema,
+} from "./tasks-record-schema";
 
 interface RecordViewPageProps {
-  initialRecord?: OrgAccount;
+  initialRecord?: OrgTask;
 
   recordId: string;
 }
 
-const accountRecordQueryKey = (recordId: string) =>
-  ["account-record", recordId] as const;
+const taskRecordQueryKey = (recordId: string) =>
+  ["task-record", recordId] as const;
 
 export function RecordViewPage({
   initialRecord,
@@ -44,10 +43,10 @@ export function RecordViewPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const layout = useLayout(
-    "org_accounts",
-  ) as RecordPageLayout<AccountRecordFormValues>;
+    "org_tasks",
+  ) as RecordPageLayout<TaskRecordFormValues>;
 
-  const queryKey = useMemo(() => accountRecordQueryKey(recordId), [recordId]);
+  const queryKey = useMemo(() => taskRecordQueryKey(recordId), [recordId]);
 
   const {
     data: record,
@@ -55,7 +54,7 @@ export function RecordViewPage({
     isLoading,
   } = useQuery({
     queryKey,
-    queryFn: () => fetchAccountRecord(recordId),
+    queryFn: () => fetchTaskRecord(recordId),
     initialData: initialRecord,
     retry: false,
   });
@@ -72,29 +71,29 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () => (record ? createAccountFormDefaults(record, layout) : undefined),
+    () => (record ? createTaskFormDefaults(record, layout) : undefined),
     [layout, record],
   );
 
-  const form = useForm<AccountRecordFormValues>({
+  const form = useForm<TaskRecordFormValues>({
     defaultValues: formDefaults,
-    resolver: zodResolver(accountRecordSchema),
+    resolver: zodResolver(taskRecordSchema),
   });
 
   useEffect(() => {
     if (record) {
-      form.reset(createAccountFormDefaults(record, layout));
+      form.reset(createTaskFormDefaults(record, layout));
     }
   }, [form, layout, record]);
 
-  const updateAccount = useMutation({
-    mutationFn: (payload: Partial<OrgAccount>) =>
-      updateAccountRecord(recordId, payload),
+  const updateTask = useMutation({
+    mutationFn: (payload: Partial<OrgTask>) =>
+      updateTaskRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createAccountFormDefaults(updated, layout));
+      form.reset(createTaskFormDefaults(updated, layout));
       setIsEditing(false);
-      toast.success("Account updated");
+      toast.success("Task updated");
     },
     onError: () => {
       toast.error("We couldn't save your changes. Please try again.");
@@ -107,11 +106,11 @@ export function RecordViewPage({
   const handleSubmit = form.handleSubmit(async (values) => {
     if (!record) return;
 
-    const parsed = accountRecordSchema.parse(values);
-    const payload = createAccountUpdatePayload(record, parsed, layout);
+    const parsed = taskRecordSchema.parse(values);
+    const payload = createTaskUpdatePayload(record, parsed, layout);
 
     try {
-      await updateAccount.mutateAsync(payload);
+      await updateTask.mutateAsync(payload);
     } catch (_error) {
       // handled by mutation onError
     }
@@ -127,9 +126,7 @@ export function RecordViewPage({
 
   if (!record) {
     return (
-      <div className="text-destructive">
-        Unable to load this account record.
-      </div>
+      <div className="text-destructive">Unable to load this task record.</div>
     );
   }
 
@@ -138,9 +135,9 @@ export function RecordViewPage({
       {isEditing ? (
         <>
           <Button
-            disabled={updateAccount.isPending}
+            disabled={updateTask.isPending}
             onClick={() => {
-              form.reset(createAccountFormDefaults(record, layout));
+              form.reset(createTaskFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -148,8 +145,8 @@ export function RecordViewPage({
           >
             Cancel
           </Button>
-          <Button disabled={updateAccount.isPending} type="submit">
-            {updateAccount.isPending ? (
+          <Button disabled={updateTask.isPending} type="submit">
+            {updateTask.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />
             ) : null}
             Save changes
@@ -167,9 +164,9 @@ export function RecordViewPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost">
-          <Link className="inline-flex items-center gap-2" href="/crm/accounts">
+          <Link className="inline-flex items-center gap-2" href="/crm/tasks">
             <ArrowLeft className="size-4" />
-            Back to accounts
+            Back to tasks
           </Link>
         </Button>
       </div>
@@ -187,22 +184,16 @@ export function RecordViewPage({
   );
 }
 
-async function fetchAccountRecord(recordId: string) {
-  const { data } = await axios.get<OrgAccount>(
-    `${modelEndpoint}/r/${recordId}`,
-    {
-      withCredentials: true,
-    },
-  );
+async function fetchTaskRecord(recordId: string) {
+  const { data } = await axios.get<OrgTask>(`${modelEndpoint}/r/${recordId}`, {
+    withCredentials: true,
+  });
 
   return data;
 }
 
-async function updateAccountRecord(
-  recordId: string,
-  payload: Partial<OrgAccount>,
-) {
-  const { data } = await axios.patch<OrgAccount>(
+async function updateTaskRecord(recordId: string, payload: Partial<OrgTask>) {
+  const { data } = await axios.patch<OrgTask>(
     `${modelEndpoint}/r/${recordId}`,
     payload,
     {

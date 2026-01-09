@@ -3,9 +3,26 @@ import type { FieldValues } from "react-hook-form";
 import { useMemo } from "react";
 
 import { accountRecordLayout } from "@/app/(authenticated)/crm/accounts/account-record-layout";
+import { activityRecordLayout } from "@/app/(authenticated)/crm/activities/r/[id]/activity-record-layout";
+import { categoriesRecordLayout } from "@/app/(authenticated)/crm/categories/r/[id]/categories-record-layout";
 import { contactRecordLayout } from "@/app/(authenticated)/crm/contacts/r/[id]/contact-record-layout";
+import { eventsRecordLayout } from "@/app/(authenticated)/crm/events/r/[id]/events-record-layout";
 import { leadRecordLayout } from "@/app/(authenticated)/crm/leads/r/[id]/lead-record-layout";
 import { opportunityRecordLayout } from "@/app/(authenticated)/crm/opportunities/opportunity-record-layout";
+import { tagsRecordLayout } from "@/app/(authenticated)/crm/tags/r/[id]/tags-record-layout";
+import { tasksRecordLayout } from "@/app/(authenticated)/crm/tasks/r/[id]/tasks-record-layout";
+import { emailCampaignRecordLayout } from "@/app/(authenticated)/marketing/email-campaigns/email-campaign-record-layout";
+import { emailClicksRecordLayout } from "@/app/(authenticated)/marketing/email-clicks/r/[id]/email-clicks-record-layout";
+import { emailDomainsRecordLayout } from "@/app/(authenticated)/marketing/email-domains/r/[id]/email-domains-record-layout";
+import { emailTemplateRecordLayout } from "@/app/(authenticated)/marketing/email-templates/email-template-record-layout";
+import { emailTestReceiverRecordLayout } from "@/app/(authenticated)/marketing/email-test-receivers/email-test-receiver-record-layout";
+import { emailsRecordLayout } from "@/app/(authenticated)/marketing/emails/r/[id]/emails-record-layout";
+import { bookingBuyersRecordLayout } from "@/app/(authenticated)/real-estate/booking-buyers/r/[id]/booking-buyers-record-layout";
+import { bookingRecordLayout } from "@/app/(authenticated)/real-estate/bookings/r/[id]/booking-record-layout";
+import { paymentPlanTemplateRecordLayout } from "@/app/(authenticated)/real-estate/payment-plan-templates/r/[id]/payment-plan-template-record-layout";
+import { paymentPlanRecordLayout } from "@/app/(authenticated)/real-estate/payment-plans/r/[id]/payment-plan-record-layout";
+import { projectRecordLayout } from "@/app/(authenticated)/real-estate/projects/r/[id]/project-record-layout";
+import { propertyRecordLayout } from "@/app/(authenticated)/real-estate/properties/r/[id]/property-record-layout";
 import { useRecordLayout } from "@/hooks/use-record-layout";
 
 import type { RecordPageLayout } from "./layout";
@@ -47,6 +64,23 @@ const DEFAULT_LAYOUTS: Partial<
   org_leads: leadRecordLayout,
   org_accounts: accountRecordLayout,
   org_opportunities: opportunityRecordLayout,
+  org_activities: activityRecordLayout,
+  org_categories: categoriesRecordLayout,
+  org_tags: tagsRecordLayout,
+  org_events: eventsRecordLayout,
+  org_tasks: tasksRecordLayout,
+  org_email_templates: emailTemplateRecordLayout,
+  org_email_campaigns: emailCampaignRecordLayout,
+  org_email_test_receivers: emailTestReceiverRecordLayout,
+  org_email_domains: emailDomainsRecordLayout,
+  org_emails: emailsRecordLayout,
+  org_email_clicks: emailClicksRecordLayout,
+  org_real_estate_projects: projectRecordLayout,
+  org_real_estate_properties: propertyRecordLayout,
+  org_real_estate_bookings: bookingRecordLayout,
+  org_payment_plans: paymentPlanRecordLayout,
+  org_payment_plan_templates: paymentPlanTemplateRecordLayout,
+  org_real_estate_booking_buyers: bookingBuyersRecordLayout,
 };
 
 /**

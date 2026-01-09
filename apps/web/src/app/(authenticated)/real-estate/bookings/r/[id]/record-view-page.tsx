@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { BookingRecordFormValues } from "./booking-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { bookingRecordLayout } from "./booking-record-layout";
 import {
   bookingRecordSchema,
   createBookingFormDefaults,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_real_estate_bookings",
+  ) as RecordPageLayout<BookingRecordFormValues>;
 
   const queryKey = useMemo(() => bookingRecordQueryKey(recordId), [recordId]);
 
@@ -67,11 +72,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record
-        ? createBookingFormDefaults(record, bookingRecordLayout)
-        : undefined,
-    [record],
+    () => (record ? createBookingFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<BookingRecordFormValues>({
@@ -81,16 +83,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(createBookingFormDefaults(record, bookingRecordLayout));
+      form.reset(createBookingFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateBooking = useMutation({
     mutationFn: (payload: Partial<OrgRealEstateBooking>) =>
       updateBookingRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createBookingFormDefaults(updated, bookingRecordLayout));
+      form.reset(createBookingFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Booking updated");
     },
@@ -106,11 +108,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = bookingRecordSchema.parse(values);
-    const payload = createBookingUpdatePayload(
-      record,
-      parsed,
-      bookingRecordLayout,
-    );
+    const payload = createBookingUpdatePayload(record, parsed, layout);
 
     try {
       await updateBooking.mutateAsync(payload);
@@ -142,9 +140,7 @@ export function RecordViewPage({
           <Button
             disabled={updateBooking.isPending}
             onClick={() => {
-              form.reset(
-                createBookingFormDefaults(record, bookingRecordLayout),
-              );
+              form.reset(createBookingFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -186,7 +182,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={bookingRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

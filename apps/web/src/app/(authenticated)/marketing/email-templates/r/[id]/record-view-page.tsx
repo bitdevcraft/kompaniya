@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { EmailTemplateRecordFormValues } from "../../email-template-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { emailTemplateRecordLayout } from "../../email-template-record-layout";
 import {
   createEmailTemplateFormDefaults,
   createEmailTemplateUpdatePayload,
@@ -40,6 +42,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_email_templates",
+  ) as RecordPageLayout<EmailTemplateRecordFormValues>;
 
   const queryKey = useMemo(
     () => emailTemplateRecordQueryKey(recordId),
@@ -70,10 +75,8 @@ export function RecordViewPage({
 
   const formDefaults = useMemo(
     () =>
-      record
-        ? createEmailTemplateFormDefaults(record, emailTemplateRecordLayout)
-        : undefined,
-    [record],
+      record ? createEmailTemplateFormDefaults(record, layout) : undefined,
+    [layout, record],
   );
 
   const form = useForm<EmailTemplateRecordFormValues>({
@@ -83,20 +86,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(
-        createEmailTemplateFormDefaults(record, emailTemplateRecordLayout),
-      );
+      form.reset(createEmailTemplateFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateEmailTemplate = useMutation({
     mutationFn: (payload: Partial<OrgEmailTemplate>) =>
       updateEmailTemplateRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(
-        createEmailTemplateFormDefaults(updated, emailTemplateRecordLayout),
-      );
+      form.reset(createEmailTemplateFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Email template updated");
     },
@@ -112,11 +111,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = emailTemplateRecordSchema.parse(values);
-    const payload = createEmailTemplateUpdatePayload(
-      record,
-      parsed,
-      emailTemplateRecordLayout,
-    );
+    const payload = createEmailTemplateUpdatePayload(record, parsed, layout);
 
     try {
       await updateEmailTemplate.mutateAsync(payload);
@@ -148,12 +143,7 @@ export function RecordViewPage({
           <Button
             disabled={updateEmailTemplate.isPending}
             onClick={() => {
-              form.reset(
-                createEmailTemplateFormDefaults(
-                  record,
-                  emailTemplateRecordLayout,
-                ),
-              );
+              form.reset(createEmailTemplateFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -195,7 +185,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={emailTemplateRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>

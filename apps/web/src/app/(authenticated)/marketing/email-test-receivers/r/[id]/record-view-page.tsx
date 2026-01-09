@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { EmailTestReceiverRecordFormValues } from "../../email-test-receiver-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { emailTestReceiverRecordLayout } from "../../email-test-receiver-record-layout";
 import {
   createEmailTestReceiverFormDefaults,
   createEmailTestReceiverUpdatePayload,
@@ -40,6 +42,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_email_test_receivers",
+  ) as RecordPageLayout<EmailTestReceiverRecordFormValues>;
 
   const queryKey = useMemo(
     () => emailTestReceiverRecordQueryKey(recordId),
@@ -70,13 +75,8 @@ export function RecordViewPage({
 
   const formDefaults = useMemo(
     () =>
-      record
-        ? createEmailTestReceiverFormDefaults(
-            record,
-            emailTestReceiverRecordLayout,
-          )
-        : undefined,
-    [record],
+      record ? createEmailTestReceiverFormDefaults(record, layout) : undefined,
+    [layout, record],
   );
 
   const form = useForm<EmailTestReceiverRecordFormValues>({
@@ -86,26 +86,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(
-        createEmailTestReceiverFormDefaults(
-          record,
-          emailTestReceiverRecordLayout,
-        ),
-      );
+      form.reset(createEmailTestReceiverFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateEmailTestReceiver = useMutation({
     mutationFn: (payload: Partial<OrgEmailTestReceiver>) =>
       updateEmailTestReceiverRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(
-        createEmailTestReceiverFormDefaults(
-          updated,
-          emailTestReceiverRecordLayout,
-        ),
-      );
+      form.reset(createEmailTestReceiverFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Email test receiver updated");
     },
@@ -124,7 +114,7 @@ export function RecordViewPage({
     const payload = createEmailTestReceiverUpdatePayload(
       record,
       parsed,
-      emailTestReceiverRecordLayout,
+      layout,
     );
 
     try {
@@ -164,12 +154,7 @@ export function RecordViewPage({
           <Button
             disabled={updateEmailTestReceiver.isPending}
             onClick={() => {
-              form.reset(
-                createEmailTestReceiverFormDefaults(
-                  record,
-                  emailTestReceiverRecordLayout,
-                ),
-              );
+              form.reset(createEmailTestReceiverFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -211,7 +196,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={emailTestReceiverRecordLayout}
+          layout={layout}
           record={displayRecord as Record<string, unknown>}
         />
       </form>

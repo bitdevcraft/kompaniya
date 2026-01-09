@@ -13,12 +13,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 
 import type { ActivityRecordFormValues } from "./activity-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { activityRecordLayout } from "./activity-record-layout";
 import {
   activityRecordSchema,
   createActivityFormDefaults,
@@ -41,6 +43,9 @@ export function RecordViewPage({
   const [isEditing, setIsEditing] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_activities",
+  ) as RecordPageLayout<ActivityRecordFormValues>;
 
   const queryKey = useMemo(() => activityRecordQueryKey(recordId), [recordId]);
 
@@ -67,11 +72,8 @@ export function RecordViewPage({
   }, [error, isLoading, router]);
 
   const formDefaults = useMemo(
-    () =>
-      record
-        ? createActivityFormDefaults(record, activityRecordLayout)
-        : undefined,
-    [record],
+    () => (record ? createActivityFormDefaults(record, layout) : undefined),
+    [layout, record],
   );
 
   const form = useForm<ActivityRecordFormValues>({
@@ -81,16 +83,16 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(createActivityFormDefaults(record, activityRecordLayout));
+      form.reset(createActivityFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   const updateActivity = useMutation({
     mutationFn: (payload: Partial<OrgActivity>) =>
       updateActivityRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(createActivityFormDefaults(updated, activityRecordLayout));
+      form.reset(createActivityFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Activity updated");
     },
@@ -106,11 +108,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = activityRecordSchema.parse(values);
-    const payload = createActivityUpdatePayload(
-      record,
-      parsed,
-      activityRecordLayout,
-    );
+    const payload = createActivityUpdatePayload(record, parsed, layout);
 
     try {
       await updateActivity.mutateAsync(payload);
@@ -142,9 +140,7 @@ export function RecordViewPage({
           <Button
             disabled={updateActivity.isPending}
             onClick={() => {
-              form.reset(
-                createActivityFormDefaults(record, activityRecordLayout),
-              );
+              form.reset(createActivityFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -186,7 +182,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={activityRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
       </form>
