@@ -16,6 +16,7 @@ import { RealEstateBookingModule } from './api/real-estate-booking/real-estate-b
 import { RealEstateProjectModule } from './api/real-estate-project/real-estate-project.module';
 import { RealEstatePropertyModule } from './api/real-estate-property/real-estate-property.module';
 import { SystemAdminModule } from './api/system-admin/system-admin.module';
+import { TablePreferencesModule } from './api/table-preferences/table-preferences.module';
 import { TagModule } from './api/tag/tag.module';
 
 @Module({
@@ -36,6 +37,7 @@ import { TagModule } from './api/tag/tag.module';
     RealEstateBookingModule,
     PaymentPlanModule,
     PaymentPlanTemplateModule,
+    TablePreferencesModule,
     TagModule,
   ],
 })

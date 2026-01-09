@@ -326,3 +326,18 @@ export const DEFAULT_TABLE_COLUMN_PREFERENCES = {
 
 export type DefaultTablePreferenceEntityType =
   keyof typeof DEFAULT_TABLE_COLUMN_PREFERENCES;
+
+export const getDefaultTableColumnPreferences = (
+  entityType: DefaultTablePreferenceEntityType,
+) => {
+  const defaults = DEFAULT_TABLE_COLUMN_PREFERENCES[entityType];
+
+  return {
+    visibility: { ...defaults.visibility },
+    order: [...defaults.order],
+    pinning: {
+      left: [...defaults.pinning.left],
+      right: [...defaults.pinning.right],
+    },
+  };
+};

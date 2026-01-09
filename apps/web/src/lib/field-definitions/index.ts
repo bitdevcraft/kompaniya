@@ -7,5 +7,6 @@
  */
 
 export * from "./entity-types";
+export * from "./field-definition-columns";
 export * from "./registry";
 export * from "./types";

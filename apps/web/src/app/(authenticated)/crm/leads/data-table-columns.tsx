@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@kompaniya/ui-common/components/button";
 import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
 import {
@@ -17,6 +19,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 import Link from "next/link";
 
+import { getFieldDefinitionColumns } from "@/lib/field-definitions/field-definition-columns";
+import { useCustomFieldColumns } from "@/lib/hooks/use-custom-field-columns";
+import { useTagOptions } from "@/lib/hooks/use-tag-options";
 import { DataTableActionType } from "@/types/data-table-actions";
 
 import { tableType } from "./config";
@@ -28,11 +33,12 @@ export function useDataTableColumns(
 ) {
   const onDelete = makeRowAction(setRowAction, DataTableActionType.DELETE);
   const onUpdate = makeRowAction(setRowAction, DataTableActionType.UPDATE);
+  const customFieldColumns = useCustomFieldColumns<tableType>("org_leads");
+  const tagOptionsQuery = useTagOptions("lead");
 
   const columns: ColumnDef<tableType>[] = [
     {
-      id: "id",
-      accessorKey: "id",
+      id: "select",
       header: ({ table }) => (
         <Checkbox
           aria-label="Select all"
@@ -76,6 +82,7 @@ export function useDataTableColumns(
         icon: Text,
       },
       enableColumnFilter: true,
+      enableHiding: false,
     },
     {
       id: "email",
@@ -128,6 +135,30 @@ export function useDataTableColumns(
     },
   ];
 
-  // nothing added/removed/modified—just pass through
-  return getTableColumns<tableType>({ setRowAction, columns });
+  const customColumns = customFieldColumns ?? [];
+  const actionsColumn = columns[3];
+  const existingColumnIds = new Set(
+    [...columns, ...customColumns]
+      .map((column) => column.id)
+      .filter(Boolean) as string[],
+  );
+  const fieldDefinitionColumns = getFieldDefinitionColumns<tableType>(
+    "org_leads",
+    existingColumnIds,
+    {
+      tagOptionsByRelatedType: {
+        lead: tagOptionsQuery.data ?? [],
+      },
+    },
+  );
+
+  return getTableColumns<tableType>({
+    setRowAction,
+    columns: [
+      ...columns.slice(0, 3),
+      ...fieldDefinitionColumns,
+      ...customColumns,
+      actionsColumn,
+    ],
+  });
 }

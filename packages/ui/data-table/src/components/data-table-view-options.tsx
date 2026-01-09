@@ -28,32 +28,23 @@ interface DataTableViewOptionsProps<TData> {
 export function DataTableViewOptions<TData>({
   table,
 }: DataTableViewOptionsProps<TData>) {
-  const columns = React.useMemo(
-    () =>
-      table
-        .getAllColumns()
-        .filter(
-          (column) =>
-            typeof column.accessorFn !== "undefined" && column.getCanHide(),
-        ),
-    [table],
-  );
+  const columns = table
+    .getAllColumns()
+    .filter(
+      (column) =>
+        typeof column.accessorFn !== "undefined" && column.getCanHide(),
+    );
 
-  // Separate columns into standard and custom fields
-  const { standardColumns, customFieldColumns } = React.useMemo(() => {
-    const standard: typeof columns = [];
-    const customFields: typeof columns = [];
+  const standardColumns: typeof columns = [];
+  const customFieldColumns: typeof columns = [];
 
-    for (const column of columns) {
-      if (column.columnDef.meta?.isCustomField) {
-        customFields.push(column);
-      } else {
-        standard.push(column);
-      }
+  for (const column of columns) {
+    if (column.columnDef.meta?.isCustomField) {
+      customFieldColumns.push(column);
+    } else {
+      standardColumns.push(column);
     }
-
-    return { standardColumns: standard, customFieldColumns: customFields };
-  }, [columns]);
+  }
 
   return (
     <Popover>

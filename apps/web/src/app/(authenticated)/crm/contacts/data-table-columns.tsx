@@ -18,7 +18,9 @@ import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
+import { getFieldDefinitionColumns } from "@/lib/field-definitions/field-definition-columns";
 import { useCustomFieldColumns } from "@/lib/hooks/use-custom-field-columns";
+import { useTagOptions } from "@/lib/hooks/use-tag-options";
 import { DataTableActionType } from "@/types/data-table-actions";
 
 import { tableType } from "./config";
@@ -38,6 +40,7 @@ export function useDataTableColumns(
 
   // Fetch custom field columns
   const customFieldColumns = useCustomFieldColumns<tableType>("org_contacts");
+  const tagOptionsQuery = useTagOptions("contact");
 
   // Merge static columns with dynamic custom field columns
   const allColumns = React.useMemo(() => {
@@ -91,6 +94,7 @@ export function useDataTableColumns(
           icon: Text,
         },
         enableColumnFilter: true,
+        enableHiding: false,
       }),
       // Actions column (display column)
       columnHelper.display({
@@ -129,16 +133,30 @@ export function useDataTableColumns(
       }),
     ] as const;
 
-    // Insert custom field columns before the actions column
     const customColumns = customFieldColumns ?? [];
     const actionsColumn = staticColumns[2]; // Actions is at index 2
+    const existingColumnIds = new Set(
+      [...staticColumns, ...customColumns]
+        .map((column) => column.id)
+        .filter(Boolean) as string[],
+    );
+    const fieldDefinitionColumns = getFieldDefinitionColumns<tableType>(
+      "org_contacts",
+      existingColumnIds,
+      {
+        tagOptionsByRelatedType: {
+          contact: tagOptionsQuery.data ?? [],
+        },
+      },
+    );
 
     return [
       ...staticColumns.slice(0, 2), // select and name columns
+      ...fieldDefinitionColumns,
       ...customColumns,
       actionsColumn,
     ];
-  }, [customFieldColumns, onDelete, onUpdate]);
+  }, [customFieldColumns, onDelete, onUpdate, tagOptionsQuery.data]);
 
   return allColumns;
 }

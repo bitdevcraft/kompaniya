@@ -7,6 +7,7 @@ import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
+  DataTableSkeleton,
   DataTableSortList,
   DataTableViewOptions,
   DataTableViewToggle,
@@ -14,13 +15,14 @@ import {
 import { useDataTable } from "@kompaniya/ui-data-table/hooks/use-data-table";
 import { useDataTableViewMode } from "@kompaniya/ui-data-table/hooks/use-data-table-view-mode";
 import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
-import { useQuery } from "@tanstack/react-query";
+import { useIsFetching, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog";
 import { authClient } from "@/lib/auth/client";
+import { useTablePreferences } from "@/lib/hooks/use-table-preferences";
 import { DataTableActionType } from "@/types/data-table-actions";
 import { SearchParamsSchema } from "@/types/validations";
 
@@ -34,6 +36,8 @@ import { NewButton } from "./new/new-button";
 interface OrgDataTableProps {
   search: SearchParamsSchema;
 }
+
+const tablePreferencesEntityType = "org_contacts";
 
 const useDataLoad = (
   activeOrganization: OrganizationModel,
@@ -89,6 +93,22 @@ export function OrgDataTable(props: OrgDataTableProps) {
     getRowId: (row) => row.id,
     shallow: false,
   });
+
+  const { isReady } = useTablePreferences({
+    entityType: tablePreferencesEntityType,
+    table,
+    organizationId: activeOrganization?.data?.id,
+  });
+
+  const customFieldsFetching = useIsFetching({
+    queryKey: ["custom-field-definitions", tablePreferencesEntityType],
+  });
+
+  const isTableSetupLoading = !isReady || customFieldsFetching > 0;
+
+  if (isTableSetupLoading) {
+    return <DataTableSkeleton columnCount={6} filterCount={2} shrinkZero />;
+  }
 
   return (
     <>
