@@ -1,3 +1,9 @@
+import type {
+  FieldDataType,
+  FieldDefinition,
+  RecordPageLayout,
+} from '@repo/domain';
+
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   type Db,
@@ -19,7 +25,7 @@ import { CustomFieldDefinitionsService } from '../custom-fields/custom-field-def
 /**
  * Mapping from custom field types to layout field types
  */
-const CUSTOM_FIELD_TYPE_MAPPING: Record<string, string> = {
+const CUSTOM_FIELD_TYPE_MAPPING: Record<string, FieldDataType> = {
   string: 'text',
   number: 'number',
   boolean: 'boolean',
@@ -30,6 +36,25 @@ const CUSTOM_FIELD_TYPE_MAPPING: Record<string, string> = {
   json: 'textarea',
   reference: 'lookup',
 };
+
+/**
+ * Layout upsert input type
+ */
+export type LayoutUpsertInput = {
+  header: RecordLayoutHeader;
+  sectionColumns?: RecordLayoutSectionColumns | null;
+  sections?: unknown[] | null;
+  supplementalFields?: unknown[] | null;
+  autoIncludeCustomFields?: boolean;
+};
+
+/**
+ * Layout with custom fields merged in
+ */
+export interface LayoutWithCustomFields extends RecordPageLayout {
+  isDefault?: boolean;
+  autoIncludeCustomFields?: boolean;
+}
 
 @Injectable()
 export class RecordLayoutsService {
@@ -42,7 +67,7 @@ export class RecordLayoutsService {
   /**
    * Get all layouts for an organization
    */
-  async getAllLayouts(organizationId: string): Promise<unknown[]> {
+  async getAllLayouts(organizationId: string): Promise<OrgRecordLayout[]> {
     const layouts = await this.db
       .select()
       .from(orgRecordLayoutsTable)
@@ -53,7 +78,7 @@ export class RecordLayoutsService {
         ),
       );
 
-    return layouts as unknown[];
+    return layouts;
   }
 
   /**
@@ -63,7 +88,7 @@ export class RecordLayoutsService {
   async getCustomFieldsForLayout(
     organizationId: string,
     entityType: string,
-  ): Promise<unknown[]> {
+  ): Promise<FieldDefinition[]> {
     const customFields = await this.customFieldService.getByEntityType(
       organizationId,
       entityType,
@@ -72,13 +97,13 @@ export class RecordLayoutsService {
     return customFields.map((cf) => ({
       id: `customFields.${cf.key}`,
       label: cf.label,
-      description: cf.description,
+      description: cf.description ?? undefined,
       type: CUSTOM_FIELD_TYPE_MAPPING[cf.fieldType] || 'text',
       category: 'custom',
       isRequired: cf.isRequired,
       isCustom: true,
-      _customFieldKey: cf.key,
-      _customFieldType: cf.fieldType,
+      customFieldKey: cf.key,
+      customFieldType: cf.fieldType,
       options: cf.choices?.map((c: { label: string; value: string }) => ({
         label: c.label,
         value: c.value,
@@ -95,10 +120,10 @@ export class RecordLayoutsService {
   async getLayout(
     organizationId: string,
     entityType: string,
-  ): Promise<unknown> {
+  ): Promise<LayoutWithCustomFields> {
     const cacheKey = Keys.RecordLayout.layout(organizationId, entityType);
 
-    const result = await this.cacheService.wrapCache<unknown>({
+    const result = await this.cacheService.wrapCache<LayoutWithCustomFields>({
       key: cacheKey,
       fn: async () => {
         // Try to get customized layout
@@ -174,15 +199,9 @@ export class RecordLayoutsService {
   async upsertLayout(
     organizationId: string,
     entityType: string,
-    layout: {
-      header: unknown;
-      sectionColumns?: unknown;
-      sections?: unknown[] | null;
-      supplementalFields?: unknown[] | null;
-      autoIncludeCustomFields?: boolean;
-    },
+    layout: LayoutUpsertInput,
     userId: string,
-  ): Promise<unknown> {
+  ): Promise<OrgRecordLayout> {
     const existing = await this.db
       .select()
       .from(orgRecordLayoutsTable)
@@ -205,11 +224,10 @@ export class RecordLayoutsService {
       result = await this.db
         .update(orgRecordLayoutsTable)
         .set({
-          header: layout.header as RecordLayoutHeader,
-          sectionColumns:
-            layout.sectionColumns as RecordLayoutSectionColumns | null,
-          sections: layout.sections as unknown[] | null,
-          supplementalFields: layout.supplementalFields as unknown[] | null,
+          header: layout.header,
+          sectionColumns: layout.sectionColumns ?? null,
+          sections: layout.sections ?? null,
+          supplementalFields: layout.supplementalFields ?? null,
           autoIncludeCustomFields: layout.autoIncludeCustomFields ?? true,
           isCustomized: true,
           updatedBy: userId,
@@ -225,11 +243,10 @@ export class RecordLayoutsService {
           entityType: entityType as RecordLayoutEntityType,
           createdBy: userId,
           updatedBy: userId,
-          header: layout.header as RecordLayoutHeader,
-          sectionColumns:
-            layout.sectionColumns as RecordLayoutSectionColumns | null,
-          sections: layout.sections as unknown[] | null,
-          supplementalFields: layout.supplementalFields as unknown[] | null,
+          header: layout.header,
+          sectionColumns: layout.sectionColumns ?? null,
+          sections: layout.sections ?? null,
+          supplementalFields: layout.supplementalFields ?? null,
           autoIncludeCustomFields: layout.autoIncludeCustomFields ?? true,
           isCustomized: true,
         })
@@ -239,13 +256,13 @@ export class RecordLayoutsService {
     // Invalidate cache
     await this.invalidateCache(organizationId, entityType);
 
-    return result[0];
+    return result[0]!;
   }
 
   /**
    * Get default layout (TypeScript definition)
    */
-  private getDefaultLayout(entityType: string): unknown {
+  private getDefaultLayout(entityType: string): LayoutWithCustomFields {
     const defaultLayout =
       DEFAULT_RECORD_LAYOUTS[entityType as keyof typeof DEFAULT_RECORD_LAYOUTS];
     if (!defaultLayout) {
@@ -282,14 +299,14 @@ export class RecordLayoutsService {
         supplementalFields: [],
         isDefault: true,
         autoIncludeCustomFields: true,
-      };
+      } as LayoutWithCustomFields;
     }
 
     return {
       ...defaultLayout,
       isDefault: true,
       autoIncludeCustomFields: true,
-    };
+    } as LayoutWithCustomFields;
   }
 
   /**
@@ -309,15 +326,10 @@ export class RecordLayoutsService {
   private async mergeLayoutWithCustomFields(
     organizationId: string,
     entityType: string,
-    layout: {
-      autoIncludeCustomFields?: boolean;
-      sections?: unknown[] | null;
-      supplementalFields?: unknown[] | null;
-      [key: string]: unknown;
-    },
-  ): Promise<unknown> {
+    layout: OrgRecordLayout,
+  ): Promise<LayoutWithCustomFields> {
     if (!layout.autoIncludeCustomFields) {
-      return layout;
+      return layout as LayoutWithCustomFields;
     }
 
     const customFields = await this.customFieldService.getByEntityType(
@@ -326,7 +338,7 @@ export class RecordLayoutsService {
     );
 
     if (customFields.length === 0) {
-      return layout;
+      return layout as LayoutWithCustomFields;
     }
 
     // Convert custom field definitions to RecordLayoutField format
@@ -360,6 +372,6 @@ export class RecordLayoutsService {
     return {
       ...layout,
       sections,
-    };
+    } as LayoutWithCustomFields;
   }
 }

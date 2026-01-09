@@ -1,9 +1,9 @@
+import type { FieldOption as RecordFieldOption } from "@repo/domain";
+
 import { MultiSelect } from "@kompaniya/ui-common/components/multi-select";
 import { startTransition, useEffect, useMemo, useState } from "react";
 
 import { env } from "@/env/client";
-
-import type { RecordFieldOption } from "./layout";
 
 import { RecordField } from "./record-field";
 import {

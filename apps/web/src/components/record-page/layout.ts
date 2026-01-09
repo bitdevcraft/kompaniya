@@ -1,149 +1,135 @@
+import type {
+  HeaderAvatar as DomainHeaderAvatar,
+  HeaderChip as DomainHeaderChip,
+  HeaderMetadata as DomainHeaderMetadata,
+  HeaderText as DomainHeaderText,
+  LayoutField as DomainLayoutField,
+  LayoutSection as DomainLayoutSection,
+  LayoutSectionColumns as DomainLayoutSectionColumns,
+  LayoutSectionGroup as DomainLayoutSectionGroup,
+  RecordLayoutHeader as DomainRecordLayoutHeader,
+  RecordPageLayout as DomainRecordPageLayout,
+  HeaderDataType,
+  HeaderIconType,
+  HeaderLinkType,
+} from "@repo/domain";
 import type { FieldValues, Path } from "react-hook-form";
 
-export interface LookupFieldConfig {
-  /** Endpoint used to fetch a specific record by ID. Supports `:id` or `{id}` placeholders. */
-  findByIdEndpoint: string;
-  /** Key in the response representing the display label. Defaults to `name`. */
-  labelKey?: string;
-  /** Key in the response representing the option description. */
-  descriptionKey?: string;
-  /** Key in the response representing the option value. Defaults to `id`. */
-  valueKey?: string;
-  /** Query parameter to use when searching. Defaults to `q`. */
-  queryParam?: string;
-  /** Query parameter to use when looking up by ID when no placeholder is provided. Defaults to `id`. */
-  idParam?: string;
-  /** Endpoint used to query for options. */
-  searchEndpoint: string;
-  /** Base URL for redirecting to the related record. Supports `:id` or `{id}` placeholders. */
-  redirectBaseUrl?: string | null;
-}
+/**
+ * Re-export domain icon and link types for convenience
+ */
+export type {
+  HeaderDataType,
+  HeaderIconType,
+  HeaderLinkType,
+} from "@repo/domain";
 
-export type RecordFieldDataType =
-  | "text"
-  | "textarea"
-  | "number"
-  | "date"
-  | "datetime"
-  | "boolean"
-  | "picklist"
-  | "multipicklist"
-  | "tag"
-  | "phone"
-  | "html"
-  | "mjml"
-  | "lookup";
-
-export interface RecordFieldOption {
-  label: string;
-  value: string;
-}
-
+/**
+ * React-hook-form typed layout field
+ */
 export interface RecordLayoutField<
   TFieldValues extends FieldValues = FieldValues,
-> {
-  colSpan?: number;
-  /**
-   * Whether the field should appear on create/new forms. Defaults to true.
-   */
-  availableOnCreate?: boolean;
-  description?: string;
+> extends Omit<DomainLayoutField, "id"> {
   id: Path<TFieldValues>;
-  label: string;
-  lookup?: LookupFieldConfig;
-  options?: RecordFieldOption[];
-  placeholder?: string;
-  readOnly?: boolean;
-  tag?: TagFieldConfig;
-  type: RecordFieldDataType;
 }
 
-export interface RecordLayoutHeaderChip<TKey> {
+/**
+ * React-hook-form typed header avatar
+ */
+export interface RecordLayoutHeaderAvatar<
+  TFieldValues extends FieldValues = FieldValues,
+> extends Omit<DomainHeaderAvatar, "imageFieldId" | "fallbackFieldId"> {
+  imageFieldId?: Path<TFieldValues>;
+  fallbackFieldId?: Path<TFieldValues>;
+}
+
+/**
+ * React-hook-form typed header chip
+ */
+export interface RecordLayoutHeaderChip<TKey>
+  extends Omit<DomainHeaderChip, "fieldId"> {
   fieldId: TKey;
-  icon?: RecordLayoutHeaderIcon;
-  id: string;
-  linkType?: "mailto" | "tel" | "url";
-  prefix?: string;
-  suffix?: string;
+  icon?: HeaderIconType;
+  linkType?: HeaderLinkType;
 }
 
-export type RecordLayoutHeaderIcon =
-  | "user"
-  | "mail"
-  | "phone"
-  | "globe"
-  | "tags"
-  | "building"
-  | "calendar"
-  | "mapPin"
-  | "sparkles";
-
-export interface RecordLayoutHeaderMetadata<TKey> {
+/**
+ * React-hook-form typed header metadata
+ */
+export interface RecordLayoutHeaderMetadata<TKey>
+  extends Omit<DomainHeaderMetadata, "fieldId"> {
   fieldId: TKey;
-  id: string;
-  label: string;
-  type?: "text" | "number" | "date" | "datetime";
+  type?: HeaderDataType;
 }
 
-export interface RecordLayoutHeaderText<TKey> {
-  fallback?: string;
+/**
+ * React-hook-form typed header text
+ */
+export interface RecordLayoutHeaderText<TKey>
+  extends Omit<DomainHeaderText, "fieldId"> {
   fieldId: TKey;
-  prefix?: string;
-  suffix?: string;
-  type?: "text" | "number" | "date" | "datetime";
 }
 
+/**
+ * React-hook-form typed section
+ */
 export interface RecordLayoutSection<
   TFieldValues extends FieldValues = FieldValues,
-> {
-  columns?: 1 | 2 | 3 | 4;
-  description?: string;
+> extends Omit<DomainLayoutSection, "fields"> {
   fields: RecordLayoutField<TFieldValues>[];
-  id: string;
-  title?: string;
 }
 
+/**
+ * React-hook-form typed section columns
+ */
 export interface RecordLayoutSectionColumns<
   TFieldValues extends FieldValues = FieldValues,
-> {
-  firstColumn?: RecordLayoutSectionGroup<TFieldValues>;
+> extends Omit<
+    DomainLayoutSectionColumns,
+    "header" | "firstColumn" | "secondColumn"
+  > {
   header?: RecordLayoutSectionGroup<TFieldValues>;
+  firstColumn?: RecordLayoutSectionGroup<TFieldValues>;
   secondColumn?: RecordLayoutSectionGroup<TFieldValues>;
-  sidebar?: "firstColumn" | "secondColumn" | null;
 }
 
+/**
+ * React-hook-form typed section group
+ */
 export interface RecordLayoutSectionGroup<
   TFieldValues extends FieldValues = FieldValues,
-> {
-  /**
-   * Default grid columns for fields inside this section group.
-   */
-  fieldsGridColumns?: 1 | 2 | 3 | 4;
+> extends Omit<DomainLayoutSectionGroup, "sections"> {
   sections: RecordLayoutSection<TFieldValues>[];
 }
 
+/**
+ * React-hook-form typed header
+ */
 export interface RecordPageHeaderConfig<
   TFieldValues extends FieldValues = FieldValues,
-> {
-  avatar?: {
-    fallbackFieldId?: Path<TFieldValues>;
-    imageFieldId?: Path<TFieldValues>;
-  };
+> extends Omit<
+    DomainRecordLayoutHeader,
+    "title" | "avatar" | "chips" | "metadata" | "subtitle"
+  > {
+  title: RecordLayoutHeaderText<Path<TFieldValues>>;
+  avatar?: RecordLayoutHeaderAvatar<TFieldValues>;
   chips?: RecordLayoutHeaderChip<Path<TFieldValues>>[];
   metadata?: RecordLayoutHeaderMetadata<Path<TFieldValues>>[];
   subtitle?: RecordLayoutHeaderText<Path<TFieldValues>>[];
-  title: RecordLayoutHeaderText<Path<TFieldValues>>;
 }
 
+/**
+ * React-hook-form typed complete layout
+ * This extends the domain layout with react-hook-form types
+ */
 export interface RecordPageLayout<
   TFieldValues extends FieldValues = FieldValues,
-> {
+> extends Omit<
+    DomainRecordPageLayout,
+    "header" | "sectionColumns" | "sections" | "supplementalFields"
+  > {
   header: RecordPageHeaderConfig<TFieldValues>;
   sectionColumns?: RecordLayoutSectionColumns<TFieldValues>;
   sections?: RecordLayoutSection<TFieldValues>[];
   supplementalFields?: RecordLayoutField<TFieldValues>[];
-}
-
-export interface TagFieldConfig {
-  relatedType: string;
 }

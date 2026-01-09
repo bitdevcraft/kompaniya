@@ -18,6 +18,11 @@ import {
 import { Form, FormField } from "@kompaniya/ui-common/components/form";
 import { cn } from "@kompaniya/ui-common/lib/utils";
 import {
+  LookupFieldConfig,
+  FieldOption as RecordFieldOption,
+  HeaderIconType as RecordLayoutHeaderIcon,
+} from "@repo/domain";
+import {
   Building2,
   CalendarDays,
   Globe2,
@@ -31,11 +36,8 @@ import {
 import { ReactElement, type ReactNode, useEffect, useState } from "react";
 
 import type {
-  LookupFieldConfig,
-  RecordFieldOption,
   RecordLayoutField,
   RecordLayoutHeaderChip,
-  RecordLayoutHeaderIcon,
   RecordLayoutHeaderText,
   RecordLayoutSection,
   RecordPageLayout,

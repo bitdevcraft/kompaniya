@@ -1,7 +1,6 @@
-import {
-  type RecordFieldOption,
-  type RecordPageLayout,
-} from "@/components/record-page/layout";
+import { FieldOption as RecordFieldOption } from "@repo/domain";
+
+import { type RecordPageLayout } from "@/components/record-page/layout";
 
 import type { AccountRecordFormValues } from "./account-record-schema";
 

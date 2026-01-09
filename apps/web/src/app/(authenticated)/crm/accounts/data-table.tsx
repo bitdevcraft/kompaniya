@@ -8,6 +8,7 @@ import {
   DataTableAdvancedToolbar,
   DataTableFilterList,
   DataTableSortList,
+  DataTableViewOptions,
   DataTableViewToggle,
 } from "@kompaniya/ui-data-table/components/index";
 import { useDataTable } from "@kompaniya/ui-data-table/hooks/use-data-table";
@@ -137,6 +138,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
                   paramKey={`${model.plural}View`}
                   viewMode={viewMode}
                 />
+                <DataTableViewOptions table={table} />
               </div>
             </DataTableAdvancedToolbar>
           </div>

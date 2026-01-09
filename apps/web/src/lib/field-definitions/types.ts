@@ -1,43 +1,40 @@
-import type { RecordLayoutField } from "@/components/record-page/layout";
+import type { FieldDefinition as DomainFieldDefinition } from "@repo/domain";
+import type { FieldValues, Path } from "react-hook-form";
 
 /**
- * Field category for organization in the UI palette
+ * Native field definition for the UI builder
+ * Extends the domain FieldDefinition with any web-specific properties
+ *
+ * The domain FieldDefinition already contains all the properties we need:
+ * - id, label, type, category
+ * - isSystem, isRequired, group, sortOrder, defaultValue
+ * - isCustom, customFieldKey, customFieldType
+ * - availableOnCreate, description, placeholder, colSpan, readOnly
+ * - options, lookup, tag
  */
-export type FieldCategory =
-  | "identity"
-  | "contact"
-  | "organization"
-  | "classification"
-  | "system"
-  | "address"
-  | "consent"
-  | "activity"
-  | "metadata"
-  | "custom";
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface NativeFieldDefinition extends DomainFieldDefinition {}
 
 /**
- * Extended field definition interface for the UI builder
- * Adds metadata needed for the field palette and builder
+ * React-hook-form typed field definition
+ * Extends the domain FieldDefinition with React form types
+ *
+ * This type is ONLY used in components that work with react-hook-form
  */
-export interface NativeFieldDefinition extends RecordLayoutField {
-  /** Category for grouping in the field palette */
-  category: FieldCategory;
-  /** System fields cannot be removed from layouts */
-  isSystem?: boolean;
-  /** Whether this field is required (validation) */
-  isRequired?: boolean;
-  /** Whether this field is read-only */
-  isReadOnly?: boolean;
-  /** Group name for organization (e.g., "Profile", "Address") */
-  group?: string;
-  /** Default sort order within group */
-  sortOrder?: number;
-  /** Default value for the field */
-  defaultValue?: unknown;
-  /** Whether this is a custom field (vs native field) */
-  isCustom?: boolean;
-  /** The key of the custom field (from custom_field_definitions.key) */
-  _customFieldKey?: string;
-  /** The field type from custom_field_definitions (string, number, etc.) */
-  _customFieldType?: string;
+export interface RecordLayoutField<
+  TFieldValues extends FieldValues = FieldValues,
+> extends Omit<DomainFieldDefinition, "id"> {
+  /** Field ID as a react-hook-form Path */
+  id: Path<TFieldValues>;
 }
+
+/**
+ * Re-export domain types for convenience
+ */
+export type {
+  FieldCategory,
+  FieldDataType,
+  FieldOption,
+  LookupFieldConfig,
+  TagFieldConfig,
+} from "@repo/domain";

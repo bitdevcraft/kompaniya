@@ -1,8 +1,7 @@
 import { Badge } from "@kompaniya/ui-common/components/badge";
 import { MultiSelect } from "@kompaniya/ui-common/components/multi-select";
+import { FieldOption as RecordFieldOption } from "@repo/domain";
 import { useMemo } from "react";
-
-import type { RecordFieldOption } from "./layout";
 
 import { RecordField } from "./record-field";
 import {

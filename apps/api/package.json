@@ -31,6 +31,7 @@
     "@nestjs/platform-express": "catalog:",
     "@nestjs/schedule": "^6.0.1",
     "@repo/database": "workspace:^",
+    "@repo/domain": "workspace:^",
     "@repo/shared": "workspace:^",
     "@t3-oss/env-core": "catalog:",
     "@thallesp/nestjs-better-auth": "catalog:",

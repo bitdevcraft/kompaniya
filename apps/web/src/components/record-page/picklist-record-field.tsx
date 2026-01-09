@@ -5,8 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@kompaniya/ui-common/components/select";
-
-import type { RecordFieldOption } from "./layout";
+import { FieldOption as RecordFieldOption } from "@repo/domain";
 
 import { RecordField } from "./record-field";
 import {

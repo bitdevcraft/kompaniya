@@ -21,3 +21,4 @@ export * from "./org-real-estate-properties";
 export * from "./org-record-layouts";
 export * from "./org-tags";
 export * from "./org-tasks";
+export * from "./org-user-table-preferences";

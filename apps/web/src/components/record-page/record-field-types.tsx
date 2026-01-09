@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
-import type {
+import {
   LookupFieldConfig,
-  RecordFieldOption,
+  FieldOption as RecordFieldOption,
   TagFieldConfig,
-} from "./layout";
+} from "@repo/domain";
 
 export interface BaseRecordFieldProps<TValue> {
   description?: string;

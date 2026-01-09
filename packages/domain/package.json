@@ -1,0 +1,41 @@
+{
+  "name": "@repo/domain",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:pkg": "tsup",
+    "dev:pkg": "tsup --watch",
+    "lint": "eslint --max-warnings=0 src",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "tsup": "catalog:"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./record-layouts": {
+      "types": "./dist/record-layouts.d.ts",
+      "import": "./dist/record-layouts.js",
+      "default": "./dist/record-layouts.js"
+    },
+    "./custom-fields": {
+      "types": "./dist/custom-fields.d.ts",
+      "import": "./dist/custom-fields.js",
+      "default": "./dist/custom-fields.js"
+    },
+    "./entities": {
+      "types": "./dist/entities.d.ts",
+      "import": "./dist/entities.js",
+      "default": "./dist/entities.js"
+    },
+    "./package.json": "./package.json"
+  }
+}
