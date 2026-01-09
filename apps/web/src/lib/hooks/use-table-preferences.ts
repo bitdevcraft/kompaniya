@@ -61,12 +61,15 @@ export function useTablePreferences<TData>({
 
   const hasAppliedPreferences = React.useRef(false);
   const lastSavedVisibility = React.useRef<string | null>(null);
+  const preferencesVisibilityRef = React.useRef<ColumnVisibilityState | null>(
+    null,
+  );
   const saveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
   const [isReady, setIsReady] = React.useState(!enabled || !organizationId);
 
-  const normalizeVisibility = React.useCallback(
+  const buildVisibilityFromState = React.useCallback(
     (visibility: ColumnVisibilityState) => {
       const nextVisibility: ColumnVisibilityState = { ...visibility };
 
@@ -100,12 +103,35 @@ export function useTablePreferences<TData>({
     [lockVisibleColumns, table],
   );
 
+  const getVisibilitySnapshot = React.useCallback(() => {
+    const nextVisibility: ColumnVisibilityState = {};
+
+    table.getAllLeafColumns().forEach((column) => {
+      if (!column.getCanHide()) {
+        return;
+      }
+
+      nextVisibility[column.id] = column.getIsVisible();
+    });
+
+    lockVisibleColumns.forEach((columnId) => {
+      if (table.getColumn(columnId)) {
+        nextVisibility[columnId] = true;
+      }
+    });
+
+    return nextVisibility;
+  }, [lockVisibleColumns, table]);
+
   React.useEffect(() => {
     if (!preferencesQuery.data || hasAppliedPreferences.current) {
       return;
     }
 
-    const mergedVisibility = normalizeVisibility({
+    preferencesVisibilityRef.current =
+      preferencesQuery.data.preferences.visibility;
+
+    const mergedVisibility = buildVisibilityFromState({
       ...table.getState().columnVisibility,
       ...preferencesQuery.data.preferences.visibility,
     });
@@ -114,7 +140,7 @@ export function useTablePreferences<TData>({
     hasAppliedPreferences.current = true;
     lastSavedVisibility.current = JSON.stringify(mergedVisibility);
     setIsReady(true);
-  }, [normalizeVisibility, preferencesQuery.data, table]);
+  }, [buildVisibilityFromState, preferencesQuery.data, table]);
 
   const columnVisibility = table.getState().columnVisibility;
   const columnSignature = table
@@ -127,8 +153,11 @@ export function useTablePreferences<TData>({
       return;
     }
 
-    const normalizedVisibility = normalizeVisibility(columnVisibility);
-    const serialized = JSON.stringify(normalizedVisibility);
+    const visibilitySnapshot = getVisibilitySnapshot();
+    const visibilityToSave = preferencesVisibilityRef.current
+      ? { ...preferencesVisibilityRef.current, ...visibilitySnapshot }
+      : visibilitySnapshot;
+    const serialized = JSON.stringify(visibilityToSave);
 
     if (serialized === lastSavedVisibility.current) {
       return;
@@ -140,7 +169,8 @@ export function useTablePreferences<TData>({
 
     saveTimeoutRef.current = setTimeout(() => {
       lastSavedVisibility.current = serialized;
-      saveTablePreferences(normalizedVisibility);
+      preferencesVisibilityRef.current = visibilityToSave;
+      saveTablePreferences(visibilityToSave);
     }, 300);
 
     return () => {
@@ -148,14 +178,17 @@ export function useTablePreferences<TData>({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [columnVisibility, normalizeVisibility, saveTablePreferences]);
+  }, [columnVisibility, getVisibilitySnapshot, saveTablePreferences]);
 
   React.useEffect(() => {
     if (!hasAppliedPreferences.current) {
       return;
     }
 
-    const normalizedVisibility = normalizeVisibility(columnVisibility);
+    const baseVisibility = preferencesVisibilityRef.current
+      ? { ...preferencesVisibilityRef.current, ...columnVisibility }
+      : columnVisibility;
+    const normalizedVisibility = buildVisibilityFromState(baseVisibility);
     const serialized = JSON.stringify(normalizedVisibility);
 
     if (serialized === JSON.stringify(columnVisibility)) {
@@ -164,7 +197,7 @@ export function useTablePreferences<TData>({
 
     lastSavedVisibility.current = serialized;
     table.setColumnVisibility(normalizedVisibility);
-  }, [columnSignature, columnVisibility, normalizeVisibility, table]);
+  }, [columnSignature, columnVisibility, buildVisibilityFromState, table]);
 
   React.useEffect(() => {
     if (!enabled || !organizationId) {
@@ -180,6 +213,7 @@ export function useTablePreferences<TData>({
   React.useEffect(() => {
     hasAppliedPreferences.current = false;
     lastSavedVisibility.current = null;
+    preferencesVisibilityRef.current = null;
     setIsReady(!enabled || !organizationId);
   }, [entityType, enabled, organizationId]);
 

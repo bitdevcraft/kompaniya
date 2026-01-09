@@ -44,7 +44,7 @@ export class CustomFieldQueryService {
   ): SQL | undefined {
     // Access the custom_fields column from the table
     const customFieldsColumn = (table as unknown as Record<string, unknown>)
-      .custom_fields;
+      .customFields;
 
     if (!customFieldsColumn) {
       return undefined;
@@ -112,7 +112,7 @@ export class CustomFieldQueryService {
     order: 'asc' | 'desc' = 'asc',
   ): SQL {
     const customFieldsColumn = (table as unknown as Record<string, unknown>)
-      .custom_fields;
+      .customFields;
 
     if (!customFieldsColumn) {
       return sql`TRUE`;
