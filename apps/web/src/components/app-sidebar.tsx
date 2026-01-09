@@ -150,12 +150,8 @@ const data = {
           url: "/settings/email-setup/domains",
         },
         {
-          title: "Custom Attributes",
-          url: "/settings/custom-attributes",
-        },
-        {
-          title: "Record Layouts",
-          url: "/settings/record-layouts",
+          title: "Entity Manager",
+          url: "/settings/entity-manager",
         },
         {
           title: "Tags",

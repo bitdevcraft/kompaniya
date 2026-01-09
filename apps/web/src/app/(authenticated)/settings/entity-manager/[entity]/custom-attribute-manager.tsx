@@ -34,18 +34,17 @@ import { convertCase } from "@repo/shared/utils";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Edit, Ellipsis, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
 import React from "react";
-
-import type { CustomAttributeEntity } from "@/app/(authenticated)/settings/custom-attributes/entity-types";
 
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog";
 import { env } from "@/env/client";
 
+import type { EntityConfig } from "../config";
+
 import { CustomFieldDefinitionForm } from "./custom-field-definition-form";
 
 interface CustomAttributeManagerProps {
-  entity: CustomAttributeEntity;
+  entity: EntityConfig;
 }
 
 const definitionEndpoint = `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/custom-fields/definitions`;
@@ -81,7 +80,7 @@ export function CustomAttributeManager({
       : "Unable to load custom attributes.";
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="text-2xl font-semibold">Custom Attributes</div>
@@ -89,15 +88,10 @@ export function CustomAttributeManager({
             Manage custom fields for {entity.label}.
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline">
-            <Link href="/settings/custom-attributes">Change entity</Link>
-          </Button>
-          <Button onClick={() => setIsCreateOpen(true)} variant="default">
-            <Plus />
-            New Attribute
-          </Button>
-        </div>
+        <Button onClick={() => setIsCreateOpen(true)} variant="default">
+          <Plus />
+          New Attribute
+        </Button>
       </div>
 
       <Card>
