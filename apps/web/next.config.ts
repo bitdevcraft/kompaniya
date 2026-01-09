@@ -12,6 +12,25 @@ const nextConfig: NextConfig = {
     "@kompaniya/ui-email-editor",
     "@kompaniya/ui-monaco-editor",
   ],
+  async redirects() {
+    return [
+      {
+        source: "/crm/:path*",
+        destination: "/record/:path*",
+        permanent: true,
+      },
+      {
+        source: "/marketing/:path*",
+        destination: "/record/:path*",
+        permanent: true,
+      },
+      {
+        source: "/real-estate/:path*",
+        destination: "/record/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();

@@ -22,7 +22,8 @@
       "Bash(diff:*)",
       "Bash(powershell:*)",
       "Bash(pnpm tsc:*)",
-      "Bash(pnpm -r exec tsc:*)"
+      "Bash(pnpm -r exec tsc:*)",
+      "Bash(robocopy:*)"
     ]
   }
 }

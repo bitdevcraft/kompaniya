@@ -60,23 +60,23 @@ const data = {
       items: [
         {
           title: "Leads",
-          url: "/crm/leads",
+          url: "/record/leads",
         },
         {
           title: "Accounts",
-          url: "/crm/accounts",
+          url: "/record/accounts",
         },
         {
           title: "Contacts",
-          url: "/crm/contacts",
+          url: "/record/contacts",
         },
         {
           title: "Opportunities",
-          url: "/crm/opportunities",
+          url: "/record/opportunities",
         },
         {
           title: "Activities",
-          url: "/crm/activities",
+          url: "/record/activities",
         },
       ],
     },
@@ -89,23 +89,23 @@ const data = {
       items: [
         {
           title: "Projects",
-          url: "/real-estate/projects",
+          url: "/record/projects",
         },
         {
           title: "Properties",
-          url: "/real-estate/properties",
+          url: "/record/properties",
         },
         {
           title: "Bookings",
-          url: "/real-estate/bookings",
+          url: "/record/bookings",
         },
         {
           title: "Payment Plans",
-          url: "/real-estate/payment-plans",
+          url: "/record/payment-plans",
         },
         {
           title: "Payment Plan Templates",
-          url: "/real-estate/payment-plan-templates",
+          url: "/record/payment-plan-templates",
         },
       ],
     },
@@ -117,15 +117,15 @@ const data = {
       items: [
         {
           title: "Campaign",
-          url: "/marketing/email-campaigns",
+          url: "/record/email-campaigns",
         },
         {
           title: "Template",
-          url: "/marketing/email-templates",
+          url: "/record/email-templates",
         },
         {
           title: "Test Receivers",
-          url: "/marketing/email-test-receivers",
+          url: "/record/email-test-receivers",
         },
       ],
     },
