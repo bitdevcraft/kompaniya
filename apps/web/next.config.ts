@@ -4,6 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: "standalone",
   transpilePackages: [
     "@kompaniya/ui-common",
     "@kompaniya/ui-data-table",
