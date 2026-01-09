@@ -1,0 +1,110 @@
+# docker-compose.production.yml
+# Production Docker Compose configuration for Kompaniya
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: "${APP_NAME:-kompaniya}-postgres"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-app_db}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-app_db}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    networks:
+      - internal
+
+  redis:
+    image: redis:8
+    container_name: "${APP_NAME:-kompaniya}-redis"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks:
+      - internal
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: "${APP_NAME:-kompaniya}-api"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-app_db}
+      REDIS_URL: redis://redis:6379
+      # AWS credentials (if using SES for emails)
+      AWS_REGION: ${AWS_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_SES_CONFIGURATION_SET: ${AWS_SES_CONFIGURATION_SET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - internal
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_SERVER_URL: ${NEXT_PUBLIC_BASE_SERVER_URL:-http://localhost}
+        NEXT_PUBLIC_BASE_CLIENT_URL: ${NEXT_PUBLIC_BASE_CLIENT_URL:-http://localhost}
+    container_name: "${APP_NAME:-kompaniya}-web"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_BASE_SERVER_URL: ${NEXT_PUBLIC_BASE_SERVER_URL:-http://localhost}
+      NEXT_PUBLIC_BASE_CLIENT_URL: ${NEXT_PUBLIC_BASE_CLIENT_URL:-http://localhost}
+    depends_on:
+      api:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:alpine
+    container_name: "${APP_NAME:-kompaniya}-nginx"
+    ports:
+      - "80:80"
+      # Uncomment for HTTPS:
+      # - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # Uncomment for SSL certificates:
+      # - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+      - web
+    restart: unless-stopped
+    networks:
+      - internal
+
+volumes:
+  pg_data:
+  redis_data:
+
+networks:
+  internal:
+    driver: bridge
