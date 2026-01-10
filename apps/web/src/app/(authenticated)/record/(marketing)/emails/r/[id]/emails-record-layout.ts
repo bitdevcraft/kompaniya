@@ -69,8 +69,8 @@ export const emailsRecordLayout: RecordPageLayout = {
               id: "emailCampaignId",
               label: "Campaign ID",
               placeholder: "Campaign identifier",
-              type: "lookup",
-              lookup: {
+              type: "reference",
+              reference: {
                 searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-campaign/paginated`,
                 findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-campaign/r/:id`,
               },
@@ -79,8 +79,8 @@ export const emailsRecordLayout: RecordPageLayout = {
               id: "emailDomainId",
               label: "Domain ID",
               placeholder: "Domain identifier",
-              type: "lookup",
-              lookup: {
+              type: "reference",
+              reference: {
                 searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/paginated`,
                 findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/r/:id`,
               },
@@ -89,8 +89,8 @@ export const emailsRecordLayout: RecordPageLayout = {
               id: "crmContactId",
               label: "Contact ID",
               placeholder: "Contact identifier",
-              type: "lookup",
-              lookup: {
+              type: "reference",
+              reference: {
                 searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/contact/paginated`,
                 findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/contact/r/:id`,
               },

@@ -27,7 +27,7 @@ export function createDefaultValuesForLayout<
         setValueAtPath(defaults, field.id as string, []);
         break;
       }
-      case "lookup":
+      case "reference":
       case "number":
       case "date":
       case "datetime":
@@ -146,7 +146,7 @@ export function normalizeValueForForm(
       if (value === null || value === undefined) return "";
       return String(value);
     }
-    case "lookup": {
+    case "reference": {
       if (value === null || value === undefined) return "";
       return String(value);
     }
@@ -207,7 +207,7 @@ export function normalizeValueForSubmission<TFieldValues extends FieldValues>(
     case "html":
     case "mjml":
     case "phone":
-    case "lookup":
+    case "reference":
     case "text":
     case "textarea": {
       if (typeof value !== "string") return null;

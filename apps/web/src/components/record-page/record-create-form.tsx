@@ -27,12 +27,12 @@ import { DateRecordField } from "./date-record-field";
 import { DatetimeRecordField } from "./datetime-record-field";
 import { HtmlRecordField } from "./html-record-field";
 import { getCreateLayoutFields } from "./layout-helpers";
-import { LookupRecordField } from "./lookup-record-field";
 import { MjmlRecordField } from "./mjml-record-field";
 import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
 import { PhoneRecordField } from "./phone-record-field";
 import { PicklistRecordField } from "./picklist-record-field";
+import { ReferenceRecordField } from "./reference-record-field";
 import { TagRecordField } from "./tag-record-field";
 import { TextRecordField } from "./text-record-field";
 import { TextareaRecordField } from "./textarea-record-field";
@@ -42,7 +42,7 @@ type FieldComponent = (props: {
   editing: boolean;
   fallback?: string;
   label: string;
-  lookup?: RecordLayoutField["lookup"];
+  reference?: RecordLayoutField["reference"];
   name?: string;
   onBlur?: () => void;
   onChange?: (value: unknown) => void;
@@ -60,7 +60,7 @@ const CREATE_FIELD_COMPONENTS: Record<
   date: DateRecordField as FieldComponent,
   datetime: DatetimeRecordField as FieldComponent,
   html: HtmlRecordField as FieldComponent,
-  lookup: LookupRecordField as FieldComponent,
+  reference: ReferenceRecordField as FieldComponent,
   multipicklist: MultipicklistRecordField as FieldComponent,
   number: NumberRecordField as FieldComponent,
   phone: PhoneRecordField as FieldComponent,
@@ -322,12 +322,12 @@ function CreateField<TFieldValues extends FieldValues>({
           description={field.description}
           editing
           label={field.label}
-          lookup={field.lookup}
           name={field.id as string}
           onBlur={controllerField.onBlur}
           onChange={(value) => controllerField.onChange(value)}
           options={field.options}
           placeholder={field.placeholder}
+          reference={field.reference}
           tag={field.tag}
           value={controllerField.value}
         />

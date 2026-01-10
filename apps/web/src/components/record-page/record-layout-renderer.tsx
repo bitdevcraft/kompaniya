@@ -18,9 +18,9 @@ import {
 import { Form, FormField } from "@kompaniya/ui-common/components/form";
 import { cn } from "@kompaniya/ui-common/lib/utils";
 import {
-  LookupFieldConfig,
   FieldOption as RecordFieldOption,
   HeaderIconType as RecordLayoutHeaderIcon,
+  ReferenceFieldConfig,
 } from "@repo/domain";
 import {
   Building2,
@@ -54,12 +54,12 @@ import {
   normalizeValueForSubmission,
   setValueAtPath,
 } from "./layout-helpers";
-import { LookupRecordField } from "./lookup-record-field";
 import { MjmlRecordField } from "./mjml-record-field";
 import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
 import { PhoneRecordField } from "./phone-record-field";
 import { PicklistRecordField } from "./picklist-record-field";
+import { ReferenceRecordField } from "./reference-record-field";
 import { TagRecordField } from "./tag-record-field";
 import { TextRecordField } from "./text-record-field";
 import { TextareaRecordField } from "./textarea-record-field";
@@ -88,7 +88,7 @@ type FieldComponent = (props: {
   editing: boolean;
   fallback?: string;
   label: string;
-  lookup?: RecordLayoutField["lookup"];
+  reference?: RecordLayoutField["reference"];
   name?: string;
   onBlur?: () => void;
   onChange?: (value: unknown) => void;
@@ -235,22 +235,22 @@ function buildHeaderChip<TFieldValues extends FieldValues>(
   };
 }
 
-function buildLookupFindUrl(
-  lookup: LookupFieldConfig,
+function buildReferenceFindUrl(
+  reference: ReferenceFieldConfig,
   id: string,
 ): string | undefined {
-  const replaced = lookup.findByIdEndpoint
+  const replaced = reference.findByIdEndpoint
     .replace(":id", encodeURIComponent(id))
     .replace("{id}", encodeURIComponent(id));
 
-  if (replaced !== lookup.findByIdEndpoint) {
+  if (replaced !== reference.findByIdEndpoint) {
     return buildUrl(replaced);
   }
 
-  const url = new URL(buildUrl(lookup.findByIdEndpoint));
-  const idParam = lookup.idParam ?? DEFAULT_LOOKUP_ID_PARAM;
+  const url = new URL(buildUrl(reference.findByIdEndpoint));
+  const idParam = reference.idParam ?? DEFAULT_LOOKUP_ID_PARAM;
 
-  if (lookup.findByIdEndpoint.includes("?")) {
+  if (reference.findByIdEndpoint.includes("?")) {
     url.searchParams.set(idParam, id);
     return url.toString();
   }
@@ -268,12 +268,12 @@ function buildUrl(endpoint: string): string {
     return endpoint;
   }
 }
-async function fetchLookupDisplayValue(
+async function fetchReferenceDisplayValue(
   id: string,
-  lookup: LookupFieldConfig,
+  reference: ReferenceFieldConfig,
   signal?: AbortSignal,
 ): Promise<string | null> {
-  const url = buildLookupFindUrl(lookup, id);
+  const url = buildReferenceFindUrl(reference, id);
   if (!url) return null;
 
   const response = await fetch(url, { signal, credentials: "include" });
@@ -283,19 +283,19 @@ async function fetchLookupDisplayValue(
   }
 
   const data = await response.json();
-  return normalizeLookupRecordLabel(data, lookup);
+  return normalizeReferenceRecordLabel(data, reference);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function normalizeLookupRecordLabel(
+function normalizeReferenceRecordLabel(
   data: unknown,
-  lookup: LookupFieldConfig,
+  reference: ReferenceFieldConfig,
 ): string | null {
-  const valueKey = lookup.valueKey ?? DEFAULT_LOOKUP_VALUE_KEY;
-  const labelKey = lookup.labelKey ?? DEFAULT_LOOKUP_LABEL_KEY;
+  const valueKey = reference.valueKey ?? DEFAULT_LOOKUP_VALUE_KEY;
+  const labelKey = reference.labelKey ?? DEFAULT_LOOKUP_LABEL_KEY;
 
   const record = toRecordArray(data)[0];
   if (!record) return null;
@@ -313,7 +313,7 @@ const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
   datetime: DatetimeRecordField as FieldComponent,
   html: HtmlRecordField as FieldComponent,
   mjml: MjmlRecordField as FieldComponent,
-  lookup: LookupRecordField as FieldComponent,
+  reference: ReferenceRecordField as FieldComponent,
   multipicklist: MultipicklistRecordField as FieldComponent,
   number: NumberRecordField as FieldComponent,
   phone: PhoneRecordField as FieldComponent,
@@ -382,13 +382,13 @@ function FieldRenderer<TFieldValues extends FieldValues>({
             description={field.description}
             editing
             label={field.label}
-            lookup={field.lookup}
             name={field.id as string}
             onBlur={controllerField.onBlur}
             onChange={(value) => controllerField.onChange(value)}
             options={field.options}
             placeholder={field.placeholder}
             record={record}
+            reference={field.reference}
             tag={field.tag}
             value={controllerField.value}
           />
@@ -402,9 +402,9 @@ function FieldRenderer<TFieldValues extends FieldValues>({
       description={field.description}
       editing={false}
       label={field.label}
-      lookup={field.lookup}
       options={field.options}
       record={record}
+      reference={field.reference}
       tag={field.tag}
       value={resolveFieldValue(record, form, field.id)}
     />
@@ -598,7 +598,7 @@ function Header<TFieldValues extends FieldValues>({
           const rawValue = resolveFieldValue(record, form, item.fieldId);
           const emptyFallback = item.fallback ?? "Empty";
 
-          if (field?.type === "lookup") {
+          if (field?.type === "reference") {
             const id =
               rawValue === null || rawValue === undefined
                 ? ""
@@ -608,7 +608,7 @@ function Header<TFieldValues extends FieldValues>({
               return emptyFallback;
             }
 
-            if (!field.lookup) {
+            if (!field.reference) {
               return (
                 formatHeaderText(item, fieldMap, record, form, true) ??
                 emptyFallback
@@ -616,9 +616,9 @@ function Header<TFieldValues extends FieldValues>({
             }
 
             try {
-              const displayValue = await fetchLookupDisplayValue(
+              const displayValue = await fetchReferenceDisplayValue(
                 id,
-                field.lookup,
+                field.reference,
                 controller.signal,
               );
 

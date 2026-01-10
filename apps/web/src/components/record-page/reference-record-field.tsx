@@ -15,11 +15,11 @@ import {
 } from "./record-field-types";
 import { renderLink } from "./utils";
 
-export type LookupRecordFieldProps = BaseRecordFieldProps<
+export type ReferenceRecordFieldProps = BaseRecordFieldProps<
   string | null | undefined
 >;
 
-interface NormalizedLookupRecord {
+interface NormalizedReferenceRecord {
   description?: string;
   id: string;
   label: string;
@@ -31,20 +31,20 @@ const DEFAULT_VALUE_KEY = "id";
 const DEFAULT_QUERY_PARAM = "name";
 const DEFAULT_ID_PARAM = "id";
 
-export function LookupRecordField({
+export function ReferenceRecordField({
   description,
   editing,
   fallback,
   label,
-  lookup,
+  reference,
   name,
   onBlur,
   onChange,
   placeholder,
   value,
-}: LookupRecordFieldProps) {
+}: ReferenceRecordFieldProps) {
   const [selectedRecord, setSelectedRecord] =
-    useState<NormalizedLookupRecord | null>(null);
+    useState<NormalizedReferenceRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const normalizedValue = useMemo(() => {
@@ -53,17 +53,17 @@ export function LookupRecordField({
     return String(value);
   }, [value]);
 
-  const labelKey = lookup?.labelKey ?? DEFAULT_LABEL_KEY;
-  const valueKey = lookup?.valueKey ?? DEFAULT_VALUE_KEY;
-  const descriptionKey = lookup?.descriptionKey;
-  const queryParam = lookup?.queryParam ?? DEFAULT_QUERY_PARAM;
-  const idParam = lookup?.idParam ?? DEFAULT_ID_PARAM;
-  const shouldFetch = Boolean(lookup) && normalizedValue.length > 0;
+  const labelKey = reference?.labelKey ?? DEFAULT_LABEL_KEY;
+  const valueKey = reference?.valueKey ?? DEFAULT_VALUE_KEY;
+  const descriptionKey = reference?.descriptionKey;
+  const queryParam = reference?.queryParam ?? DEFAULT_QUERY_PARAM;
+  const idParam = reference?.idParam ?? DEFAULT_ID_PARAM;
+  const shouldFetch = Boolean(reference) && normalizedValue.length > 0;
 
   const resolveRedirectUrl = useCallback(
     (id: string): string | undefined => {
-      if (!lookup?.redirectBaseUrl) return undefined;
-      const base = lookup.redirectBaseUrl;
+      if (!reference?.redirectBaseUrl) return undefined;
+      const base = reference.redirectBaseUrl;
       if (base.includes(":id")) {
         return base.replace(":id", encodeURIComponent(id));
       }
@@ -72,11 +72,11 @@ export function LookupRecordField({
       }
       return `${base}${encodeURIComponent(id)}`;
     },
-    [lookup],
+    [reference],
   );
 
   const normalizeRecord = useCallback(
-    (record: Record<string, unknown>): NormalizedLookupRecord | null => {
+    (record: Record<string, unknown>): NormalizedReferenceRecord | null => {
       const rawValue = record[valueKey];
       if (rawValue === null || rawValue === undefined) {
         return null;
@@ -139,8 +139,8 @@ export function LookupRecordField({
 
   const buildSearchUrl = useCallback(
     (query?: string): string | undefined => {
-      if (!lookup) return undefined;
-      const baseUrl = buildUrl(lookup.searchEndpoint);
+      if (!reference) return undefined;
+      const baseUrl = buildUrl(reference.searchEndpoint);
       const url = new URL(baseUrl);
       if (query !== undefined) {
         url.searchParams.set(queryParam, query);
@@ -149,22 +149,22 @@ export function LookupRecordField({
       }
       return url.toString();
     },
-    [buildUrl, lookup, queryParam],
+    [buildUrl, reference, queryParam],
   );
 
   const buildFindUrl = useCallback(
     (id: string): string | undefined => {
-      if (!lookup) return undefined;
-      const replaced = lookup.findByIdEndpoint
+      if (!reference) return undefined;
+      const replaced = reference.findByIdEndpoint
         .replace(":id", encodeURIComponent(id))
         .replace("{id}", encodeURIComponent(id));
 
-      if (replaced !== lookup.findByIdEndpoint) {
+      if (replaced !== reference.findByIdEndpoint) {
         return buildUrl(replaced);
       }
 
-      const url = new URL(buildUrl(lookup.findByIdEndpoint));
-      if (lookup.findByIdEndpoint.includes("?")) {
+      const url = new URL(buildUrl(reference.findByIdEndpoint));
+      if (reference.findByIdEndpoint.includes("?")) {
         url.searchParams.set(idParam, id);
         return url.toString();
       }
@@ -172,7 +172,7 @@ export function LookupRecordField({
       url.pathname = `${url.pathname.replace(/\/$/, "")}/${encodeURIComponent(id)}`;
       return url.toString();
     },
-    [buildUrl, idParam, lookup],
+    [buildUrl, idParam, reference],
   );
 
   const fetchJson = useCallback(
@@ -192,27 +192,29 @@ export function LookupRecordField({
     async (
       id: string,
       signal?: AbortSignal,
-    ): Promise<NormalizedLookupRecord | null> => {
-      if (!lookup || !id) return null;
+    ): Promise<NormalizedReferenceRecord | null> => {
+      if (!reference || !id) return null;
       const data = await fetchJson(buildFindUrl(id), signal);
       if (!data) return null;
       const [record] = toArray(data);
       if (!record) return null;
       return normalizeRecord(record);
     },
-    [buildFindUrl, fetchJson, lookup, normalizeRecord, toArray],
+    [buildFindUrl, fetchJson, reference, normalizeRecord, toArray],
   );
 
   const fetchSearch = useCallback(
-    async (query?: string): Promise<NormalizedLookupRecord[]> => {
-      if (!lookup) return [];
+    async (query?: string): Promise<NormalizedReferenceRecord[]> => {
+      if (!reference) return [];
       const data = await fetchJson(buildSearchUrl(query));
       if (!data) return [];
       return toArray(data)
         .map((record) => normalizeRecord(record))
-        .filter((record): record is NormalizedLookupRecord => Boolean(record));
+        .filter((record): record is NormalizedReferenceRecord =>
+          Boolean(record),
+        );
     },
-    [buildSearchUrl, fetchJson, lookup, normalizeRecord, toArray],
+    [buildSearchUrl, fetchJson, reference, normalizeRecord, toArray],
   );
 
   useEffect(() => {
@@ -245,8 +247,8 @@ export function LookupRecordField({
   }, [fetchById, normalizedValue, shouldFetch]);
 
   const fetchOptions = useCallback(
-    async (query?: string): Promise<NormalizedLookupRecord[]> => {
-      if (!lookup) return [];
+    async (query?: string): Promise<NormalizedReferenceRecord[]> => {
+      if (!reference) return [];
       const trimmed = query?.trim();
 
       if (trimmed && normalizedValue && trimmed === normalizedValue) {
@@ -262,14 +264,14 @@ export function LookupRecordField({
 
       return results;
     },
-    [fetchById, fetchSearch, lookup, normalizedValue],
+    [fetchById, fetchSearch, reference, normalizedValue],
   );
 
   const effectiveRecord = shouldFetch ? selectedRecord : null;
   const effectiveError = shouldFetch ? error : null;
   const isLoading = shouldFetch && !effectiveRecord && !effectiveError;
 
-  if (!lookup) {
+  if (!reference) {
     return (
       <div className="space-y-2">
         <RecordField
@@ -310,7 +312,7 @@ export function LookupRecordField({
   return (
     <div className="space-y-2">
       <FieldLabel htmlFor={name}>{label}</FieldLabel>
-      <AsyncSelect<NormalizedLookupRecord>
+      <AsyncSelect<NormalizedReferenceRecord>
         fetcher={fetchOptions}
         getDisplayValue={(option) => option.label}
         getOptionValue={(option) => option.id}

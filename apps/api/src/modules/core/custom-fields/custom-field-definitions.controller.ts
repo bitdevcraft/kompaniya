@@ -20,6 +20,8 @@ import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { CustomFieldDefinitionsService } from './custom-field-definitions.service';
 
+const referenceConfigSchema = z.object({ targetType: z.string() });
+
 // Zod schemas for validation
 const createDefinitionSchema = z
   .object({
@@ -52,6 +54,7 @@ const createDefinitionSchema = z
       .optional(),
     validation: z.record(z.string(), z.any()).optional(),
     isIndexed: z.boolean().default(false),
+    referenceConfig: referenceConfigSchema.optional(),
   })
   .strict();
 

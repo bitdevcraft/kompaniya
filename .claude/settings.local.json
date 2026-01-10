@@ -23,7 +23,11 @@
       "Bash(powershell:*)",
       "Bash(pnpm tsc:*)",
       "Bash(pnpm -r exec tsc:*)",
-      "Bash(robocopy:*)"
+      "Bash(robocopy:*)",
+      "Bash(pnpm --filter @repo/domain lint:*)",
+      "Bash(pnpm run)",
+      "Bash(pnpm check-types:*)",
+      "Bash(pnpm exec turbo run:*)"
     ]
   }
 }

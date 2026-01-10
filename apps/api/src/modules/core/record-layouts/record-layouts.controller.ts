@@ -1,3 +1,5 @@
+import type { FieldDefinition } from '@repo/domain';
+
 import {
   Body,
   Controller,
@@ -79,9 +81,10 @@ type UpdateLayoutDto = z.infer<typeof updateLayoutSchema>;
 /**
  * Valid entity types for record layouts
  */
-const validEntityTypes = new Set([
+const validEntityTypes = new Set<string>([
   'org_accounts',
   'org_activities',
+  'org_booking_buyers',
   'org_categories',
   'org_contacts',
   'org_email_campaigns',
@@ -124,7 +127,7 @@ export class RecordLayoutsController {
   async getCustomFields(
     @Param('entityType') entityType: string,
     @ActiveOrganization() organization: { id: string },
-  ) {
+  ): Promise<FieldDefinition[]> {
     return await this.layoutsService.getCustomFieldsForLayout(
       organization.id,
       entityType,

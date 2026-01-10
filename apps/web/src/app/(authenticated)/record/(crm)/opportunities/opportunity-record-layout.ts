@@ -154,8 +154,8 @@ export const opportunityRecordLayout: RecordPageLayout<OpportunityRecordFormValu
               {
                 id: "accountId",
                 label: "Account ID",
-                type: "lookup",
-                lookup: {
+                type: "reference",
+                reference: {
                   searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/account/paginated`,
                   findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/account/r/:id`,
                   redirectBaseUrl: `/crm/accounts/r/:id`,

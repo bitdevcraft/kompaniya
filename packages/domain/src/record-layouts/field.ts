@@ -23,8 +23,8 @@ export interface BaseFieldDefinition {
   readOnly?: boolean;
   /** Options for picklist/multipicklist fields */
   options?: FieldOption[];
-  /** Lookup configuration for relationship fields */
-  lookup?: LookupFieldConfig;
+  /** Reference configuration for relationship fields */
+  reference?: ReferenceFieldConfig;
   /** Tag configuration for tag fields */
   tag?: TagFieldConfig;
 }
@@ -61,7 +61,7 @@ export type FieldDataType =
   | "phone"
   | "html"
   | "mjml"
-  | "lookup";
+  | "reference";
 
 /**
  * Extended field definition with UI builder metadata
@@ -97,10 +97,10 @@ export interface FieldOption {
 }
 
 /**
- * Lookup field configuration for relationship fields
+ * Reference field configuration for relationship fields
  * This is used for fields that reference other entities
  */
-export interface LookupFieldConfig {
+export interface ReferenceFieldConfig {
   /** Endpoint used to fetch a specific record by ID */
   findByIdEndpoint: string;
   /** Key in the response representing the display label */

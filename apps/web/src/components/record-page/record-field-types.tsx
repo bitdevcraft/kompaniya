@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
 import {
-  LookupFieldConfig,
   FieldOption as RecordFieldOption,
+  ReferenceFieldConfig,
   TagFieldConfig,
 } from "@repo/domain";
 
@@ -10,7 +10,7 @@ export interface BaseRecordFieldProps<TValue> {
   description?: string;
   editing: boolean;
   fallback?: string;
-  lookup?: LookupFieldConfig;
+  reference?: ReferenceFieldConfig;
   label: string;
   name?: string;
   onBlur?: () => void;

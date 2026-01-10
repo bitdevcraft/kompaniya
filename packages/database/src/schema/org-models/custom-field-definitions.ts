@@ -64,6 +64,12 @@ export const customFieldDefinitionsTable = pgTable(
     // Format: [{label: string, value: string}, ...]
     choices: jsonb("choices").$type<{ label: string; value: string }[]>(),
 
+    // Reference field configuration
+    // Format: {targetType: string} where targetType is the entity type (e.g., "org_accounts")
+    referenceConfig: jsonb("reference_config").$type<{
+      targetType: string;
+    }>(),
+
     // Additional validation rules (Zod-compatible)
     // Format: {min?: number, max?: number, minLength?: number, maxLength?: number, pattern?: string, ...}
     validation: jsonb("validation").$type<Record<string, unknown>>(),
@@ -136,6 +142,13 @@ export type CustomFieldType =
  */
 export type NewCustomFieldDefinition =
   typeof customFieldDefinitionsTable.$inferInsert;
+
+/**
+ * Reference field configuration type
+ */
+export interface ReferenceFieldConfigDb {
+  targetType: string;
+}
 
 /**
  * Reference value type for reference fields

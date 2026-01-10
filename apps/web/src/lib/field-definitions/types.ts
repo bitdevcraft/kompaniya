@@ -10,7 +10,7 @@ import type { FieldValues, Path } from "react-hook-form";
  * - isSystem, isRequired, group, sortOrder, defaultValue
  * - isCustom, customFieldKey, customFieldType
  * - availableOnCreate, description, placeholder, colSpan, readOnly
- * - options, lookup, tag
+ * - options, reference, tag
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface NativeFieldDefinition extends DomainFieldDefinition {}
@@ -35,6 +35,6 @@ export type {
   FieldCategory,
   FieldDataType,
   FieldOption,
-  LookupFieldConfig,
+  ReferenceFieldConfig,
   TagFieldConfig,
 } from "@repo/domain";

@@ -66,8 +66,8 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
                 id: "orgEmailDomainId",
                 label: "Sending domain ID",
                 placeholder: "Domain identifier",
-                type: "lookup",
-                lookup: {
+                type: "reference",
+                reference: {
                   searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/paginated`,
                   findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain/r/:id`,
                 },
@@ -76,8 +76,8 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
                 id: "orgEmailTemplateId",
                 label: "Template ID",
                 placeholder: "Template identifier",
-                type: "lookup",
-                lookup: {
+                type: "reference",
+                reference: {
                   searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-template/paginated`,
                   findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-template/r/:id`,
                 },
@@ -86,8 +86,8 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
                 id: "orgEmailTestReceiverId",
                 label: "Test receiver ID",
                 placeholder: "Receiver identifier",
-                type: "lookup",
-                lookup: {
+                type: "reference",
+                reference: {
                   searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-test-receiver/paginated`,
                   findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-test-receiver/r/:id`,
                 },

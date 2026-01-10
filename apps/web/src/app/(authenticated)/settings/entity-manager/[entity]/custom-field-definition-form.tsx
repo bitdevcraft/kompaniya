@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@kompaniya/ui-common/components/select";
 import { Textarea } from "@kompaniya/ui-common/components/textarea";
+import { ENTITY_REFERENCE_CONFIGS } from "@repo/domain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
@@ -63,6 +64,7 @@ const FormSchema = z
     isRequired: z.boolean().default(false),
     isIndexed: z.boolean().default(false),
     choices: z.string().optional(),
+    referenceEntityType: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (isSelectType(data.fieldType)) {
@@ -75,6 +77,13 @@ const FormSchema = z
         });
       }
     }
+    if (data.fieldType === "reference" && !data.referenceEntityType) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["referenceEntityType"],
+        message: "Target entity is required for reference fields.",
+      });
+    }
   });
 
 type CreatePayload = {
@@ -86,6 +95,7 @@ type CreatePayload = {
   isRequired: boolean;
   isIndexed: boolean;
   choices?: { label: string; value: string }[];
+  referenceConfig?: { targetType: string };
 };
 
 interface CustomFieldDefinitionFormProps {
@@ -152,6 +162,9 @@ export function CustomFieldDefinitionForm({
   React.useEffect(() => {
     if (!isSelectType(fieldType)) {
       form.setValue("choices", "");
+    }
+    if (fieldType !== "reference") {
+      form.setValue("referenceEntityType", "");
     }
   }, [fieldType, form]);
 
@@ -243,6 +256,7 @@ export function CustomFieldDefinitionForm({
               <FormItem>
                 <FormLabel>Field Type</FormLabel>
                 <Select
+                  disabled={mode === "edit"}
                   onValueChange={field.onChange}
                   value={field.value || undefined}
                 >
@@ -280,6 +294,42 @@ export function CustomFieldDefinitionForm({
                   </FormControl>
                   <FormDescription>
                     Enter the options users can choose from.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {fieldType === "reference" && (
+            <FormField
+              control={form.control}
+              name="referenceEntityType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Entity</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select the entity to reference" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ENTITY_REFERENCE_CONFIGS.map((config) => (
+                        <SelectItem
+                          key={config.entityType}
+                          value={config.entityType}
+                        >
+                          {config.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    The entity type that this field will reference.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -380,6 +430,10 @@ function buildPayload(
     isRequired: data.isRequired,
     isIndexed: data.isIndexed,
     choices: choices && choices.length > 0 ? choices : undefined,
+    referenceConfig:
+      data.fieldType === "reference" && data.referenceEntityType
+        ? { targetType: data.referenceEntityType }
+        : undefined,
   };
 
   if (mode === "edit") {
@@ -403,6 +457,9 @@ function getDefaultValues(definition?: CustomFieldDefinition) {
     isIndexed: definition?.isIndexed ?? false,
     choices:
       definition?.choices?.map((choice) => choice.label).join("\n") ?? "",
+    referenceEntityType:
+      (definition?.referenceConfig as { targetType?: string })?.targetType ??
+      "",
   };
 }
 

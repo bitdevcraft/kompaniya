@@ -180,10 +180,7 @@ export class CustomFieldValidationService {
         break;
 
       case 'reference':
-        schema = z.object({
-          entity_type: z.string(),
-          id: z.string().uuid(),
-        });
+        schema = z.uuid();
         break;
 
       default:

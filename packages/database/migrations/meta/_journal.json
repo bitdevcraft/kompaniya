@@ -43,6 +43,13 @@
       "when": 1767954332451,
       "tag": "0005_secret_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1767993366571,
+      "tag": "0006_motionless_oracle",
+      "breakpoints": true
     }
   ]
 }

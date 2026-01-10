@@ -1,7 +1,7 @@
 import type {
   FieldDataType,
   FieldOption,
-  LookupFieldConfig,
+  ReferenceFieldConfig,
   TagFieldConfig,
 } from "./field.js";
 import type {
@@ -23,7 +23,7 @@ export type {
   FieldDataType,
   FieldDefinition,
   FieldOption,
-  LookupFieldConfig,
+  ReferenceFieldConfig,
   TagFieldConfig,
 } from "./field.js";
 
@@ -63,8 +63,8 @@ export interface LayoutField {
   readOnly?: boolean;
   /** Options for picklist fields */
   options?: FieldOption[];
-  /** Lookup configuration */
-  lookup?: LookupFieldConfig;
+  /** Reference configuration */
+  reference?: ReferenceFieldConfig;
   /** Tag configuration */
   tag?: TagFieldConfig;
 }

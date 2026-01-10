@@ -5,7 +5,7 @@ export type {
   FieldDataType,
   FieldDefinition,
   FieldOption,
-  LookupFieldConfig,
+  ReferenceFieldConfig,
   TagFieldConfig,
 } from "./field.js";
 

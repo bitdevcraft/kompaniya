@@ -5,6 +5,7 @@ import type {
 } from '@repo/domain';
 
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   type Db,
   DEFAULT_RECORD_LAYOUTS,
@@ -14,6 +15,10 @@ import {
   type RecordLayoutSectionColumns,
 } from '@repo/database';
 import { orgRecordLayoutsTable } from '@repo/database/schema';
+import {
+  generateReferenceEndpoints,
+  getEntityReferenceConfig,
+} from '@repo/domain';
 import { and, eq } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
@@ -34,7 +39,7 @@ const CUSTOM_FIELD_TYPE_MAPPING: Record<string, FieldDataType> = {
   single_select: 'picklist',
   multi_select: 'multipicklist',
   json: 'textarea',
-  reference: 'lookup',
+  reference: 'reference',
 };
 
 /**
@@ -58,11 +63,17 @@ export interface LayoutWithCustomFields extends RecordPageLayout {
 
 @Injectable()
 export class RecordLayoutsService {
+  private readonly baseUrl: string;
+
   constructor(
     @Inject(DRIZZLE_DB) private readonly db: Db,
     private readonly cacheService: CacheService,
     private readonly customFieldService: CustomFieldDefinitionsService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.baseUrl =
+      this.configService.get<string>('app.baseUrl') ?? 'http://localhost:3000';
+  }
 
   /**
    * Get all layouts for an organization
@@ -94,23 +105,40 @@ export class RecordLayoutsService {
       entityType,
     );
 
-    return customFields.map((cf) => ({
-      id: `customFields.${cf.key}`,
-      label: cf.label,
-      description: cf.description ?? undefined,
-      type: CUSTOM_FIELD_TYPE_MAPPING[cf.fieldType] || 'text',
-      category: 'custom',
-      isRequired: cf.isRequired,
-      isCustom: true,
-      customFieldKey: cf.key,
-      customFieldType: cf.fieldType,
-      options: cf.choices?.map((c: { label: string; value: string }) => ({
-        label: c.label,
-        value: c.value,
-      })),
-      availableOnCreate: true,
-      readOnly: false,
-    }));
+    return customFields.map((cf): FieldDefinition => {
+      const baseField: FieldDefinition = {
+        id: `customFields.${cf.key}`,
+        label: cf.label,
+        description: cf.description ?? undefined,
+        type: CUSTOM_FIELD_TYPE_MAPPING[cf.fieldType] || 'text',
+        category: 'custom',
+        isRequired: cf.isRequired,
+        isCustom: true,
+        customFieldKey: cf.key,
+        customFieldType: cf.fieldType,
+        options: cf.choices?.map((c: { label: string; value: string }) => ({
+          label: c.label,
+          value: c.value,
+        })),
+        availableOnCreate: true,
+        readOnly: false,
+      };
+
+      // Add reference config for reference fields
+      if (cf.fieldType === 'reference' && cf.referenceConfig?.targetType) {
+        const entityConfig = getEntityReferenceConfig(
+          cf.referenceConfig.targetType as RecordLayoutEntityType,
+        );
+        if (entityConfig) {
+          return {
+            ...baseField,
+            reference: generateReferenceEndpoints(entityConfig, this.baseUrl),
+          };
+        }
+      }
+
+      return baseField;
+    });
   }
 
   /**
@@ -342,15 +370,33 @@ export class RecordLayoutsService {
     }
 
     // Convert custom field definitions to RecordLayoutField format
-    const customFieldLayouts = customFields.map((cf) => ({
-      id: `customFields.${cf.key}`,
-      label: cf.label,
-      description: cf.description,
-      type: CUSTOM_FIELD_TYPE_MAPPING[cf.fieldType] || 'text',
-      required: cf.isRequired,
-      options: cf.choices,
-      readOnly: false,
-    }));
+
+    const customFieldLayouts = customFields.map((cf) => {
+      const baseLayout = {
+        id: `customFields.${cf.key}`,
+        label: cf.label,
+        description: cf.description,
+        type: CUSTOM_FIELD_TYPE_MAPPING[cf.fieldType] || 'text',
+        required: cf.isRequired,
+        options: cf.choices,
+        readOnly: false,
+      };
+
+      // Add reference config for reference fields
+      if (cf.fieldType === 'reference' && cf.referenceConfig?.targetType) {
+        const entityConfig = getEntityReferenceConfig(
+          cf.referenceConfig.targetType as RecordLayoutEntityType,
+        );
+        if (entityConfig) {
+          return {
+            ...baseLayout,
+            reference: generateReferenceEndpoints(entityConfig, this.baseUrl),
+          };
+        }
+      }
+
+      return baseLayout;
+    });
 
     // Append to sections or add a new "Custom Fields" section
     const sections = layout.sections || [];
