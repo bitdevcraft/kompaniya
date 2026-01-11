@@ -1,4 +1,15 @@
 import {
+  adminAccessControl,
+  orgAccessControl,
+  orgAdmin,
+  orgMember,
+  orgOwner,
+  superAdmin,
+  systemAdmin,
+  systemUser,
+} from "@repo/shared/auth";
+import {
+  adminClient,
   apiKeyClient,
   emailOTPClient,
   inferAdditionalFields,
@@ -20,6 +31,14 @@ export const authClient = createAuthClient({
     phoneNumberClient(),
     //
     apiKeyClient(),
+    adminClient({
+      ac: adminAccessControl,
+      roles: {
+        superAdmin,
+        systemUser,
+        systemAdmin,
+      },
+    }),
     organizationClient({
       schema: inferOrgAdditionalFields({
         organization: {
@@ -33,6 +52,15 @@ export const authClient = createAuthClient({
           },
         },
       }),
+      dynamicAccessControl: {
+        enabled: true,
+      },
+      ac: orgAccessControl,
+      roles: {
+        admin: orgAdmin,
+        owner: orgOwner,
+        member: orgMember,
+      },
     }),
 
     //

@@ -57,6 +57,13 @@
       "when": 1768118335860,
       "tag": "0007_fixed_metal_master",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1768159021523,
+      "tag": "0008_faithful_vin_gonzales",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,15 @@
 import { db } from '@repo/database';
 import * as schema from '@repo/database/schema';
+import {
+  adminAccessControl,
+  orgAccessControl,
+  orgAdmin,
+  orgMember,
+  orgOwner,
+  superAdmin,
+  systemAdmin,
+  systemUser,
+} from '@repo/shared/auth';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import {
@@ -12,8 +22,6 @@ import {
 } from 'better-auth/plugins';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ac, superAdmin, systemAdmin, systemUser } from './permissions';
-
 export const auth = betterAuth({
   appName: 'Kompaniya',
   database: drizzleAdapter(db, {
@@ -24,6 +32,7 @@ export const auth = betterAuth({
       apiKey: schema.apikeysTable,
       invitation: schema.invitationsTable,
       member: schema.membersTable,
+      organizationRole: schema.organizationRolesTable,
       organization: schema.organizationsTable,
       session: schema.sessionsTable,
       teamMember: schema.teamMembersTable,
@@ -71,7 +80,7 @@ export const auth = betterAuth({
     // Authorization
     apiKey(),
     admin({
-      ac,
+      ac: adminAccessControl,
       roles: {
         superAdmin,
         systemUser,
@@ -104,6 +113,15 @@ export const auth = betterAuth({
             },
           },
         },
+      },
+      dynamicAccessControl: {
+        enabled: true,
+      },
+      ac: orgAccessControl,
+      roles: {
+        admin: orgAdmin,
+        owner: orgOwner,
+        member: orgMember,
       },
     }),
     //

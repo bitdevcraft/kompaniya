@@ -5,6 +5,7 @@ export default defineConfig({
   dts: true,
   entry: {
     index: "src/index.ts",
+    auth: "src/auth/index.ts",
     utils: "src/utils/index.ts",
     config: "src/config/index.ts",
   },

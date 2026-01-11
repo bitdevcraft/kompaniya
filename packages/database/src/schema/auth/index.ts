@@ -3,6 +3,7 @@ export * from "./api-keys";
 export * from "./index";
 export * from "./invitations";
 export * from "./members";
+export * from "./organization-roles";
 export * from "./organizations";
 export * from "./sessions";
 export * from "./team-members";
