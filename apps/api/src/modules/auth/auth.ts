@@ -34,7 +34,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    autoSignIn: false,
+    autoSignIn: true,
   },
   advanced: {
     database: {
