@@ -34,7 +34,7 @@ export class AdminHook {
 
     if (
       ctx.path !== '/admin/create-user' &&
-      session.user.role !== 'superadmin'
+      session.user.role !== 'super_admin'
     ) {
       throw new APIError('BAD_REQUEST', {
         message: 'Admin API Bad Request',

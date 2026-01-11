@@ -45,7 +45,7 @@ export class SystemAdminController {
         email: dto.email,
         password: dto.password,
         name: dto.name,
-        role: hasAdmin(dto.role) ? 'admin' : 'user',
+        role: hasAdmin(dto.role) ? 'systemAdmin' : 'systemUser',
       },
       headers,
     });

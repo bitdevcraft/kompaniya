@@ -50,6 +50,13 @@
       "when": 1767993366571,
       "tag": "0006_motionless_oracle",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768118335860,
+      "tag": "0007_fixed_metal_master",
+      "breakpoints": true
     }
   ]
 }

@@ -283,4 +283,9 @@ export const Keys = {
       return `record-layout:layout:${organizationId}:${entityType}`;
     },
   },
+  Setup: {
+    existing() {
+      return `setup-existing`;
+    },
+  },
 };

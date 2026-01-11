@@ -13,11 +13,10 @@ export const organizationsTable = pgTable("organizations", {
   logo: text("logo"),
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
-  organizationSize: text("organization_size", {
-    enum: ["1-10", "11-50", "51-200", "201-500", "500+"],
-  }),
+  organizationSize: text("organization_size"),
   industry: text("industry"),
   active: boolean("active").default(true),
+  isSuper: boolean("is_super").unique(),
 });
 
 export const organizationRelations = relations(

@@ -12,6 +12,8 @@ import {
 } from 'better-auth/plugins';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ac, superAdmin, systemAdmin, systemUser } from './permissions';
+
 export const auth = betterAuth({
   appName: 'Kompaniya',
   database: drizzleAdapter(db, {
@@ -69,7 +71,12 @@ export const auth = betterAuth({
     // Authorization
     apiKey(),
     admin({
-      adminRoles: ['admin', 'superadmin'],
+      ac,
+      roles: {
+        superAdmin,
+        systemUser,
+        systemAdmin,
+      },
     }),
     organization({
       teams: {
@@ -87,6 +94,11 @@ export const auth = betterAuth({
             },
             industry: {
               type: 'string',
+              input: true,
+              required: false,
+            },
+            isSuper: {
+              type: 'boolean',
               input: true,
               required: false,
             },

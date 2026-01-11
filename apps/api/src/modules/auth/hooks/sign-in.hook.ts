@@ -12,6 +12,7 @@ import { nanoid } from 'nanoid';
 
 import { OrganizationRepositoryService } from '~/modules/core/database/repository/organization-repository/organization-repository.service';
 import { SessionRepositoryService } from '~/modules/core/database/repository/session-repository/session-repository.service';
+import { SetupService } from '~/modules/setup/setup.service';
 import { convertCase } from '~/utils/string-convert-case';
 
 import { auth } from '../auth';
@@ -22,6 +23,7 @@ export class SignInHook {
   constructor(
     private readonly sessionRepositoryService: SessionRepositoryService,
     private readonly organizationRepositoryService: OrganizationRepositoryService,
+    private readonly setupService: SetupService,
     private authService: AuthService<typeof auth>,
   ) {}
 
@@ -66,12 +68,15 @@ export class SignInHook {
     organization: OrganizationData,
     userId: string,
   ) {
+    const setupFinished = await this.setupService.isFinished();
+
     const newOrg = await this.authService.api.createOrganization({
       body: {
         name: organization.companyName,
         slug: `${convertCase(organization.companyName, 'sentence', 'kebab')}-(${nanoid()})`,
         organizationSize: organization.companySize,
         industry: organization.industry,
+        isSuper: setupFinished ? undefined : true,
       },
       headers: ctx.headers,
     });

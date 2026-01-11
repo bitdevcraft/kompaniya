@@ -9,6 +9,7 @@ import { CoreModule } from './modules/core/core.module';
 import { CsvImportModule } from './modules/csv-import/csv-import.module';
 import { EmailModule } from './modules/email/email.module';
 import { OrganizationModule } from './modules/organization/organization.module';
+import { SetupModule } from './modules/setup/setup.module';
 import { TaskScheduleModule } from './modules/task-schedule/task-schedule.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -30,6 +31,7 @@ import { UserModule } from './modules/user/user.module';
     CoreModule,
     TaskScheduleModule,
     CsvImportModule,
+    SetupModule,
   ],
   controllers: [],
   providers: [],
