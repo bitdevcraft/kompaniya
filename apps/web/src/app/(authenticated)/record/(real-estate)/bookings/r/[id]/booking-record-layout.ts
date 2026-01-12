@@ -1,9 +1,29 @@
-import { type RecordPageLayout } from "@/components/record-page/layout";
+import { FieldOption as RecordFieldOption } from "@repo/domain";
+
+import { RecordPageLayout } from "@/components/record-page/layout";
 
 import type { BookingRecordFormValues } from "./booking-record-schema";
 
+const BOOKING_TYPE_OPTIONS: RecordFieldOption[] = [
+  { label: "Sale", value: "sale" },
+  { label: "Rent", value: "rent" },
+];
+
+const STATUS_OPTIONS: RecordFieldOption[] = [
+  { label: "Pending", value: "pending" },
+  { label: "Confirmed", value: "confirmed" },
+  { label: "Cancelled", value: "cancelled" },
+  { label: "Completed", value: "completed" },
+];
+
 export const bookingRecordLayout: RecordPageLayout<BookingRecordFormValues> = {
   header: {
+    chips: [
+      {
+        fieldId: "referenceCode",
+        id: "reference-code-chip",
+      },
+    ],
     metadata: [
       {
         fieldId: "createdAt",
@@ -27,18 +47,103 @@ export const bookingRecordLayout: RecordPageLayout<BookingRecordFormValues> = {
     header: {
       sections: [
         {
-          description: "Key booking details for this record.",
+          description: "Basic booking information.",
           fields: [
             { id: "name", label: "Name", type: "text" },
-            { id: "projectId", label: "Project ID", type: "text" },
-            { id: "propertyId", label: "Property ID", type: "text" },
+            {
+              id: "referenceCode",
+              label: "Reference Code",
+              type: "text",
+            },
+            {
+              description: "The type of booking (sale or rent).",
+              id: "bookingType",
+              label: "Booking Type",
+              options: BOOKING_TYPE_OPTIONS,
+              type: "picklist",
+            },
+            {
+              description: "Current status of the booking.",
+              id: "status",
+              label: "Status",
+              options: STATUS_OPTIONS,
+              type: "picklist",
+            },
           ],
           id: "booking-details",
-          title: "Booking details",
+          title: "Booking Details",
+        },
+        {
+          description: "Associated project and property.",
+          fields: [
+            {
+              id: "projectId",
+              label: "Project",
+              reference: {
+                displayField: "name",
+                relatedType: "org_real_estate_projects",
+              },
+              type: "reference",
+            },
+            {
+              id: "propertyId",
+              label: "Property",
+              reference: {
+                displayField: "name",
+                relatedType: "org_real_estate_properties",
+              },
+              type: "reference",
+            },
+          ],
+          id: "booking-associations",
+          title: "Associations",
+        },
+        {
+          columns: 2,
+          description: "Financial details for the booking.",
+          fields: [
+            { id: "amount", label: "Amount", type: "number" },
+            { id: "depositAmount", label: "Deposit Amount", type: "number" },
+            { id: "currencyCode", label: "Currency Code", type: "text" },
+          ],
+          id: "booking-financials",
+          title: "Financial Details",
+        },
+        {
+          description: "Important dates for the booking.",
+          fields: [
+            {
+              id: "expectedCompletionAt",
+              label: "Expected Completion Date",
+              type: "datetime",
+            },
+            {
+              id: "contractSignedAt",
+              label: "Contract Signed Date",
+              type: "datetime",
+            },
+          ],
+          id: "booking-dates",
+          title: "Important Dates",
         },
       ],
     },
     firstColumn: { sections: [] },
-    secondColumn: { sections: [] },
+    secondColumn: {
+      sections: [
+        {
+          description: "Additional notes and information.",
+          fields: [
+            {
+              id: "notes",
+              label: "Notes",
+              type: "textarea",
+            },
+          ],
+          id: "booking-notes",
+          title: "Notes",
+        },
+      ],
+    },
   },
 };

@@ -6,15 +6,26 @@ import { type RecordPageLayout } from "@/components/record-page/layout";
 import {
   getAllLayoutFields,
   getEditableLayoutFields,
+  getValueAtPath,
   normalizeValueForForm,
   normalizeValueForSubmission,
+  setValueAtPath,
 } from "@/components/record-page/layout-helpers";
 
 export const bookingRecordSchema = z.object({
+  amount: z.string().optional(),
+  bookingType: z.string().optional(),
+  contractSignedAt: z.string().optional(),
   createdAt: z.string().optional(),
+  currencyCode: z.string().optional(),
+  depositAmount: z.string().optional(),
+  expectedCompletionAt: z.string().optional(),
   name: z.string().optional(),
-  projectId: z.string().optional(),
+  notes: z.string().optional(),
   propertyId: z.string().optional(),
+  projectId: z.string().optional(),
+  referenceCode: z.string().optional(),
+  status: z.string().optional(),
   updatedAt: z.string().optional(),
 });
 
@@ -25,13 +36,15 @@ export function createBookingFormDefaults(
   record: OrgRealEstateBooking,
   layout: RecordPageLayout<BookingRecordFormValues>,
 ): BookingRecordFormValues {
-  const defaults: Partial<BookingRecordFormValues> = {};
+  const defaults: Record<string, unknown> = {};
 
   for (const field of getAllLayoutFields(layout)) {
-    const value = (record as Record<string, unknown>)[field.id as string];
+    const value = getValueAtPath(
+      record as Record<string, unknown>,
+      field.id as string,
+    );
     const normalized = normalizeValueForForm(field, value);
-
-    defaults[field.id] = normalized as BookingRecordFormValues[typeof field.id];
+    setValueAtPath(defaults, field.id as string, normalized);
   }
 
   return defaults as BookingRecordFormValues;
@@ -46,13 +59,10 @@ export function createBookingUpdatePayload(
   const editable = getEditableLayoutFields(layout);
 
   for (const field of editable) {
-    const value = values[field.id];
-    // @ts-expect-error type
-    updates[field.id as keyof OrgRealEstateBooking] =
-      normalizeValueForSubmission(
-        field,
-        value,
-      ) as OrgRealEstateBooking[keyof OrgRealEstateBooking];
+    const fieldId = field.id as string;
+    const value = getValueAtPath(values as Record<string, unknown>, fieldId);
+    const normalized = normalizeValueForSubmission(field, value);
+    (updates as Record<string, unknown>)[fieldId] = normalized;
   }
 
   return {

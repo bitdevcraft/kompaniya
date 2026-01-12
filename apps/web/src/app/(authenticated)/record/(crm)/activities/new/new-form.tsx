@@ -1,41 +1,36 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@kompaniya/ui-common/components/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@kompaniya/ui-common/components/form";
-import { Input } from "@kompaniya/ui-common/components/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { SubmitHandler, useForm } from "react-hook-form";
-import z from "zod";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
+import {
+  createDefaultValuesForLayout,
+  extractCreateValues,
+} from "@/components/record-page/layout-helpers";
+import { RecordCreateForm } from "@/components/record-page/record-create-form";
+import { useLayout } from "@/components/record-page/use-layout";
 import { authClient } from "@/lib/auth/client";
 
 import { dictTranslation, model, modelEndpoint } from "../config";
+import {
+  ActivityRecordFormValues,
+  activityRecordSchema,
+  ActivityRecordSubmitValues,
+} from "../r/[id]/activity-record-schema";
 
 interface NewRecordFormProps {
   onFinish?: () => void;
 }
 
-const FormSchema = z.object({
-  email: z.email().min(1),
-});
-
-type FormValue = z.infer<typeof FormSchema>;
-
 const useSubmit = () => {
   return useMutation({
-    mutationFn: async (payload: FormValue) => {
+    mutationFn: async (payload: ActivityRecordSubmitValues) => {
       const res = await axios.post(`${modelEndpoint}`, payload, {
         withCredentials: true,
       });
@@ -49,26 +44,42 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   const t = useTranslations(dictTranslation);
   const queryClient = useQueryClient();
   const { data: activeOrganization } = authClient.useActiveOrganization();
+  const layout = useLayout(
+    "org_activities",
+  ) as RecordPageLayout<ActivityRecordFormValues>;
 
-  const form = useForm<FormValue>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      email: "",
-    },
+  const formDefaults = useMemo(
+    () => createDefaultValuesForLayout(layout),
+    [layout],
+  );
+
+  const form = useForm<ActivityRecordFormValues>({
+    resolver: zodResolver(activityRecordSchema),
+    defaultValues: formDefaults,
   });
+  const isDirty = form.formState.isDirty;
+
+  useEffect(() => {
+    if (!isDirty) {
+      form.reset(formDefaults);
+    }
+  }, [form, formDefaults, isDirty]);
 
   const submit = useSubmit();
 
-  const onSubmit: SubmitHandler<FormValue> = (data) => {
-    submit.mutate(data, {
+  const onSubmit = (values: ActivityRecordFormValues) => {
+    const payload = extractCreateValues(values, layout);
+
+    submit.mutate(payload as ActivityRecordSubmitValues, {
       onSuccess: () => {
         if (onFinish) onFinish();
       },
       onError: (error) => {
         if (axios.isAxiosError(error)) {
-          form.setError("email", {
+          const message = error.response?.data?.message || error.message;
+          form.setError("name", {
             type: "custom",
-            message: error.response?.data?.message || error.message,
+            message,
           });
         }
       },
@@ -81,44 +92,13 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("form.email.label")}</FormLabel>
-              <FormControl>
-                <Input placeholder={t("form.email.label")} {...field} />
-              </FormControl>
-              <FormDescription>{t("form.email.description")}</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex w-full justify-end gap-2">
-          <Button
-            className="w-full md:w-auto"
-            disabled={submit.isPending}
-            onClick={onFinish}
-            variant={"outline"}
-          >
-            Cancel
-          </Button>
-          <Button
-            className="w-full md:w-auto"
-            disabled={submit.isPending}
-            type="submit"
-          >
-            {submit.isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <>{t("form.new.submit")}</>
-            )}
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <RecordCreateForm
+      form={form}
+      isSubmitting={submit.isPending}
+      layout={layout}
+      onCancel={onFinish}
+      onSubmit={onSubmit}
+      submitLabel={t("form.new.submit")}
+    />
   );
 }
