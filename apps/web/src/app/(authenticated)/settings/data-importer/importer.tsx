@@ -40,7 +40,7 @@ const OMIT_VALUE = "__csv_import_omit__";
 type CsvImportColumn = {
   key: string;
   label: string;
-  type: "string" | "number" | "date" | "string[]";
+  type: "string" | "number" | "date" | "string[]" | "boolean" | "json";
   description?: string;
 };
 

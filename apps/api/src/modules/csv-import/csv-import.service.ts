@@ -23,11 +23,13 @@ import type {
   SupportedTable,
 } from './csv-import.types';
 
+import { CustomFieldDefinitionsService } from '../core/custom-fields/custom-field-definitions.service';
 import { FileUploadService } from '../core/file-upload/file-upload.service';
 import {
   type CsvImportJobData,
   CsvImportQueueService,
 } from './csv-import.queue';
+import { TABLE_ID_TO_ENTITY_TYPE } from './entity-type-mapping';
 import { CSV_IMPORT_TABLES } from './tables';
 
 type CsvPreview = {
@@ -49,6 +51,7 @@ export class CsvImportService {
     @Inject(DRIZZLE_DB) private readonly db: Db,
     private readonly fileUploadService: FileUploadService,
     private readonly queue: CsvImportQueueService,
+    private readonly customFieldDefinitionsService: CustomFieldDefinitionsService,
   ) {}
 
   async enqueueImport(
@@ -125,15 +128,24 @@ export class CsvImportService {
     };
   }
 
-  getTableOptions() {
-    return Object.values(CSV_IMPORT_TABLES).map(
-      ({ id, label, description, columns }) => ({
-        id,
-        label,
-        description,
-        columns,
+  async getTableOptions(organizationId: string) {
+    const tables = await Promise.all(
+      Object.values(CSV_IMPORT_TABLES).map(async (tableConfig) => {
+        const entityType = TABLE_ID_TO_ENTITY_TYPE[tableConfig.id];
+        const customFieldColumns = entityType
+          ? await this.buildCustomFieldColumns(organizationId, entityType)
+          : [];
+
+        return {
+          id: tableConfig.id,
+          label: tableConfig.label,
+          description: tableConfig.description,
+          columns: [...tableConfig.columns, ...customFieldColumns],
+        };
       }),
     );
+
+    return tables;
   }
 
   async processImportJob(job: CsvImportJobData): Promise<void> {
@@ -163,6 +175,24 @@ export class CsvImportService {
     });
   }
 
+  private async buildCustomFieldColumns(
+    organizationId: string,
+    entityType: string,
+  ): Promise<CsvImportColumn[]> {
+    const definitions =
+      await this.customFieldDefinitionsService.getByEntityType(
+        organizationId,
+        entityType,
+      );
+
+    return definitions.map((def) => ({
+      key: `customFields.${def.key}`,
+      label: def.label,
+      type: this.mapCustomFieldTypeToCsvType(def.fieldType),
+      description: def.description ?? `Custom field: ${def.label}`,
+    }));
+  }
+
   private buildUniqueHeaders(headerRow: string[]) {
     const fallbackPrefix = 'Column';
     const counts = new Map<string, number>();
@@ -187,6 +217,24 @@ export class CsvImportService {
     }
 
     switch (type) {
+      case 'boolean': {
+        const normalized = value.trim().toLowerCase();
+        if (['1', 'true', 'y', 'yes'].includes(normalized)) {
+          return true;
+        }
+        if (['0', 'false', 'n', 'no'].includes(normalized)) {
+          return false;
+        }
+        return null;
+      }
+      case 'json': {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return JSON.parse(value);
+        } catch (_error) {
+          return null;
+        }
+      }
       case 'number': {
         const parsed = Number(value);
         if (Number.isFinite(parsed)) {
@@ -208,24 +256,6 @@ export class CsvImportService {
           .filter((item) => item.length > 0);
         return parts.length > 0 ? parts : undefined;
       }
-      case 'boolean': {
-        const normalized = value.trim().toLowerCase();
-        if (['1', 'true', 'y', 'yes'].includes(normalized)) {
-          return true;
-        }
-        if (['0', 'false', 'n', 'no'].includes(normalized)) {
-          return false;
-        }
-        return null;
-      }
-      case 'json': {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return JSON.parse(value);
-        } catch (_error) {
-          return null;
-        }
-      }
       default:
         return value;
     }
@@ -241,6 +271,29 @@ export class CsvImportService {
 
     await this.db.insert(table).values(rows as never);
   }
+
+  private mapCustomFieldTypeToCsvType(fieldType: string): CsvImportColumnType {
+    switch (fieldType) {
+      case 'string':
+      case 'single_select':
+      case 'reference':
+      case 'datetime':
+        return 'string';
+      case 'number':
+        return 'number';
+      case 'boolean':
+        return 'boolean';
+      case 'date':
+        return 'date';
+      case 'multi_select':
+        return 'string[]';
+      case 'json':
+        return 'json';
+      default:
+        return 'string';
+    }
+  }
+
   private mapRow(
     row: string[],
     headerIndex: Map<string, number>,
@@ -249,6 +302,7 @@ export class CsvImportService {
     organizationId: string,
   ): MappedRow | null {
     const values: Record<string, unknown> = { organizationId };
+    const customFields: Record<string, unknown> = {};
     let hasValues = false;
 
     let id: string | undefined;
@@ -276,13 +330,24 @@ export class CsvImportService {
       }
 
       if (converted !== undefined) {
-        values[column.key] = converted;
+        // Check if this is a custom field (starts with "customFields.")
+        if (column.key.startsWith('customFields.')) {
+          const customKey = column.key.slice('customFields.'.length);
+          customFields[customKey] = converted;
+        } else {
+          values[column.key] = converted;
+        }
         hasValues = true;
       }
     }
 
     if (!hasValues) {
       return null;
+    }
+
+    // Merge custom fields into the values
+    if (Object.keys(customFields).length > 0) {
+      values.customFields = customFields;
     }
 
     return { id, values };
@@ -461,7 +526,10 @@ export class CsvImportService {
 
     await this.db.transaction(async (tx) => {
       for (const { id, values } of rows) {
-        const { organizationId, ...setValues } = values;
+        const { organizationId, customFields, ...setValues } = values as {
+          organizationId?: string;
+          customFields?: Record<string, unknown>;
+        };
 
         if (
           typeof organizationId !== 'string' ||
@@ -470,9 +538,40 @@ export class CsvImportService {
           continue;
         }
 
+        // Fetch existing record to merge custom fields
+        let finalValues = setValues;
+        if (customFields && Object.keys(customFields).length > 0) {
+          const existing = await tx
+            .select()
+            .from(table)
+            .where(
+              and(eq(table.id, id), eq(table.organizationId, organizationId)),
+            )
+            .limit(1);
+
+          if (existing.length > 0) {
+            const existingCustomFields =
+              (
+                existing[0] as {
+                  customFields?: Record<string, unknown>;
+                }
+              ).customFields ?? {};
+            // Merge: new custom fields override existing ones
+            finalValues = {
+              ...setValues,
+              customFields: { ...existingCustomFields, ...customFields },
+            } as Record<string, unknown>;
+          } else {
+            finalValues = { ...setValues, customFields } as Record<
+              string,
+              unknown
+            >;
+          }
+        }
+
         await tx
           .update(table)
-          .set(setValues as never)
+          .set(finalValues as never)
           .where(
             and(eq(table.id, id), eq(table.organizationId, organizationId)),
           );

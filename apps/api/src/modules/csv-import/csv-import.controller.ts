@@ -35,12 +35,34 @@ export class CsvImportController {
   ) {}
 
   @Get('options')
-  getOptions() {
-    return { tables: this.csvImportService.getTableOptions() };
+  async getOptions(@Session() session: UserSession) {
+    const organization =
+      await this.organizationRepository.getActiveOrganization(session.user.id);
+
+    if (!organization) {
+      throw new BadRequestException(
+        'Active organization could not be resolved.',
+      );
+    }
+
+    const tables = await this.csvImportService.getTableOptions(organization.id);
+    return { tables };
   }
 
   @Post('preview')
-  preview(@Body(new ZodValidationPipe(previewSchema)) body: PreviewDto) {
+  async preview(
+    @Body(new ZodValidationPipe(previewSchema)) body: PreviewDto,
+    @Session() session: UserSession,
+  ) {
+    const organization =
+      await this.organizationRepository.getActiveOrganization(session.user.id);
+
+    if (!organization) {
+      throw new BadRequestException(
+        'Active organization could not be resolved.',
+      );
+    }
+
     return this.csvImportService.getPreview(body.fileId);
   }
 
