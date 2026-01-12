@@ -74,11 +74,11 @@ const makeStatement = <R extends readonly string[]>(
     resources.map((r) => [r, [...actions]]),
   ) as unknown as Record<R[number], string[]>;
 
-const customStatements = makeStatement(ORG_RESOURCES, CRUD);
+export const customOrgStatements = makeStatement(ORG_RESOURCES, CRUD);
 
 export const orgStatement = {
   ...orgDefaultStatements,
-  ...customStatements,
+  ...customOrgStatements,
 } as const;
 
 export const orgAccessControl = createAccessControl(
@@ -86,12 +86,12 @@ export const orgAccessControl = createAccessControl(
 ) as AccessControl;
 
 export const orgAdmin = orgAccessControl.newRole({
-  ...customStatements,
+  ...customOrgStatements,
   ...orgAdminAc.statements,
 });
 
 export const orgOwner = orgAccessControl.newRole({
-  ...customStatements,
+  ...customOrgStatements,
   ...orgOwnerAc.statements,
 });
 

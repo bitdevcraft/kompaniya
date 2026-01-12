@@ -19,6 +19,11 @@ export function NavigationTabs() {
       active: pathname === "/settings/organization/teams",
     },
     {
+      to: "/settings/organization/roles",
+      text: "Roles",
+      active: pathname === "/settings/organization/roles",
+    },
+    {
       to: "/settings/organization/permissions",
       text: "Permissions",
       active: pathname === "/settings/organization/permissions",
