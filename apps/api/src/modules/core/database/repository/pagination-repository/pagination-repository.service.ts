@@ -1,6 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type Db } from '@repo/database';
-import { and, asc, count, desc, eq, ilike, isNull, Table } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  InferSelectModel,
+  isNull,
+  Table,
+} from 'drizzle-orm';
 import { AnyPgColumn } from 'drizzle-orm/pg-core';
 import { AnyPgTable } from 'drizzle-orm/pg-core';
 
@@ -24,7 +34,7 @@ export class PaginationRepositoryService {
 
   async getPaginatedDataTable<
     T extends AnyPgTable & {
-      deletedAt: AnyPgColumn;
+      deletedAt?: AnyPgColumn;
       createdAt: AnyPgColumn;
       name: AnyPgColumn;
       organizationId?: AnyPgColumn;
@@ -39,8 +49,11 @@ export class PaginationRepositoryService {
     cacheKey: string;
     query: PaginationQueryParserType;
     organizationId?: string;
-  }) {
-    return await this.cacheService.wrapCache({
+  }): Promise<{ data: InferSelectModel<T>[]; pageCount: number }> {
+    const result = await this.cacheService.wrapCache<{
+      data: InferSelectModel<T>[];
+      pageCount: number;
+    }>({
       key: cacheKey,
       fn: async () => {
         const offset = (query.page - 1) * query.perPage;
@@ -71,13 +84,13 @@ export class PaginationRepositoryService {
               })
             : [asc(table.createdAt)];
 
-        const data = await this.db
+        const data = (await this.db
           .select()
           .from(table as unknown as Table)
           .where(
             and(
               where,
-              isNull(table.deletedAt),
+              table.deletedAt ? isNull(table.deletedAt) : undefined,
               organizationId && table.organizationId
                 ? eq(table.organizationId, organizationId)
                 : undefined,
@@ -86,7 +99,7 @@ export class PaginationRepositoryService {
           )
           .limit(query.perPage)
           .offset(offset)
-          .orderBy(...orderBy);
+          .orderBy(...orderBy)) as InferSelectModel<T>[];
 
         const total = await this.db
           .select({
@@ -96,7 +109,7 @@ export class PaginationRepositoryService {
           .where(
             and(
               where,
-              isNull(table.deletedAt),
+              table.deletedAt ? isNull(table.deletedAt) : undefined,
               organizationId && table.organizationId
                 ? eq(table.organizationId, organizationId)
                 : undefined,
@@ -114,5 +127,7 @@ export class PaginationRepositoryService {
         };
       },
     });
+
+    return result ?? { data: [], pageCount: 0 };
   }
 }

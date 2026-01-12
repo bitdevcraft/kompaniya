@@ -64,6 +64,20 @@
       "when": 1768159021523,
       "tag": "0008_faithful_vin_gonzales",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1768208713466,
+      "tag": "0009_mean_chat",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1768210704027,
+      "tag": "0010_fuzzy_ravenous",
+      "breakpoints": true
     }
   ]
 }

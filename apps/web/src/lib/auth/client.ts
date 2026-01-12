@@ -49,6 +49,18 @@ export const authClient = createAuthClient({
             industry: {
               type: "string",
             },
+            numberOfUsers: {
+              type: "number",
+            },
+            numberOfEmailDomains: {
+              type: "number",
+            },
+            numberOfRoles: {
+              type: "number",
+            },
+            numberOfTeams: {
+              type: "number",
+            },
           },
         },
       }),

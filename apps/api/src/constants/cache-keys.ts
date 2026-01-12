@@ -17,6 +17,17 @@ export const Keys = {
       return `user:id:${userId}`;
     },
   },
+  SuperAdminOrganization: {
+    paginated(userId: string) {
+      return `super-admin:organization:paginated:${userId}`;
+    },
+    paginatedList(userId: string) {
+      return `super-admin:organization:paginated-list:${userId}`;
+    },
+    id(id: string) {
+      return `super-admin:organization:id:${id}`;
+    },
+  },
   Domain: {
     paginated(userId: string, organizationId: string) {
       return `domain:paginated:${userId}:${organizationId}`;

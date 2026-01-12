@@ -194,6 +194,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = authClient.useSession();
   const { data: organization } = authClient.useActiveOrganization();
   const organizationId = organization?.id;
+  const role = session?.user?.role;
+  const isSuperAdmin =
+    role === "superAdmin" || role === "super_admin" || role === "superadmin";
+  console.log(session?.user);
   const { data: permissions } = useQuery({
     queryKey: ["active-permissions", organizationId],
     enabled: Boolean(organizationId),
@@ -227,6 +231,37 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     (Array.isArray(permissions[resource]) &&
       permissions[resource].includes("access"));
 
+  const navSettingsItems = React.useMemo(() => {
+    if (!isSuperAdmin) {
+      return data.navSettings;
+    }
+
+    return data.navSettings.map((section) => {
+      if (section.title !== "Settings") {
+        return section;
+      }
+
+      const hasSuperAdminLink = section.items.some(
+        (item) => item.url === "/settings/super-admin/organizations",
+      );
+
+      if (hasSuperAdminLink) {
+        return section;
+      }
+
+      return {
+        ...section,
+        items: [
+          ...section.items,
+          {
+            title: "Super Admin",
+            url: "/settings/super-admin/organizations",
+          },
+        ],
+      };
+    });
+  }, [isSuperAdmin]);
+
   // Filter navMain items based on permissions
   const filteredNavMain = data.navMain
     .map((section) => ({
@@ -240,7 +275,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Filter navSettings items based on permissions
   // Routes not in SETTINGS_PERMISSION_MAP (Security, Import Data) are always shown
-  const filteredNavSettings = data.navSettings
+  const filteredNavSettings = navSettingsItems
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => {

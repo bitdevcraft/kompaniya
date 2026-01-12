@@ -10,6 +10,7 @@ import { CsvImportModule } from './modules/csv-import/csv-import.module';
 import { EmailModule } from './modules/email/email.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { SetupModule } from './modules/setup/setup.module';
+import { SuperAdminModule } from './modules/super-admin/super-admin.module';
 import { TaskScheduleModule } from './modules/task-schedule/task-schedule.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -27,6 +28,7 @@ import { UserModule } from './modules/user/user.module';
     AuthModule,
     UserModule,
     OrganizationModule,
+    SuperAdminModule,
     EmailModule,
     CoreModule,
     TaskScheduleModule,

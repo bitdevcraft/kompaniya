@@ -111,6 +111,26 @@ export const auth = betterAuth({
               input: true,
               required: false,
             },
+            numberOfUsers: {
+              type: 'number',
+              input: true,
+              required: false,
+            },
+            numberOfEmailDomains: {
+              type: 'number',
+              input: true,
+              required: false,
+            },
+            numberOfRoles: {
+              type: 'number',
+              input: true,
+              required: false,
+            },
+            numberOfTeams: {
+              type: 'number',
+              input: true,
+              required: false,
+            },
           },
         },
       },
