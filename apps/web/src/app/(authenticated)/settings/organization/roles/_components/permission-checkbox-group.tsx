@@ -7,6 +7,8 @@ import { type Crud } from "@repo/shared/auth";
 
 import type { PermissionState } from "../config";
 
+import { SettingsPermissionsToggles } from "./settings-permissions-toggles";
+
 type CheckedState = boolean | "indeterminate";
 
 interface PermissionCheckboxGroupProps {
@@ -66,59 +68,71 @@ export function PermissionCheckboxGroup({
   };
 
   return (
-    <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-      {ORG_RESOURCES.map((resource) => {
-        const displayName = formatResourceName(resource);
-        const checkedState = getResourceCheckedState(resource);
-        const resourcePermissions = value[resource] || [];
+    <div className="space-y-6">
+      <SettingsPermissionsToggles
+        disabled={disabled}
+        onChange={onChange}
+        value={value}
+      />
+      <div className="space-y-3">
+        <h3 className="font-semibold text-sm">Organization Resources</h3>
+        <div className="max-h-[500px] overflow-y-auto pr-2 space-y-3">
+          {ORG_RESOURCES.map((resource) => {
+            const displayName = formatResourceName(resource);
+            const checkedState = getResourceCheckedState(resource);
+            const resourcePermissions = value[resource] || [];
 
-        return (
-          <div
-            className="border rounded-lg p-3 hover:bg-muted/50 transition-colors"
-            key={resource}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Checkbox
-                checked={checkedState}
-                disabled={disabled}
-                id={resource}
-                onCheckedChange={() => handleResourceToggle(resource)}
-              />
-              <Label
-                className="font-semibold cursor-pointer flex-1"
-                htmlFor={resource}
+            return (
+              <div
+                className="border rounded-lg p-3 hover:bg-muted/50 transition-colors"
+                key={resource}
               >
-                {displayName}
-              </Label>
-              <span className="text-xs text-muted-foreground">
-                {resourcePermissions.length} / {CRUD.length}
-              </span>
-            </div>
-
-            <div className="ml-6 flex gap-4">
-              {CRUD.map((action) => (
-                <div
-                  className="flex items-center gap-2"
-                  key={`${resource}-${action}`}
-                >
+                <div className="flex items-center gap-2 mb-2">
                   <Checkbox
-                    checked={resourcePermissions.includes(action)}
+                    checked={checkedState}
                     disabled={disabled}
-                    id={`${resource}-${action}`}
-                    onCheckedChange={() => handleActionToggle(resource, action)}
+                    id={resource}
+                    onCheckedChange={() => handleResourceToggle(resource)}
                   />
                   <Label
-                    className="cursor-pointer capitalize text-sm"
-                    htmlFor={`${resource}-${action}`}
+                    className="font-semibold cursor-pointer flex-1"
+                    htmlFor={resource}
                   >
-                    {action}
+                    {displayName}
                   </Label>
+                  <span className="text-xs text-muted-foreground">
+                    {resourcePermissions.length} / {CRUD.length}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
+
+                <div className="ml-6 flex gap-4">
+                  {CRUD.map((action) => (
+                    <div
+                      className="flex items-center gap-2"
+                      key={`${resource}-${action}`}
+                    >
+                      <Checkbox
+                        checked={resourcePermissions.includes(action)}
+                        disabled={disabled}
+                        id={`${resource}-${action}`}
+                        onCheckedChange={() =>
+                          handleActionToggle(resource, action)
+                        }
+                      />
+                      <Label
+                        className="cursor-pointer capitalize text-sm"
+                        htmlFor={`${resource}-${action}`}
+                      >
+                        {action}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

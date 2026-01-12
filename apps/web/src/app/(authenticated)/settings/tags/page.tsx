@@ -1,3 +1,4 @@
+import { RecordPermissionGuard } from "@/components/record-permission-guard";
 import { SearchParams } from "@/types/search-params";
 import { searchParamsCache } from "@/types/validations";
 
@@ -9,5 +10,9 @@ interface IndexPageProps {
 export default async function Page(props: IndexPageProps) {
   const searchParams = await props.searchParams;
   const search = searchParamsCache.parse(searchParams);
-  return <OrgDataTable search={search} />;
+  return (
+    <RecordPermissionGuard>
+      <OrgDataTable search={search} />
+    </RecordPermissionGuard>
+  );
 }

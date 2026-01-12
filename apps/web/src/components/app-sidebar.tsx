@@ -26,7 +26,10 @@ import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { env } from "@/env/client";
 import { authClient } from "@/lib/auth/client";
-import { RESOURCE_PERMISSION_MAP } from "@/lib/record-permissions";
+import {
+  RESOURCE_PERMISSION_MAP,
+  SETTINGS_PERMISSION_MAP,
+} from "@/lib/record-permissions";
 
 import { NavCompanyHeader } from "./nav-company-header";
 import { NavSettings } from "./nav-settings";
@@ -218,6 +221,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     (Array.isArray(permissions[resource]) &&
       permissions[resource].includes("view"));
 
+  const hasAccessPermission = (resource?: string) =>
+    !resource ||
+    !permissions ||
+    (Array.isArray(permissions[resource]) &&
+      permissions[resource].includes("access"));
+
   // Filter navMain items based on permissions
   const filteredNavMain = data.navMain
     .map((section) => ({
@@ -229,6 +238,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }))
     .filter((section) => section.items.length > 0);
 
+  // Filter navSettings items based on permissions
+  // Routes not in SETTINGS_PERMISSION_MAP (Security, Import Data) are always shown
+  const filteredNavSettings = data.navSettings
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        // Check if this route has a permission requirement
+        const permissionEntry = Object.entries(SETTINGS_PERMISSION_MAP).find(
+          ([route]) => item.url.startsWith(route),
+        );
+        if (!permissionEntry) return true; // No permission required
+        const [, resource] = permissionEntry;
+        return hasAccessPermission(resource);
+      }),
+    }))
+    .filter((section) => section.items.length > 0);
+
   return (
     <Sidebar collapsible="icon" {...props} className="border-none">
       <SidebarHeader>
@@ -236,7 +262,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={filteredNavMain} />
-        <NavSettings items={data.navSettings} />
+        <NavSettings items={filteredNavSettings} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

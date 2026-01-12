@@ -1,5 +1,7 @@
 import type { Crud } from "@repo/shared/auth";
 
+export type PermissionAction = Crud | "access";
+
 export const PROTECTED_ROLES = [
   "admin",
   "owner",
@@ -11,7 +13,7 @@ export const MODEL = {
   plural: "roles",
 };
 
-export type PermissionState = Record<string, Crud[]>;
+export type PermissionState = Record<string, PermissionAction[]>;
 
 export type RoleRow = {
   id: string;

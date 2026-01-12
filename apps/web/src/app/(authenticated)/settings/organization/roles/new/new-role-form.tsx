@@ -25,6 +25,8 @@ import { PermissionCheckboxGroup } from "../_components/permission-checkbox-grou
 import { createRole } from "../actions";
 import { PROTECTED_ROLES } from "../config";
 
+const permissionActionEnum = z.enum([...CRUD, "access"]);
+
 const CreateRoleSchema = z.object({
   role: z
     .string()
@@ -37,7 +39,7 @@ const CreateRoleSchema = z.object({
     .refine((val) => !PROTECTED_ROLES.includes(val), {
       message: "This role name is reserved and cannot be used",
     }),
-  permissions: z.record(z.string(), z.array(z.enum(CRUD))),
+  permissions: z.record(z.string(), z.array(permissionActionEnum)),
 });
 
 type CreateRoleDto = z.infer<typeof CreateRoleSchema>;

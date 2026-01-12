@@ -6,7 +6,10 @@ import { useEffect } from "react";
 
 import { env } from "@/env/client";
 import { authClient } from "@/lib/auth/client";
-import { RESOURCE_PERMISSION_MAP } from "@/lib/record-permissions";
+import {
+  RESOURCE_PERMISSION_MAP,
+  SETTINGS_PERMISSION_MAP,
+} from "@/lib/record-permissions";
 
 export function RecordPermissionGuard({
   children,
@@ -42,44 +45,65 @@ export function RecordPermissionGuard({
     },
   });
 
-  const resource = Object.keys(RESOURCE_PERMISSION_MAP).find((path) =>
+  // Check for settings routes first (use "access" permission)
+  const settingsRoute = Object.keys(SETTINGS_PERMISSION_MAP).find((path) =>
     pathname.startsWith(path),
   );
-  const permissionResource = resource
-    ? RESOURCE_PERMISSION_MAP[resource]
+  const settingsResource = settingsRoute
+    ? SETTINGS_PERMISSION_MAP[settingsRoute]
+    : undefined;
+  const hasAccessPermission =
+    settingsResource &&
+    Array.isArray(permissions?.[settingsResource]) &&
+    permissions[settingsResource].includes("access");
+
+  // Check for record routes (use "view" permission)
+  const recordRoute = Object.keys(RESOURCE_PERMISSION_MAP).find((path) =>
+    pathname.startsWith(path),
+  );
+  const recordResource = recordRoute
+    ? RESOURCE_PERMISSION_MAP[recordRoute]
     : undefined;
   const hasViewPermission =
-    permissionResource &&
-    Array.isArray(permissions?.[permissionResource]) &&
-    permissions[permissionResource].includes("view");
+    recordResource &&
+    Array.isArray(permissions?.[recordResource]) &&
+    permissions[recordResource].includes("view");
+
+  // Determine which permission type to check
+  const permissionResource = settingsResource ?? recordResource;
+  const requiredPermission = settingsResource ? "access" : "view";
+  const hasPermission = settingsResource
+    ? hasAccessPermission
+    : hasViewPermission;
 
   useEffect(() => {
     if (!organizationId) return;
     if (isLoading) return;
-    if (!permissionResource) return;
+    if (!permissionResource) return; // No permission required (e.g., Security, Import Data)
 
     if (isError || !permissions) {
       router.replace("/unauthorized");
       return;
     }
 
-    if (!hasViewPermission) {
+    if (!hasPermission) {
       router.replace("/unauthorized");
     }
   }, [
     organizationId,
     isLoading,
     permissionResource,
+    requiredPermission,
     isError,
     permissions,
-    hasViewPermission,
+    hasPermission,
     router,
   ]);
 
   if (!organizationId) return null;
-  if (!permissionResource) return children;
+  if (!permissionResource) return children; // No permission required
   if (isLoading || isError || !permissions) return null;
-  if (!hasViewPermission) return null;
+  if (!hasPermission) return null;
 
   return children;
 }

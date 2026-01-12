@@ -26,8 +26,10 @@ import { PermissionCheckboxGroup } from "../_components/permission-checkbox-grou
 import { fetchRoles, updateRole } from "../actions";
 import { type PermissionState, PROTECTED_ROLES } from "../config";
 
+const permissionActionEnum = z.enum([...CRUD, "access"]);
+
 const UpdateRoleSchema = z.object({
-  permissions: z.record(z.string(), z.array(z.enum(CRUD))),
+  permissions: z.record(z.string(), z.array(permissionActionEnum)),
 });
 
 interface EditRoleFormProps {

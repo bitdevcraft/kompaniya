@@ -33,3 +33,22 @@ export const ORG_RECORD_RESOURCES: readonly PermissionResource[] = [
   "orgEmailTemplates",
   "orgEmailTestReceivers",
 ] as const;
+
+// Settings routes that require "access" permission
+export const SETTINGS_PERMISSION_MAP: Record<string, string> = {
+  "/settings/organization": "settingsOrganization",
+  "/settings/email-setup": "settingsEmailSetup",
+  "/settings/entity-manager": "settingsEntityManager",
+  "/settings/tags": "settingsTags",
+} as const;
+
+export type SettingsPermissionResource =
+  (typeof SETTINGS_PERMISSION_MAP)[keyof typeof SETTINGS_PERMISSION_MAP];
+
+// All settings resources that have access permissions
+export const SETTINGS_RESOURCES: readonly SettingsPermissionResource[] = [
+  "settingsOrganization",
+  "settingsEmailSetup",
+  "settingsEntityManager",
+  "settingsTags",
+] as const;

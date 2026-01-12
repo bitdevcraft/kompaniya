@@ -76,9 +76,26 @@ const makeStatement = <R extends readonly string[]>(
 
 export const customOrgStatements = makeStatement(ORG_RESOURCES, CRUD);
 
+export const SETTINGS_RESOURCES = [
+  "settingsOrganization",
+  "settingsEmailSetup",
+  "settingsEntityManager",
+  "settingsTags",
+] as const;
+
+export type SettingsResource = (typeof SETTINGS_RESOURCES)[number];
+
+export const customOrgSettingsStatements = {
+  settingsOrganization: ["access"],
+  settingsEmailSetup: ["access"],
+  settingsEntityManager: ["access"],
+  settingsTags: ["access"],
+};
+
 export const orgStatement = {
   ...orgDefaultStatements,
   ...customOrgStatements,
+  ...customOrgSettingsStatements,
 } as const;
 
 export const orgAccessControl = createAccessControl(
@@ -87,11 +104,13 @@ export const orgAccessControl = createAccessControl(
 
 export const orgAdmin = orgAccessControl.newRole({
   ...customOrgStatements,
+  ...customOrgSettingsStatements,
   ...orgAdminAc.statements,
 });
 
 export const orgOwner = orgAccessControl.newRole({
   ...customOrgStatements,
+  ...customOrgSettingsStatements,
   ...orgOwnerAc.statements,
 });
 
