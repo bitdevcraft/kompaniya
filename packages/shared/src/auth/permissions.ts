@@ -37,7 +37,7 @@ export const systemAdmin = adminAccessControl.newRole({
 
 // Organization Roles
 
-export const CRUD = ["create", "update", "delete"] as const;
+export const CRUD = ["view", "create", "update", "delete"] as const;
 export type Crud = (typeof CRUD)[number];
 
 export const ORG_RESOURCES = [

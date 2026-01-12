@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@kompaniya/ui-common/components/form";
 import { Input } from "@kompaniya/ui-common/components/input";
+import { CRUD } from "@repo/shared/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -26,10 +27,7 @@ import { fetchRoles, updateRole } from "../actions";
 import { type PermissionState, PROTECTED_ROLES } from "../config";
 
 const UpdateRoleSchema = z.object({
-  permissions: z.record(
-    z.string(),
-    z.array(z.enum(["create", "update", "delete"])),
-  ),
+  permissions: z.record(z.string(), z.array(z.enum(CRUD))),
 });
 
 interface EditRoleFormProps {

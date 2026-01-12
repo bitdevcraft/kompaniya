@@ -15,3 +15,6 @@ export const organizationRolesTable = pgTable("organization_roles", {
     () => /* @__PURE__ */ new Date(),
   ),
 });
+
+export type NewOrganizationRole = typeof organizationRolesTable.$inferInsert;
+export type OrganizationRole = typeof organizationRolesTable.$inferSelect;

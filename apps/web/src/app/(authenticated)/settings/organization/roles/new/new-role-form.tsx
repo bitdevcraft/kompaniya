@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@kompaniya/ui-common/components/form";
 import { Input } from "@kompaniya/ui-common/components/input";
+import { CRUD } from "@repo/shared/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -36,10 +37,7 @@ const CreateRoleSchema = z.object({
     .refine((val) => !PROTECTED_ROLES.includes(val), {
       message: "This role name is reserved and cannot be used",
     }),
-  permissions: z.record(
-    z.string(),
-    z.array(z.enum(["create", "update", "delete"])),
-  ),
+  permissions: z.record(z.string(), z.array(z.enum(CRUD))),
 });
 
 type CreateRoleDto = z.infer<typeof CreateRoleSchema>;

@@ -21,7 +21,7 @@ import { CreateUserDto, RoleOrRoles } from './dto/create-user.dto';
 import { SystemAdminService } from './system-admin.service';
 
 @UseGuards(ActiveOrganizationGuard)
-@Roles(['admin'])
+@Roles(['superAdmin', 'systemAdmin'])
 @Controller('api/organization/system-admin')
 export class SystemAdminController {
   constructor(

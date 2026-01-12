@@ -49,7 +49,7 @@ export async function fetchRoles(
   _page: number,
   _pageSize: number,
 ): Promise<RoleRow[] | null> {
-  const { data } = await authClient.$fetch("/organization/list-roles", {
+  const { data } = await authClient.organization.listRoles({
     query: {
       organizationId,
     },

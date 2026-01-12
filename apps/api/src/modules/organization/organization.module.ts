@@ -18,6 +18,7 @@ import { RealEstatePropertyModule } from './api/real-estate-property/real-estate
 import { SystemAdminModule } from './api/system-admin/system-admin.module';
 import { TablePreferencesModule } from './api/table-preferences/table-preferences.module';
 import { TagModule } from './api/tag/tag.module';
+import { UserModule } from './api/user/user.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TagModule } from './api/tag/tag.module';
     PaymentPlanTemplateModule,
     TablePreferencesModule,
     TagModule,
+    UserModule,
   ],
 })
 export class OrganizationModule {}

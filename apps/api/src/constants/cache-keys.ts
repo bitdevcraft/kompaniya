@@ -288,4 +288,9 @@ export const Keys = {
       return `setup-existing`;
     },
   },
+  OrganizationRole: {
+    byOrg(id: string) {
+      return `organization-role:id:${id}`;
+    },
+  },
 };

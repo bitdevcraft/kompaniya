@@ -7,6 +7,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@kompaniya/ui-common/components/sidebar";
+import { useQuery } from "@tanstack/react-query";
 import {
   AudioWaveform,
   Command,
@@ -23,6 +24,9 @@ import * as React from "react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
+import { env } from "@/env/client";
+import { authClient } from "@/lib/auth/client";
+import { RESOURCE_PERMISSION_MAP } from "@/lib/record-permissions";
 
 import { NavCompanyHeader } from "./nav-company-header";
 import { NavSettings } from "./nav-settings";
@@ -184,17 +188,68 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = authClient.useSession();
+  const { data: organization } = authClient.useActiveOrganization();
+  const organizationId = organization?.id;
+  const { data: permissions } = useQuery({
+    queryKey: ["active-permissions", organizationId],
+    enabled: Boolean(organizationId),
+    queryFn: async () => {
+      const response = await fetch(
+        `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/user/active-permissions`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to load permissions");
+      }
+
+      const data = (await response.json()) as { permissions?: unknown };
+      return (data.permissions as Record<string, string[]>) ?? {};
+    },
+  });
+
+  const hasViewPermission = (resource?: string) =>
+    !resource ||
+    !permissions ||
+    (Array.isArray(permissions[resource]) &&
+      permissions[resource].includes("view"));
+
+  // Filter navMain items based on permissions
+  const filteredNavMain = data.navMain
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        const resource = RESOURCE_PERMISSION_MAP[item.url];
+        return hasViewPermission(resource);
+      }),
+    }))
+    .filter((section) => section.items.length > 0);
+
   return (
     <Sidebar collapsible="icon" {...props} className="border-none">
       <SidebarHeader>
         <NavCompanyHeader />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={filteredNavMain} />
         <NavSettings items={data.navSettings} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={
+            session?.user
+              ? {
+                  name: session.user.name,
+                  email: session.user.email,
+                  avatar: session.user.image ?? "",
+                }
+              : data.user
+          }
+        />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
