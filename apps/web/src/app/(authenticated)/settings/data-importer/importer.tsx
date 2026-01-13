@@ -7,6 +7,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@kompaniya/ui-common/components/alert";
+import { Badge } from "@kompaniya/ui-common/components/badge";
 import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
@@ -30,6 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@kompaniya/ui-common/components/table";
+import { ArrowDownToLine } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { FileUpload } from "@/components/file-upload";
@@ -61,6 +63,14 @@ type CsvPreviewResponse = {
   headers: string[];
   rows: string[][];
 };
+
+// Mapping row component - renders a row in the preview table with dropdowns for field mapping
+interface MappingRowProps {
+  csvHeaders: string[];
+  tableColumns: CsvImportColumn[];
+  columnMapping: Record<string, string | null>;
+  onMappingChange: (csvHeader: string, tableFieldKey: string) => void;
+}
 
 type SubmitState =
   | { state: "idle" }
@@ -214,12 +224,27 @@ export default function CsvImporter() {
     [],
   );
 
-  const handleMappingChange = useCallback((column: string, value: string) => {
-    setColumnMapping((previous) => ({
-      ...previous,
-      [column]: value === OMIT_VALUE ? null : value,
-    }));
-  }, []);
+  const handleMappingChange = useCallback(
+    (csvHeader: string, tableFieldKey: string) => {
+      setColumnMapping((previous) => {
+        const newMapping = { ...previous };
+        // Clear any existing mapping for this table field (one-to-one mapping)
+        for (const [key, value] of Object.entries(newMapping)) {
+          if (key === tableFieldKey && tableFieldKey !== OMIT_VALUE) {
+            continue; // We'll set this one below
+          }
+          if (value === csvHeader) {
+            newMapping[key] = null;
+          }
+        }
+        // Set the new mapping
+        newMapping[tableFieldKey] =
+          tableFieldKey === OMIT_VALUE ? null : csvHeader;
+        return newMapping;
+      });
+    },
+    [],
+  );
 
   const handleSubmit = useCallback(async () => {
     if (!preview || !selectedTable) {
@@ -302,8 +327,8 @@ export default function CsvImporter() {
         <CardHeader>
           <CardTitle>Mapping</CardTitle>
           <CardDescription>
-            Choose the destination table and map CSV headers to the available
-            columns.
+            Choose the destination table and map CSV columns to the available
+            fields in the preview table below.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -346,49 +371,6 @@ export default function CsvImporter() {
                 )}
               </div>
 
-              {selectedTable && preview ? (
-                <div className="grid gap-4">
-                  {selectedTable.columns.map((column) => (
-                    <div className="grid gap-2" key={column.key}>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-sm">
-                          {column.label}
-                        </span>
-                        {column.description && (
-                          <span className="text-sm text-muted-foreground">
-                            {column.description}
-                          </span>
-                        )}
-                      </div>
-                      <Select
-                        onValueChange={(value) =>
-                          handleMappingChange(column.key, value)
-                        }
-                        value={columnMapping[column.key] ?? OMIT_VALUE}
-                      >
-                        <SelectTrigger className="w-full justify-between">
-                          <SelectValue placeholder="Omit column" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={OMIT_VALUE}>
-                            Omit column
-                          </SelectItem>
-                          {preview.headers.map((header) => (
-                            <SelectItem key={header} value={header}>
-                              {header}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Upload a CSV file to configure column mapping.
-                </p>
-              )}
-
               <div className="flex items-center gap-3">
                 <Button
                   disabled={
@@ -425,6 +407,15 @@ export default function CsvImporter() {
             <CardDescription>
               Showing up to the first three rows from{" "}
               {preview.fileName ?? "the uploaded file"}.
+              {selectedTable && (
+                <span className="block mt-1 text-muted-foreground">
+                  Use the mapping row below to connect CSV columns to{" "}
+                  <span className="font-medium text-foreground">
+                    {selectedTable.label}
+                  </span>{" "}
+                  fields.
+                </span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="max-w-6xl">
@@ -437,6 +428,14 @@ export default function CsvImporter() {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {selectedTable && (
+                  <MappingRow
+                    columnMapping={columnMapping}
+                    csvHeaders={preview.headers}
+                    onMappingChange={handleMappingChange}
+                    tableColumns={selectedTable.columns}
+                  />
+                )}
                 {preview.rows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={preview.headers.length}>
@@ -482,6 +481,99 @@ function buildInitialMapping(columns: CsvImportColumn[], headers: string[]) {
   }
 
   return mapping;
+}
+
+function MappingRow({
+  csvHeaders,
+  tableColumns,
+  columnMapping,
+  onMappingChange,
+}: MappingRowProps) {
+  // Reverse mapping: for each CSV header, find which table column it's mapped to
+  const headerToColumnMap = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const [columnKey, csvHeader] of Object.entries(columnMapping)) {
+      if (csvHeader) {
+        map.set(csvHeader, columnKey);
+      }
+    }
+    return map;
+  }, [columnMapping]);
+
+  return (
+    <>
+      {/* Label row */}
+      <TableRow className="bg-muted/30 border-b-2 border-muted-foreground/20">
+        <TableCell
+          className="font-medium text-muted-foreground text-xs uppercase tracking-wide"
+          colSpan={csvHeaders.length}
+        >
+          <div className="flex items-center gap-2">
+            <ArrowDownToLine className="h-4 w-4" />
+            <span>Map CSV columns to destination fields</span>
+          </div>
+        </TableCell>
+      </TableRow>
+      {/* Dropdown row */}
+      <TableRow className="bg-muted/15">
+        {csvHeaders.map((header) => {
+          const mappedColumnKey = headerToColumnMap.get(header) ?? null;
+          const mappedColumn = tableColumns.find(
+            (c) => c.key === mappedColumnKey,
+          );
+
+          return (
+            <TableCell className="p-2 min-w-[150px]" key={header}>
+              <Select
+                onValueChange={(value) => onMappingChange(header, value)}
+                value={mappedColumnKey ?? OMIT_VALUE}
+              >
+                <SelectTrigger className="h-auto py-1 px-2 text-sm">
+                  <SelectValue placeholder="Skip column">
+                    {mappedColumn ? (
+                      <div className="flex items-center gap-1.5">
+                        <span>{mappedColumn.label}</span>
+                        {mappedColumn.type && (
+                          <Badge
+                            className="text-[10px] px-1 h-4"
+                            variant="secondary"
+                          >
+                            {mappedColumn.type}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Skip column</span>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={OMIT_VALUE}>
+                    <span className="text-muted-foreground">Skip column</span>
+                  </SelectItem>
+                  {tableColumns.map((column) => (
+                    <SelectItem key={column.key} value={column.key}>
+                      <div className="flex items-center gap-2">
+                        <span>{column.label}</span>
+                        {column.type && (
+                          <Badge
+                            className="text-[10px] px-1 h-4 ml-auto"
+                            variant="outline"
+                          >
+                            {column.type}
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </TableCell>
+          );
+        })}
+      </TableRow>
+    </>
+  );
 }
 
 function normalizeHeader(value: string) {

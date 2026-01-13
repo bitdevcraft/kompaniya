@@ -27,7 +27,8 @@
       "Bash(pnpm --filter @repo/domain lint:*)",
       "Bash(pnpm run)",
       "Bash(pnpm check-types:*)",
-      "Bash(pnpm exec turbo run:*)"
+      "Bash(pnpm exec turbo run:*)",
+      "Bash(npx prettier:*)"
     ]
   }
 }

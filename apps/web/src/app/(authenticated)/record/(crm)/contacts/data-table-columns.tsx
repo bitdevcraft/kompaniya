@@ -83,7 +83,7 @@ export function useDataTableColumns(
         cell: (info) => (
           <Button asChild size="sm" variant="link">
             <Link href={`/record/contacts/r/${info.row.original.id}`}>
-              {info.getValue()}
+              {info.getValue() ?? "-"}
             </Link>
           </Button>
         ),

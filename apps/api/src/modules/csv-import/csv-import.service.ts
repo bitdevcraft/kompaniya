@@ -65,7 +65,28 @@ export class CsvImportService {
       throw new BadRequestException('Unknown table selected for CSV import.');
     }
 
-    const sanitizedMapping = this.sanitizeMapping(mapping, tableConfig.columns);
+    const entityType = TABLE_ID_TO_ENTITY_TYPE[tableConfig.id];
+
+    // Extract and process custom field mappings
+    const { customFieldsMapping } = this.separateCustomFieldMappings(mapping);
+
+    // Create custom field definitions for new custom fields
+    if (entityType && Object.keys(customFieldsMapping).length > 0) {
+      await this.ensureCustomFieldDefinitions(
+        organizationId,
+        entityType,
+        customFieldsMapping,
+      );
+    }
+
+    // Re-fetch custom field columns after ensuring definitions exist
+    const customFieldColumns = entityType
+      ? await this.buildCustomFieldColumns(organizationId, entityType)
+      : [];
+
+    // Sanitize with both static and custom field columns
+    const allColumns = [...tableConfig.columns, ...customFieldColumns];
+    const sanitizedMapping = this.sanitizeMapping(mapping, allColumns);
     const hasAtLeastOneColumn = Object.values(sanitizedMapping).some(
       (value) => value,
     );
@@ -158,6 +179,17 @@ export class CsvImportService {
       throw new NotFoundException('Unknown table selected for CSV import.');
     }
 
+    const entityType = TABLE_ID_TO_ENTITY_TYPE[tableConfig.id];
+    const customFieldColumns = entityType
+      ? await this.buildCustomFieldColumns(job.organizationId, entityType)
+      : [];
+
+    // Extend table config with custom field columns
+    const extendedTableConfig: CsvImportTableConfig = {
+      ...tableConfig,
+      columns: [...tableConfig.columns, ...customFieldColumns],
+    };
+
     const filePath = this.fileUploadService.getUploadFilePath(job.fileId);
 
     try {
@@ -170,7 +202,7 @@ export class CsvImportService {
       fileId: job.fileId,
       filePath,
       organizationId: job.organizationId,
-      table: tableConfig,
+      table: extendedTableConfig,
       mapping: job.mapping,
     });
   }
@@ -258,6 +290,71 @@ export class CsvImportService {
       }
       default:
         return value;
+    }
+  }
+
+  private deriveLabelFromHeader(header: string): string {
+    return (
+      header
+        .replace(/[_-]/g, ' ')
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .trim()
+        .split(' ')
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
+        .join(' ') || header
+    );
+  }
+
+  private async ensureCustomFieldDefinitions(
+    organizationId: string,
+    entityType: string,
+    customFieldsMapping: ColumnMapping,
+  ): Promise<void> {
+    // Get existing definitions
+    const existingDefinitions =
+      await this.customFieldDefinitionsService.getByEntityType(
+        organizationId,
+        entityType,
+      );
+
+    const existingKeys = new Set(existingDefinitions.map((d) => d.key));
+
+    // Create definitions for new custom fields
+    for (const [mappingKey, csvHeader] of Object.entries(customFieldsMapping)) {
+      if (!csvHeader) continue; // Skip null/empty mappings
+
+      // Extract custom field key from "customFields.xxx" format
+      const customKey = mappingKey.slice('customFields.'.length);
+
+      // Skip if already exists
+      if (existingKeys.has(customKey)) {
+        continue;
+      }
+
+      // Derive label from CSV header (e.g., "custom_attribute_1" -> "Custom Attribute 1")
+      const label = this.deriveLabelFromHeader(csvHeader);
+
+      // Create new definition with default type 'string'
+      // Note: Data conversion during import will follow the definition type via convertValue()
+      try {
+        await this.customFieldDefinitionsService.create(organizationId, {
+          key: customKey,
+          label,
+          fieldType: 'string', // Default type - user can edit later if needed
+          entityType,
+          description: `Created via CSV import from column "${csvHeader}"`,
+        });
+        this.logger.log(
+          `Created custom field definition "${customKey}" for ${entityType}`,
+        );
+      } catch (error) {
+        // Log but don't fail - could be validation errors
+        this.logger.warn(
+          `Failed to create custom field definition "${customKey}": ${String(error)}`,
+        );
+      }
     }
   }
 
@@ -514,6 +611,24 @@ export class CsvImportService {
       normalized[column.key] = value ?? null;
     }
     return normalized;
+  }
+
+  private separateCustomFieldMappings(mapping: ColumnMapping): {
+    staticMapping: ColumnMapping;
+    customFieldsMapping: ColumnMapping;
+  } {
+    const staticMapping: ColumnMapping = {};
+    const customFieldsMapping: ColumnMapping = {};
+
+    for (const [key, value] of Object.entries(mapping)) {
+      if (key.startsWith('customFields.')) {
+        customFieldsMapping[key] = value;
+      } else {
+        staticMapping[key] = value;
+      }
+    }
+
+    return { staticMapping, customFieldsMapping };
   }
 
   private async updateBatch(
