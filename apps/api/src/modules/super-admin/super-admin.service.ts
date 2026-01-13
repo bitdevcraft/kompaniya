@@ -31,6 +31,22 @@ export class SuperAdminService {
     private readonly cacheService: CacheService,
   ) {}
 
+  async deletePaginatedCache(userId: string) {
+    const paginationCache = await this.cacheService.get<string[]>(
+      Keys.SuperAdminOrganization.paginatedList(userId),
+    );
+
+    if (!paginationCache) return;
+
+    paginationCache.forEach((key) => {
+      void this.cacheService.delete(key);
+    });
+
+    await this.cacheService.delete(
+      Keys.SuperAdminOrganization.paginatedList(userId),
+    );
+  }
+
   async getOrganizationById(id: string) {
     return this.cacheService.wrapCache({
       key: Keys.SuperAdminOrganization.id(id),
@@ -207,5 +223,53 @@ export class SuperAdminService {
       })),
       pageCount: paginated.pageCount,
     };
+  }
+
+  async updateOrganizationLimits(
+    id: string,
+    userId: string,
+    limits: {
+      numberOfUsers?: number | null;
+      numberOfEmailDomains?: number | null;
+      numberOfRoles?: number | null;
+      numberOfTeams?: number | null;
+    },
+  ) {
+    const updates: Partial<typeof organizationsTable.$inferInsert> = {};
+
+    if (limits.numberOfUsers !== undefined) {
+      updates.numberOfUsers = limits.numberOfUsers;
+    }
+
+    if (limits.numberOfEmailDomains !== undefined) {
+      updates.numberOfEmailDomains = limits.numberOfEmailDomains;
+    }
+
+    if (limits.numberOfRoles !== undefined) {
+      updates.numberOfRoles = limits.numberOfRoles;
+    }
+
+    if (limits.numberOfTeams !== undefined) {
+      updates.numberOfTeams = limits.numberOfTeams;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return await this.getOrganizationById(id);
+    }
+
+    const updated = await this.db
+      .update(organizationsTable)
+      .set(updates)
+      .where(eq(organizationsTable.id, id))
+      .returning();
+
+    if (updated.length === 0) {
+      return null;
+    }
+
+    await this.cacheService.delete(Keys.SuperAdminOrganization.id(id));
+    await this.deletePaginatedCache(userId);
+
+    return await this.getOrganizationById(id);
   }
 }
