@@ -10,6 +10,7 @@ import {
   CsvImportQueueService,
 } from './csv-import.queue';
 import { CsvImportService } from './csv-import.service';
+import { CsvImportJobsService } from './csv-import-jobs.service';
 
 @Module({
   imports: [
@@ -18,6 +19,11 @@ import { CsvImportService } from './csv-import.service';
     BullModule.registerQueue({ name: CSV_IMPORT_QUEUE_NAME }),
   ],
   controllers: [CsvImportController],
-  providers: [CsvImportService, CsvImportQueueService, CsvImportProcessor],
+  providers: [
+    CsvImportService,
+    CsvImportQueueService,
+    CsvImportProcessor,
+    CsvImportJobsService,
+  ],
 })
 export class CsvImportModule {}

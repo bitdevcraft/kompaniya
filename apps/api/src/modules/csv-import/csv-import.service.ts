@@ -26,6 +26,10 @@ import type {
 import { CustomFieldDefinitionsService } from '../core/custom-fields/custom-field-definitions.service';
 import { FileUploadService } from '../core/file-upload/file-upload.service';
 import {
+  CsvImportJobsService,
+  type CsvImportJobStatus,
+} from './csv-import-jobs.service';
+import {
   type CsvImportJobData,
   CsvImportQueueService,
 } from './csv-import.queue';
@@ -52,6 +56,7 @@ export class CsvImportService {
     private readonly fileUploadService: FileUploadService,
     private readonly queue: CsvImportQueueService,
     private readonly customFieldDefinitionsService: CustomFieldDefinitionsService,
+    private readonly csvImportJobsService: CsvImportJobsService,
   ) {}
 
   async enqueueImport(
@@ -59,6 +64,7 @@ export class CsvImportService {
     fileId: string,
     organizationId: string,
     mapping: ColumnMapping,
+    csvImportJobId?: string,
   ) {
     const tableConfig = CSV_IMPORT_TABLES[tableId];
     if (!tableConfig) {
@@ -103,17 +109,18 @@ export class CsvImportService {
       throw new NotFoundException('Uploaded CSV file was not found.');
     }
 
-    await this.queue.enqueue({
+    const { bullJobId } = await this.queue.enqueue({
       name: `${tableConfig.id}-${fileId}`,
       data: {
         fileId,
         tableId: tableConfig.id,
         organizationId,
         mapping: sanitizedMapping,
+        csvImportJobId,
       },
     });
 
-    return { status: 'queued' };
+    return { bullJobId };
   }
 
   async getPreview(fileId: string): Promise<CsvPreview> {
@@ -169,7 +176,10 @@ export class CsvImportService {
     return tables;
   }
 
-  async processImportJob(job: CsvImportJobData): Promise<void> {
+  async processImportJob(
+    job: CsvImportJobData,
+    csvImportJobId?: string,
+  ): Promise<void> {
     const tableConfig = CSV_IMPORT_TABLES[job.tableId];
 
     if (!tableConfig) {
@@ -204,6 +214,7 @@ export class CsvImportService {
       organizationId: job.organizationId,
       table: extendedTableConfig,
       mapping: job.mapping,
+      csvImportJobId,
     });
   }
 
@@ -472,8 +483,19 @@ export class CsvImportService {
     organizationId: string;
     table: CsvImportTableConfig;
     mapping: ColumnMapping;
+    csvImportJobId?: string;
   }) {
-    const { fileId, filePath, organizationId, table, mapping } = options;
+    const { fileId, filePath, organizationId, table, mapping, csvImportJobId } =
+      options;
+
+    // Update job status to processing if tracking is enabled
+    if (csvImportJobId) {
+      await this.csvImportJobsService.updateJob(csvImportJobId, {
+        status: 'processing',
+        startedAt: new Date(),
+      });
+    }
+
     const parser = parse({
       bom: true,
       skip_empty_lines: false,
@@ -490,9 +512,13 @@ export class CsvImportService {
     let insertBatchRows: Record<string, unknown>[] = [];
     let updateBatchRows: { id: string; values: Record<string, unknown> }[] = [];
     let processedRows = 0;
-    let insertedRows = 0;
-    let updatedRows = 0;
+    let successfulRows = 0;
+    let failedRows = 0;
+    let _insertedRows = 0;
+    let _updatedRows = 0;
+    let dataRowNumber = 0; // Row number for tracking (excludes header)
     const startTime = Date.now();
+    const updateInterval = csvImportJobId ? 10 : 0; // Update job status every N rows
 
     try {
       for await (const record of stream) {
@@ -503,27 +529,62 @@ export class CsvImportService {
           continue;
         }
 
-        const mapped = this.mapRow(
-          preparedRow,
-          headerIndex,
-          table.columns,
-          mapping,
-          organizationId,
-        );
+        dataRowNumber += 1;
+        let currentRowSuccess = false;
+        let recordId: string | undefined;
+        let errorMessage: string | undefined;
+        let errorField: string | undefined;
 
-        if (!mapped) {
-          continue;
+        try {
+          const mapped = this.mapRow(
+            preparedRow,
+            headerIndex,
+            table.columns,
+            mapping,
+            organizationId,
+          );
+
+          if (!mapped) {
+            // Skip row without counting as error
+            processedRows += 1;
+            continue;
+          }
+
+          if (mapped.id) {
+            updateBatchRows.push({ id: mapped.id, values: mapped.values });
+            _updatedRows = processedRows + 1;
+            recordId = mapped.id;
+          } else {
+            insertBatchRows.push(mapped.values);
+            _insertedRows = processedRows + 1;
+          }
+
+          processedRows += 1;
+          successfulRows += 1;
+          currentRowSuccess = true;
+        } catch (rowError) {
+          failedRows += 1;
+          errorMessage =
+            rowError instanceof Error ? rowError.message : String(rowError);
+          this.logger.warn(
+            `Failed to process row ${dataRowNumber} in CSV import: ${errorMessage}`,
+          );
         }
 
-        if (mapped.id) {
-          updateBatchRows.push({ id: mapped.id, values: mapped.values });
-          updatedRows += 1;
-        } else {
-          insertBatchRows.push(mapped.values);
-          insertedRows += 1;
+        // Track row result if job tracking is enabled
+        if (csvImportJobId && !currentRowSuccess) {
+          void this.csvImportJobsService.createRowResult({
+            jobId: csvImportJobId,
+            rowNumber: dataRowNumber,
+            status: 'failed',
+            rowData: JSON.stringify(preparedRow),
+            errorMessage,
+            errorField,
+            recordId,
+          });
         }
-        processedRows += 1;
 
+        // Flush batches
         if (insertBatchRows.length >= this.batchSize) {
           await this.insertBatch(table.table, insertBatchRows);
           insertBatchRows = [];
@@ -532,8 +593,22 @@ export class CsvImportService {
           await this.updateBatch(table.table, updateBatchRows);
           updateBatchRows = [];
         }
+
+        // Update job progress periodically
+        if (
+          csvImportJobId &&
+          processedRows > 0 &&
+          processedRows % updateInterval === 0
+        ) {
+          void this.csvImportJobsService.updateJob(csvImportJobId, {
+            processedRows,
+            successfulRows,
+            failedRows,
+          });
+        }
       }
 
+      // Flush remaining batches
       if (insertBatchRows.length > 0) {
         await this.insertBatch(table.table, insertBatchRows);
       }
@@ -544,13 +619,37 @@ export class CsvImportService {
 
       const duration = Date.now() - startTime;
       this.logger.log(
-        `Imported ${processedRows} rows into ${table.id} from file ${fileId} in ${duration}ms (${insertedRows} inserts, ${updatedRows} updates attempted)`,
+        `Imported ${processedRows} rows into ${table.id} from file ${fileId} in ${duration}ms (${successfulRows} successful, ${failedRows} failed)`,
       );
+
+      // Update final job status
+      if (csvImportJobId) {
+        const finalStatus: CsvImportJobStatus =
+          failedRows > 0 ? 'partial_success' : 'completed';
+        await this.csvImportJobsService.updateJob(csvImportJobId, {
+          status: finalStatus,
+          processedRows,
+          successfulRows,
+          failedRows,
+          completedAt: new Date(),
+        });
+      }
     } catch (error) {
       this.logger.error(
         `Failed to process CSV import for file ${fileId}`,
         error instanceof Error ? error.stack : undefined,
       );
+
+      // Update job status to failed
+      if (csvImportJobId) {
+        await this.csvImportJobsService.updateJob(csvImportJobId, {
+          status: 'failed',
+          completedAt: new Date(),
+          errorMessage: error instanceof Error ? error.message : String(error),
+          errorDetails: error instanceof Error ? error.stack : undefined,
+        });
+      }
+
       throw error;
     }
   }

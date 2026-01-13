@@ -5,7 +5,7 @@ import { Label } from "@kompaniya/ui-common/components/label";
 
 import { SETTINGS_RESOURCES } from "@/lib/record-permissions";
 
-import type { PermissionState } from "../../config";
+import type { PermissionState } from "../config";
 
 interface SettingsPermissionsTogglesProps {
   value: PermissionState;

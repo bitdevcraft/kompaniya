@@ -28,7 +28,8 @@
       "Bash(pnpm run)",
       "Bash(pnpm check-types:*)",
       "Bash(pnpm exec turbo run:*)",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

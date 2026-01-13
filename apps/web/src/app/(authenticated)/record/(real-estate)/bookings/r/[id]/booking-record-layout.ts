@@ -1,6 +1,7 @@
 import { FieldOption as RecordFieldOption } from "@repo/domain";
 
 import { RecordPageLayout } from "@/components/record-page/layout";
+import { env } from "@/env/client";
 
 import type { BookingRecordFormValues } from "./booking-record-schema";
 
@@ -80,8 +81,8 @@ export const bookingRecordLayout: RecordPageLayout<BookingRecordFormValues> = {
               id: "projectId",
               label: "Project",
               reference: {
-                displayField: "name",
-                relatedType: "org_real_estate_projects",
+                searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/real-estate-project/paginated`,
+                findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/real-estate-project/r/:id`,
               },
               type: "reference",
             },
@@ -89,8 +90,8 @@ export const bookingRecordLayout: RecordPageLayout<BookingRecordFormValues> = {
               id: "propertyId",
               label: "Property",
               reference: {
-                displayField: "name",
-                relatedType: "org_real_estate_properties",
+                searchEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/real-estate-property/paginated`,
+                findByIdEndpoint: `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/real-estate-property/r/:id`,
               },
               type: "reference",
             },

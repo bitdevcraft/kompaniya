@@ -46,6 +46,10 @@ type CsvImportColumn = {
   description?: string;
 };
 
+interface CsvImporterProps {
+  onImportSuccess?: () => void;
+}
+
 type CsvImportOptionsResponse = {
   tables: CsvImportTable[];
 };
@@ -77,7 +81,7 @@ type SubmitState =
   | { state: "success"; message: string }
   | { state: "error"; message: string };
 
-export default function CsvImporter() {
+export default function CsvImporter({ onImportSuccess }: CsvImporterProps) {
   const [tables, setTables] = useState<CsvImportTable[]>([]);
   const [tablesError, setTablesError] = useState<string | null>(null);
   const [tablesLoading, setTablesLoading] = useState(true);
@@ -282,6 +286,9 @@ export default function CsvImporter() {
         state: "success",
         message: "Import queued successfully.",
       });
+
+      // Call success callback if provided
+      onImportSuccess?.();
     } catch (error) {
       setSubmitState({
         state: "error",
@@ -290,7 +297,7 @@ export default function CsvImporter() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [columnMapping, preview, selectedTable]);
+  }, [columnMapping, preview, selectedTable, onImportSuccess]);
   return (
     <div className="grid gap-6">
       <Card>

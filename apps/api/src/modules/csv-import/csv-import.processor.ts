@@ -19,7 +19,10 @@ export class CsvImportProcessor extends WorkerHost {
   }
 
   async process(job: Job<CsvImportJobData>): Promise<void> {
-    this.logger.log(`Processing CSV import job ${job.name} (${job.id})`);
-    await this.csvImportService.processImportJob(job.data);
+    const { csvImportJobId, ...jobData } = job.data;
+    this.logger.log(
+      `Processing CSV import job ${job.name} (${job.id})${csvImportJobId ? `, tracking ID: ${csvImportJobId}` : ''}`,
+    );
+    await this.csvImportService.processImportJob(jobData, csvImportJobId);
   }
 }

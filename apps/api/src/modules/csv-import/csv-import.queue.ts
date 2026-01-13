@@ -12,12 +12,17 @@ export type CsvImportJobData = {
   tableId: string;
   organizationId: string;
   mapping: ColumnMapping;
+  csvImportJobId?: string;
 };
 
 type CsvImportQueueJob = {
   name: string;
   data: CsvImportJobData;
   options?: JobsOptions;
+};
+
+type EnqueueResult = {
+  bullJobId: string;
 };
 
 @Injectable()
@@ -27,11 +32,12 @@ export class CsvImportQueueService {
     private readonly queue: Queue<CsvImportJobData>,
   ) {}
 
-  async enqueue(job: CsvImportQueueJob): Promise<void> {
+  async enqueue(job: CsvImportQueueJob): Promise<EnqueueResult> {
     const options: JobsOptions = { ...job.options };
     if (!options.jobId) {
       options.jobId = job.name;
     }
-    await this.queue.add(job.name, job.data, options);
+    const addedJob = await this.queue.add(job.name, job.data, options);
+    return { bullJobId: addedJob?.id ?? job.name };
   }
 }
