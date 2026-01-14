@@ -15,6 +15,10 @@ import { AuthService, Roles } from '@thallesp/nestjs-better-auth';
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from 'src/modules/auth/auth';
 
+import { OrganizationLimitExceededException } from '~/modules/core/organization-limits/organization-limit-exceeded.exception';
+import { OrganizationLimitsService } from '~/modules/core/organization-limits/organization-limits.service';
+import { LimitType } from '~/modules/core/organization-limits/types';
+
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { CreateUserDto, RoleOrRoles } from './dto/create-user.dto';
@@ -27,6 +31,7 @@ export class SystemAdminController {
   constructor(
     private authService: AuthService<typeof auth>,
     private systemAdminService: SystemAdminService,
+    private organizationLimitsService: OrganizationLimitsService,
   ) {}
 
   @Post('create-user')
@@ -35,6 +40,19 @@ export class SystemAdminController {
     @Body() dto: CreateUserDto,
     @ActiveOrganization() organization: Organization,
   ) {
+    // Check user limit before creating
+    const limitCheck = await this.organizationLimitsService.checkUserLimit(
+      organization.id,
+    );
+
+    if (!limitCheck.allowed) {
+      throw new OrganizationLimitExceededException(
+        LimitType.USERS,
+        limitCheck.current,
+        limitCheck.limit!,
+      );
+    }
+
     const headers = fromNodeHeaders(req.headers);
 
     const hasAdmin = (v: RoleOrRoles): boolean =>
@@ -58,6 +76,9 @@ export class SystemAdminController {
       },
       headers,
     });
+
+    // Invalidate cache after adding member
+    await this.organizationLimitsService.invalidateCache(organization.id);
 
     return { userId: newUser.user.id };
   }

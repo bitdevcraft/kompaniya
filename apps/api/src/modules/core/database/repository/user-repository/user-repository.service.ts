@@ -42,7 +42,7 @@ export class UserRepositoryService {
     return await this.db
       .update(usersTable)
       .set({
-        role: 'systemadmin',
+        role: 'systemAdmin',
       })
       .where(eq(usersTable.id, userId))
       .returning();

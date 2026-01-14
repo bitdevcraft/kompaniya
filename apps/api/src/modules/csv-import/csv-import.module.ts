@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 
 import { CustomFieldsModule } from '../core/custom-fields/custom-fields.module';
 import { FileUploadModule } from '../core/file-upload/file-upload.module';
+import { CsvImportJobsService } from './csv-import-jobs.service';
 import { CsvImportController } from './csv-import.controller';
 import { CsvImportProcessor } from './csv-import.processor';
 import {
@@ -10,7 +11,6 @@ import {
   CsvImportQueueService,
 } from './csv-import.queue';
 import { CsvImportService } from './csv-import.service';
-import { CsvImportJobsService } from './csv-import-jobs.service';
 
 @Module({
   imports: [

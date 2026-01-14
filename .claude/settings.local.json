@@ -30,7 +30,10 @@
       "Bash(pnpm exec turbo run:*)",
       "Bash(npx prettier:*)",
       "Bash(npm run build:*)",
-      "Bash(pnpm list:*)"
+      "Bash(pnpm list:*)",
+      "Bash(npm run build:api:*)",
+      "Bash(npm run:*)",
+      "Bash(npx turbo run build:*)"
     ]
   }
 }

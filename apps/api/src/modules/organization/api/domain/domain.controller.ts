@@ -19,6 +19,9 @@ import {
   type PaginationQueryParserType,
 } from '~/lib/pagination/pagination-query-parser';
 import { DrizzleErrorService } from '~/modules/core/database/drizzle-error';
+import { OrganizationLimitExceededException } from '~/modules/core/organization-limits/organization-limit-exceeded.exception';
+import { OrganizationLimitsService } from '~/modules/core/organization-limits/organization-limits.service';
+import { LimitType } from '~/modules/core/organization-limits/types';
 import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
@@ -34,6 +37,7 @@ export class DomainController {
   constructor(
     private readonly domainService: DomainService,
     private readonly drizzleErrorService: DrizzleErrorService,
+    private readonly organizationLimitsService: OrganizationLimitsService,
   ) {}
 
   @Post()
@@ -42,6 +46,20 @@ export class DomainController {
     @Session() session: UserSession,
     @ActiveOrganization() organization: Organization,
   ) {
+    // Check email domain limit before creating
+    const limitCheck =
+      await this.organizationLimitsService.checkEmailDomainLimit(
+        organization.id,
+      );
+
+    if (!limitCheck.allowed) {
+      throw new OrganizationLimitExceededException(
+        LimitType.EMAIL_DOMAINS,
+        limitCheck.current,
+        limitCheck.limit!,
+      );
+    }
+
     const domainName = createDomain.email.split('@')[1];
 
     if (!domainName) return;
@@ -59,11 +77,16 @@ export class DomainController {
       organization.id,
     );
 
-    return await this.domainService.createNewDomain(
+    const result = await this.domainService.createNewDomain(
       organization.id,
       domainName,
       createDomain.email,
     );
+
+    // Invalidate cache after adding domain
+    await this.organizationLimitsService.invalidateCache(organization.id);
+
+    return result;
   }
 
   @Delete('r/:id')
