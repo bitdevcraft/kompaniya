@@ -92,6 +92,13 @@
       "when": 1768411680679,
       "tag": "0012_slimy_bastion",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1768420708842,
+      "tag": "0013_far_killmonger",
+      "breakpoints": true
     }
   ]
 }

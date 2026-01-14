@@ -31,7 +31,7 @@ export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
   orgEmailTemplateId: uuid("org_email_template_id").references(
     () => orgEmailTemplatesTable.id,
     {
-      onDelete: "restrict",
+      onDelete: "set null",
     },
   ),
   orgEmailTestReceiverId: uuid("org_email_test_receiver_id").references(
