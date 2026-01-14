@@ -10,6 +10,7 @@ export const RESOURCE_PERMISSION_MAP: Record<string, string> = {
   "/record/payment-plans": "orgPaymentPlans",
   "/record/payment-plan-templates": "orgPaymentPlanTemplates",
   "/record/email-campaigns": "orgEmailCampaigns",
+  "/record/email-domains": "orgEmailDomains",
   "/record/email-templates": "orgEmailTemplates",
   "/record/email-test-receivers": "orgEmailTestReceivers",
 } as const;
@@ -30,6 +31,7 @@ export const ORG_RECORD_RESOURCES: readonly PermissionResource[] = [
   "orgPaymentPlans",
   "orgPaymentPlanTemplates",
   "orgEmailCampaigns",
+  "orgEmailDomains",
   "orgEmailTemplates",
   "orgEmailTestReceivers",
 ] as const;

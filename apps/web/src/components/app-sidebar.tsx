@@ -123,6 +123,10 @@ const data = {
       isActive: true,
       items: [
         {
+          title: "Domains",
+          url: "/record/email-domains",
+        },
+        {
           title: "Campaign",
           url: "/record/email-campaigns",
         },
@@ -154,7 +158,7 @@ const data = {
         },
         {
           title: "Email Setup",
-          url: "/settings/email-setup/domains",
+          url: "/record/email-domains",
         },
         {
           title: "Entity Manager",

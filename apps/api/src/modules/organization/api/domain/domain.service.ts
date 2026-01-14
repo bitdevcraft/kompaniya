@@ -29,7 +29,7 @@ export class DomainService {
     name: string,
     email: string,
   ): Promise<OrgEmailDomain[]> {
-    // const _token = await this.awsSesIdentityService.verifyIdentity(email);
+    const metadata = await this.awsSesIdentityService.verifyDomain(name);
 
     let secretKey = '';
     let secretIsAvailable = false;
@@ -55,7 +55,9 @@ export class DomainService {
       email,
       public: publicKey,
       secret: secretKey,
+      metadata,
       status: 'PENDING',
+      verified: false,
     };
 
     return await this.db
@@ -219,10 +221,7 @@ export class DomainService {
   async getIdentityAttributes(email: string) {
     return this.cacheService.wrapCache({
       key: Keys.Domain.emailAttributes(email),
-      fn: async () =>
-        await this.awsSesIdentityService.getIdentityVerificationAttributes(
-          email,
-        ),
+      fn: async () => await this.awsSesIdentityService.getDkimAttributes(email),
     });
   }
 

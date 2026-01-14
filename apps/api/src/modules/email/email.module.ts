@@ -1,4 +1,5 @@
 import { SES } from '@aws-sdk/client-ses';
+import { BullModule } from '@nestjs/bullmq';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -11,10 +12,17 @@ import { AWS_SES } from '~/constants/provider';
 
 import { AwsSesIdentityService } from './aws-ses-identity/aws-ses-identity.service';
 import { AwsSesVerificationService } from './aws-ses-verification/aws-ses-verification.service';
+import { EmailDomainVerificationProcessor } from './email-domain-verification/email-domain-verification.processor';
+import {
+  EMAIL_DOMAIN_VERIFICATION_QUEUE_NAME,
+  EmailDomainVerificationQueueService,
+} from './email-domain-verification/email-domain-verification.queue';
 
 @Global()
 @Module({
-  imports: [],
+  imports: [
+    BullModule.registerQueue({ name: EMAIL_DOMAIN_VERIFICATION_QUEUE_NAME }),
+  ],
   providers: [
     {
       provide: AWS_SES,
@@ -32,6 +40,8 @@ import { AwsSesVerificationService } from './aws-ses-verification/aws-ses-verifi
     },
     AwsSesIdentityService,
     AwsSesVerificationService,
+    EmailDomainVerificationQueueService,
+    EmailDomainVerificationProcessor,
   ],
   exports: [AwsSesVerificationService, AwsSesIdentityService],
 })

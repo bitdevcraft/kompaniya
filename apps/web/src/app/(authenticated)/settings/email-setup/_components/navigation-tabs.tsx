@@ -9,9 +9,9 @@ export function NavigationTabs() {
 
   const links = [
     {
-      to: "/settings/email-setup/domains",
+      to: "/record/email-domains",
       text: "Domains",
-      active: pathname === "/settings/email-setup/domains",
+      active: pathname === "/record/email-domains",
     },
   ];
 

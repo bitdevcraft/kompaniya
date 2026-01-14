@@ -1,52 +1,101 @@
 import { SES } from '@aws-sdk/client-ses';
 import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { APP } from '@repo/shared';
+import { convertCase } from '@repo/shared/utils';
 
+import { AWS_REGION } from '~/config/config.type';
 import { AWS_SES } from '~/constants/provider';
+
+import type { EmailDomainMetadata } from '../email-domain-verification/email-domain-verification.types';
 
 @Injectable()
 export class AwsSesIdentityService {
-  constructor(@Inject(AWS_SES) private readonly ses: SES) {}
+  constructor(
+    @Inject(AWS_SES) private readonly ses: SES,
+    private readonly configService: ConfigService,
+  ) {}
 
-  async getIdentities(identities: string[]) {
-    const res = await this.ses.getIdentityVerificationAttributes({
-      Identities: identities.flatMap((identity) => {
-        const domain = identity.split('@')[1];
-        return domain ? [domain] : [];
-      }),
-    });
+  async getDkimAttributes(identity: string) {
+    const domain = this.extractDomain(identity);
+    if (!domain) return null;
 
-    const parsedResult = Object.entries(res.VerificationAttributes ?? {});
-    return parsedResult.map((obj) => {
-      return { email: obj[0], status: obj[1].VerificationStatus };
-    });
-  }
-
-  async getIdentityVerificationAttributes(email: string) {
     const attributes = await this.ses.getIdentityDkimAttributes({
-      Identities: [email, email.split('@')[1] ?? ''],
+      Identities: [domain],
     });
 
-    const [attr1] = Object.entries(attributes.DkimAttributes ?? {});
+    const record = attributes.DkimAttributes?.[domain];
 
-    if (!attr1) return null;
+    if (!record) return null;
 
     return {
-      email: attr1[0],
-      tokens: attr1[1].DkimTokens,
-      status: attr1[1].DkimVerificationStatus,
+      identity: domain,
+      tokens: record.DkimTokens ?? [],
+      status: record.DkimVerificationStatus,
     };
   }
 
-  async verifyIdentity(email: string) {
-    const DKIM = await this.ses.verifyDomainDkim({
-      Domain: email.includes('@') ? email.split('@')[1] : email,
+  async getIdentityVerificationAttributes(identities: string[]) {
+    const uniqueIdentities = [...new Set(identities.filter(Boolean))];
+    if (uniqueIdentities.length === 0) return null;
+
+    return this.ses.getIdentityVerificationAttributes({
+      Identities: uniqueIdentities,
     });
+  }
+
+  async verifyDomain(identity: string): Promise<EmailDomainMetadata> {
+    const domain = this.extractDomain(identity);
+    if (!domain) {
+      throw new Error('Domain identity is required for SES verification.');
+    }
+
+    const dkimResult = await this.ses.verifyDomainDkim({
+      Domain: domain,
+    });
+
+    const mailFromPrefix = convertCase(APP.TITLE, 'title', 'kebab');
+    const mailFromDomain = `${mailFromPrefix}.${domain}`;
 
     await this.ses.setIdentityMailFromDomain({
-      Identity: email.includes('@') ? email.split('@')[1] : email,
-      MailFromDomain: `pulse.${email.includes('@') ? email.split('@')[1] : email}`,
+      Identity: domain,
+      MailFromDomain: mailFromDomain,
     });
 
-    return DKIM.DkimTokens;
+    const tokens = dkimResult.DkimTokens ?? [];
+    const region = this.configService.get<string>(AWS_REGION) ?? 'us-east-1';
+
+    const dnsRecords = [
+      ...tokens.map((token) => ({
+        type: 'CNAME' as const,
+        name: `${token}._domainkey.${domain}`,
+        value: `${token}.dkim.amazonses.com`,
+      })),
+      {
+        type: 'MX' as const,
+        name: mailFromDomain,
+        value: `10 feedback-smtp.${region}.amazonses.com`,
+        priority: 10,
+      },
+      {
+        type: 'TXT' as const,
+        name: mailFromDomain,
+        value: 'v=spf1 include:amazonses.com -all',
+      },
+    ];
+
+    return {
+      dkimTokens: tokens,
+      mailFromDomain,
+      dnsRecords,
+    };
+  }
+
+  async verifyEmailIdentity(email: string) {
+    return this.ses.verifyEmailIdentity({ EmailAddress: email });
+  }
+
+  private extractDomain(identity: string) {
+    return identity.includes('@') ? (identity.split('@')[1] ?? '') : identity;
   }
 }

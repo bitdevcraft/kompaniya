@@ -14,6 +14,8 @@ import {
 import { type Organization } from '@repo/database/schema';
 import { Session, type UserSession } from '@thallesp/nestjs-better-auth';
 
+import type { EmailDomainMetadata } from '~/modules/email/email-domain-verification/email-domain-verification.types';
+
 import {
   paginationQueryParserSchema,
   type PaginationQueryParserType,
@@ -123,13 +125,22 @@ export class DomainController {
       throw new NotFoundException("Domain doesn't exist");
     }
 
-    const attributes = await this.domainService.getIdentityAttributes(
-      domain.email,
-    );
+    const showVerificationDetails = domain.status !== 'READY';
+    const metadata = parseEmailDomainMetadata(domain.metadata);
+
+    const attributes = showVerificationDetails
+      ? await this.domainService.getIdentityAttributes(domain.email)
+      : null;
 
     return {
-      data: domain,
-      tokens: attributes?.tokens,
+      ...domain,
+      dkimStatus: showVerificationDetails
+        ? (attributes?.status ?? 'Pending')
+        : 'Ready',
+      spfStatus: domain.status === 'READY' ? 'Ready' : 'Pending',
+      dnsRecords: showVerificationDetails
+        ? (metadata?.dnsRecords ?? [])
+        : undefined,
     };
   }
 
@@ -198,4 +209,14 @@ export class DomainController {
       updateDomainDto,
     );
   }
+}
+
+function parseEmailDomainMetadata(
+  metadata: unknown,
+): EmailDomainMetadata | undefined {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return undefined;
+  }
+
+  return metadata as EmailDomainMetadata;
 }
