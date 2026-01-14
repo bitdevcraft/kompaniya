@@ -17,11 +17,13 @@ import {
   EMAIL_DOMAIN_VERIFICATION_QUEUE_NAME,
   EmailDomainVerificationQueueService,
 } from './email-domain-verification/email-domain-verification.queue';
+import { SnsWebhookModule } from './sns-webhook/sns-webhook.module';
 
 @Global()
 @Module({
   imports: [
     BullModule.registerQueue({ name: EMAIL_DOMAIN_VERIFICATION_QUEUE_NAME }),
+    SnsWebhookModule,
   ],
   providers: [
     {

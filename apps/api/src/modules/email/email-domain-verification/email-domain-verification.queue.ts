@@ -34,7 +34,7 @@ export class EmailDomainVerificationQueueService implements OnModuleInit {
     }
 
     const options: JobsOptions = {
-      repeat: { pattern: '*/5 * * * *' },
+      repeat: { pattern: '* * * * *' },
       attempts: 3,
       backoff: { type: 'exponential', delay: 10000 },
       removeOnComplete: 10,

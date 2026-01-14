@@ -2,13 +2,21 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
+import { rawBodyMiddleware } from './middleware/raw-body.middleware';
 
-const whitelist = new Set(['http://127.0.0.1:3001', 'http://localhost:3001']);
+const whitelist = new Set([
+  'http://127.0.0.1:3001',
+  'http://localhost:3001',
+  'https://kompaniya.centcapio.cc',
+]);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
   });
+
+  // Apply raw body middleware for webhook signature verification
+  app.use(rawBodyMiddleware);
 
   app.useGlobalPipes(
     new ValidationPipe({
