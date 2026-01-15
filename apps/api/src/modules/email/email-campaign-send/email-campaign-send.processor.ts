@@ -217,7 +217,7 @@ export class EmailCampaignSendProcessor extends WorkerHost {
           to: recipient.email,
           subject: campaign.subject ?? '',
           html: campaign.body ?? '',
-          fromDomain: domain.name,
+          fromDomain: domain.name ?? '',
           organizationId,
           emailCampaignId: campaignId,
           crmContactId: recipient.crmContactId ?? undefined,
@@ -301,10 +301,8 @@ export class EmailCampaignSendProcessor extends WorkerHost {
 
     if (remainingCount[0]?.count ?? 0 > 0) {
       // Queue next batch with a small delay
-      // Import here to avoid circular dependency
-      await import('./email-campaign-send.queue');
-      // Note: We can't inject the queue service here directly due to how processors work
-      // The next batch will be triggered by the send service
+      // Note: The next batch will be triggered by the send service
+      // since we can't inject the queue service directly in processors
     }
   }
 
@@ -347,7 +345,7 @@ export class EmailCampaignSendProcessor extends WorkerHost {
         to: email,
         subject,
         html: body,
-        fromDomain: domain.name,
+        fromDomain: domain.name ?? '',
         organizationId,
         emailCampaignId: campaignId,
         crmContactId: contactId ?? undefined,

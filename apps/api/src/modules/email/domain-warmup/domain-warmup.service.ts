@@ -59,15 +59,19 @@ export class DomainWarmupService {
 
     if (!stats) {
       // Create new stats record for today
-      [stats] = await this.db
+      const records = await this.db
         .insert(orgEmailDomainDailyStatsTable)
         .values({
           orgEmailDomainId: domainId,
-          organizationId: domain.organizationId,
+          organizationId: domain.organizationId ?? '',
           date: dateStr,
           sentCount: 0,
         })
         .returning();
+      stats = records[0];
+      if (!stats) {
+        throw new Error('Failed to create daily stats record');
+      }
     }
 
     const sentToday = stats.sentCount ?? 0;
@@ -205,44 +209,47 @@ export class DomainWarmupService {
 
     if (!stats) {
       // Create new stats record for today
-      [stats] = await this.db
+      const records = await this.db
         .insert(orgEmailDomainDailyStatsTable)
         .values({
           orgEmailDomainId: domainId,
-          organizationId: domain.organizationId,
+          organizationId: domain.organizationId ?? '',
           date: dateStr,
           sentCount: 1,
         })
         .returning();
-    } else {
-      // Increment sent count atomically
-      const [updated] = await this.db
-        .update(orgEmailDomainDailyStatsTable)
-        .set({
-          sentCount: sql`${orgEmailDomainDailyStatsTable.sentCount} + 1`,
-        })
-        .where(
-          and(
-            eq(orgEmailDomainDailyStatsTable.id, stats.id),
-            // Check that we haven't exceeded the limit
-            lt(
-              orgEmailDomainDailyStatsTable.sentCount,
-              domain.dailyLimit ?? this.getDailyLimit(),
-            ),
-          ),
-        )
-        .returning();
-
-      if (!updated) {
-        throw new Error(
-          `Daily send limit reached for domain ${domainId} on ${dateStr}`,
-        );
+      stats = records[0];
+      if (!stats) {
+        throw new Error('Failed to create daily stats record');
       }
-
-      return updated;
+      return stats;
     }
 
-    return stats;
+    // Increment sent count atomically
+    const [updated] = await this.db
+      .update(orgEmailDomainDailyStatsTable)
+      .set({
+        sentCount: sql`${orgEmailDomainDailyStatsTable.sentCount} + 1`,
+      })
+      .where(
+        and(
+          eq(orgEmailDomainDailyStatsTable.id, stats.id),
+          // Check that we haven't exceeded the limit
+          lt(
+            orgEmailDomainDailyStatsTable.sentCount,
+            domain.dailyLimit ?? this.getDailyLimit(),
+          ),
+        ),
+      )
+      .returning();
+
+    if (!updated) {
+      throw new Error(
+        `Daily send limit reached for domain ${domainId} on ${dateStr}`,
+      );
+    }
+
+    return updated;
   }
 
   /**
@@ -268,7 +275,7 @@ export class DomainWarmupService {
    * Get the UTC date string for a given date (or today)
    */
   private getUtcDateString(date: Date = new Date()): string {
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split('T')[0] ?? '';
   }
 
   /**
