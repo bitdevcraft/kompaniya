@@ -42,7 +42,8 @@ type CustomFieldFilterOperator =
   | 'gte'
   | 'lt'
   | 'lte'
-  | 'array_contains';
+  | 'array_contains'
+  | 'array_contains_all';
 
 @Injectable()
 export class ContactService {
@@ -309,6 +310,7 @@ export class ContactService {
       isEmpty: 'exists',
       isNotEmpty: 'exists',
       arrayIncludesAny: 'array_contains',
+      arrayIncludesAll: 'array_contains_all',
     };
     return operatorMap[operator] ?? 'eq';
   }

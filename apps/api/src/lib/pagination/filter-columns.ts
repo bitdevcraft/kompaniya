@@ -274,6 +274,17 @@ export function filterColumns<T extends Table>({
         }
         return undefined;
 
+      case 'arrayIncludesAll':
+        if (Array.isArray(filter.value)) {
+          const columnSql = column as unknown as string;
+
+          return sql`${columnSql} ?& ARRAY[${sql.join(
+            filter.value.map((v) => sql`${v}`),
+            sql`, `,
+          )}]`;
+        }
+        return undefined;
+
       case 'arrayIncludesNone':
         if (Array.isArray(filter.value)) {
           const columnSql = column as unknown as string;
@@ -534,6 +545,17 @@ export function filterQueries<T extends Table>({
           const columnSql = column as unknown as string;
 
           return sql`${columnSql} ?| ARRAY[${sql.join(
+            filter.value.map((v) => sql`${v}`),
+            sql`, `,
+          )}]`;
+        }
+        return undefined;
+
+      case 'arrayIncludesAll':
+        if (Array.isArray(filter.value)) {
+          const columnSql = column as unknown as string;
+
+          return sql`${columnSql} ?& ARRAY[${sql.join(
             filter.value.map((v) => sql`${v}`),
             sql`, `,
           )}]`;

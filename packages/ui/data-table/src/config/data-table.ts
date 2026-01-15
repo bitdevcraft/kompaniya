@@ -46,6 +46,7 @@ export const dataTableConfig = {
   ],
   multiSelectArrayOperators: [
     { label: "Has any of", value: "arrayIncludesAny" as const },
+    { label: "Has all of", value: "arrayIncludesAll" as const },
     { label: "Has none of", value: "arrayIncludesNone" as const },
     { label: "Is empty", value: "arrayIsEmpty" as const },
     { label: "Is not empty", value: "arrayIsNotEmpty" as const },
@@ -85,6 +86,7 @@ export const dataTableConfig = {
     "isBetween",
     "isRelativeToToday",
     "arrayIncludesAny",
+    "arrayIncludesAll",
     "arrayIncludesNone",
     "arrayIsEmpty",
     "arrayIsNotEmpty",

@@ -9,7 +9,13 @@ import {
 } from '@repo/database/schema';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 
+import type { FilterItemType } from '~/lib/pagination/pagination-query-parser';
+
 import { DRIZZLE_DB } from '~/constants/provider';
+import {
+  type ExtendedColumnFilter,
+  filterColumns,
+} from '~/lib/pagination/filter-columns';
 
 import { EmailCampaignQueueService } from './email-campaign-send.queue';
 
@@ -17,6 +23,8 @@ export interface ContactMatchOptions {
   targetTags?: string[];
   targetCategories?: string[];
   tagMatchType?: 'ALL' | 'ANY';
+  filters?: FilterItemType[];
+  joinOperator?: 'and' | 'or';
 }
 
 export interface SendCampaignOptions {
@@ -169,7 +177,13 @@ export class EmailCampaignSendService {
     organizationId: string,
     options: ContactMatchOptions,
   ): Promise<Array<{ id: string; email: string; name?: string | null }>> {
-    const { targetTags, targetCategories, tagMatchType = 'ALL' } = options;
+    const {
+      targetTags,
+      targetCategories,
+      tagMatchType = 'ALL',
+      filters,
+      joinOperator = 'and',
+    } = options;
 
     // Build conditions
     const conditions = [
@@ -178,6 +192,19 @@ export class EmailCampaignSendService {
       eq(orgContactsTable.emailOptIn, true),
       isNotNull(orgContactsTable.email),
     ];
+
+    const filtersWhere =
+      filters && filters.length > 0
+        ? filterColumns({
+            table: orgContactsTable,
+            filters: filters as ExtendedColumnFilter<typeof orgContactsTable>[],
+            joinOperator,
+          })
+        : undefined;
+
+    if (filtersWhere) {
+      conditions.push(filtersWhere);
+    }
 
     // Add tag filter
     if (targetTags && targetTags.length > 0) {

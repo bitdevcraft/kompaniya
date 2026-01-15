@@ -21,6 +21,7 @@ export type FilterOperator =
   | 'isEmpty'
   | 'isNotEmpty'
   | 'arrayIncludesAny'
+  | 'arrayIncludesAll'
   | 'arrayIncludesNone'
   | 'arrayIsEmpty'
   | 'arrayIsNotEmpty';
@@ -73,6 +74,7 @@ export function getCustomFieldOperators(
     single_select: ['eq', 'ne', 'isEmpty', 'isNotEmpty'],
     multi_select: [
       'arrayIncludesAny',
+      'arrayIncludesAll',
       'arrayIncludesNone',
       'arrayIsEmpty',
       'arrayIsNotEmpty',
@@ -136,6 +138,7 @@ export function mapToCustomFieldOperator(
     isEmpty: 'exists',
     isNotEmpty: 'exists',
     arrayIncludesAny: 'array_contains',
+    arrayIncludesAll: 'array_contains_all',
     arrayIncludesNone: 'neq',
     arrayIsEmpty: 'exists',
     arrayIsNotEmpty: 'exists',

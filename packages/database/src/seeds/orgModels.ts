@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { eq } from "drizzle-orm";
 
 import { db, Db } from "@/db";
 import { DEFAULT_RECORD_LAYOUTS } from "@/defaults/record-layouts";
@@ -8,9 +8,6 @@ import {
   orgActivitiesTable,
   orgCategoriesTable,
   orgContactsTable,
-  orgEmailDomainsTable,
-  orgEmailTemplatesTable,
-  orgEmailTestReceiversTable,
   orgEventsTable,
   orgLeadsTable,
   orgOpportunitiesTable,
@@ -18,10 +15,12 @@ import {
   orgRealEstateProjectsTable,
   orgRealEstatePropertiesTable,
   orgRecordLayoutsTable,
+  orgTagsTable,
   orgTasksTable,
   RecordLayoutEntityType,
   RecordLayoutHeader,
   RecordLayoutSectionColumns,
+  usersTable,
 } from "@/schema";
 
 export interface SeedOrgModelsOptions {
@@ -40,6 +39,24 @@ const buildOwnershipFields = (organizationId: string, userId?: string) => ({
     : {}),
 });
 
+const TAGS_BY_TYPE: Record<string, string[]> = {
+  account: ["priority", "b2b", "pilot"],
+  activity: ["demo", "follow-up", "urgent"],
+  category: ["sales", "marketing", "product"],
+  contact: ["champion", "economic-buyer", "user"],
+  domain: ["verified", "pending", "primary"],
+  "email-campaign": ["newsletter", "promo", "transactional"],
+  "email-template": ["welcome", "update", "feedback"],
+  "email-test-receiver": ["internal", "qa", "leadership"],
+  lead: ["webinar", "event", "referral"],
+  opportunity: ["rollout", "expansion", "renewal"],
+  "payment-plan": ["monthly", "quarterly", "annual"],
+  "payment-plan-template": ["starter", "professional", "enterprise"],
+  "real-estate-booking": ["confirmed", "pending", "cancelled"],
+  "real-estate-project": ["commercial", "residential", "mixed-use"],
+  "real-estate-property": ["available", "reserved", "sold"],
+};
+
 export async function seedOrgModels(
   dbInstance: Db,
   { organizationId, userId }: SeedOrgModelsOptions,
@@ -50,7 +67,34 @@ export async function seedOrgModels(
 
   const ownershipFields = buildOwnershipFields(organizationId, userId);
 
+  // Query user email to get domain for contact emails
+  let ownerEmailDomain = "example.org";
+  if (userId) {
+    const user = await dbInstance
+      .select({ email: usersTable.email })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+    if (user[0]?.email) {
+      const emailMatch = /@(.+)$/.exec(user[0].email);
+      if (emailMatch?.[1]) {
+        ownerEmailDomain = emailMatch[1];
+      }
+    }
+  }
+
   return dbInstance.transaction(async (tx) => {
+    // Seed tags for all entity types
+    const tagValues = Object.entries(TAGS_BY_TYPE).flatMap(
+      ([relatedType, names]) =>
+        names.map((name) => ({
+          ...ownershipFields,
+          name,
+          relatedType,
+        })),
+    );
+    const tags = await tx.insert(orgTagsTable).values(tagValues).returning();
+
     const categories = await tx
       .insert(orgCategoriesTable)
       .values([
@@ -69,6 +113,7 @@ export async function seedOrgModels(
       ])
       .returning();
 
+    const accountTags = TAGS_BY_TYPE.account ?? [];
     const accounts = await tx
       .insert(orgAccountsTable)
       .values([
@@ -76,26 +121,27 @@ export async function seedOrgModels(
           ...ownershipFields,
           name: "Acme Corporation",
           email: "hello@acme.test",
-          tags: ["priority", "b2b"],
+          tags: [accountTags[0] ?? "priority", accountTags[1] ?? "b2b"],
           categories: [categories[0]?.name ?? "Sales"],
         },
         {
           ...ownershipFields,
           name: "Globex Labs",
           email: "contact@globex.test",
-          tags: ["pilot"],
+          tags: [accountTags[2] ?? "pilot"],
           categories: [categories[1]?.name ?? "Marketing"],
         },
         {
           ...ownershipFields,
           name: "Initech",
           email: "team@initech.test",
-          tags: ["renewal"],
+          tags: [accountTags[2] ?? "pilot"],
           categories: [categories[2]?.name ?? "Product"],
         },
       ])
       .returning();
 
+    const contactTags = TAGS_BY_TYPE.contact ?? [];
     const contacts = await tx
       .insert(orgContactsTable)
       .values([
@@ -103,29 +149,30 @@ export async function seedOrgModels(
           ...ownershipFields,
           firstName: "Alice",
           lastName: "Nguyen",
-          email: "alice.nguyen@acme.test",
+          email: `alice.nguyen@${ownerEmailDomain}`,
           phone: "+1-555-0100",
-          tags: ["champion"],
+          tags: [contactTags[0] ?? "champion"],
         },
         {
           ...ownershipFields,
           firstName: "Brian",
           lastName: "Ibrahim",
-          email: "brian@globex.test",
+          email: `brian@${ownerEmailDomain}`,
           phone: "+1-555-0110",
-          tags: ["economic-buyer"],
+          tags: [contactTags[1] ?? "economic-buyer"],
         },
         {
           ...ownershipFields,
           firstName: "Chloe",
           lastName: "Martinez",
-          email: "chloe.martinez@initech.test",
+          email: `chloe.martinez@${ownerEmailDomain}`,
           phone: "+1-555-0120",
-          tags: ["user"],
+          tags: [contactTags[2] ?? "user"],
         },
       ])
       .returning();
 
+    const leadTags = TAGS_BY_TYPE.lead ?? [];
     const leads = await tx
       .insert(orgLeadsTable)
       .values([
@@ -134,92 +181,21 @@ export async function seedOrgModels(
           firstName: "Dan",
           lastName: "Riley",
           email: "dan.riley@prospect.test",
-          tags: ["webinar"],
+          tags: [leadTags[0] ?? "webinar"],
         },
         {
           ...ownershipFields,
           firstName: "Ella",
           lastName: "Ford",
           email: "ella.ford@prospect.test",
-          tags: ["event"],
+          tags: [leadTags[1] ?? "event"],
         },
         {
           ...ownershipFields,
           firstName: "Farid",
           lastName: "Zaman",
           email: "farid.zaman@prospect.test",
-          tags: ["referral"],
-        },
-      ])
-      .returning();
-
-    const emailDomains = await tx
-      .insert(orgEmailDomainsTable)
-      .values([
-        {
-          ...ownershipFields,
-          name: "campaigns.acme.test",
-          email: "news@acme.test",
-          public: randomUUID(),
-          secret: randomUUID(),
-          status: "READY",
-        },
-        {
-          ...ownershipFields,
-          name: "updates.globex.test",
-          email: "hello@globex.test",
-          public: randomUUID(),
-          secret: randomUUID(),
-          status: "PENDING",
-        },
-        {
-          ...ownershipFields,
-          name: "growth.initech.test",
-          email: "growth@initech.test",
-          public: randomUUID(),
-          secret: randomUUID(),
-          status: "READY",
-        },
-      ])
-      .returning();
-
-    const emailTemplates = await tx
-      .insert(orgEmailTemplatesTable)
-      .values([
-        {
-          ...ownershipFields,
-          name: "Welcome Series",
-          subject: "Welcome to our platform",
-          body: "Hi {{firstName}}, thanks for joining us!",
-        },
-        {
-          ...ownershipFields,
-          name: "Product Update",
-          subject: "What's new this month",
-          body: "We shipped great features you will love.",
-        },
-        {
-          ...ownershipFields,
-          name: "Feedback Request",
-          subject: "Can we get your feedback?",
-          body: "Tell us how we did and what to improve.",
-        },
-      ])
-      .returning();
-
-    const emailTestReceivers = await tx
-      .insert(orgEmailTestReceiversTable)
-      .values([
-        {
-          ...ownershipFields,
-          name: "Growth Team",
-          emails: ["growth@acme.test"],
-        },
-        { ...ownershipFields, name: "QA Review", emails: ["qa@globex.test"] },
-        {
-          ...ownershipFields,
-          name: "Leadership",
-          emails: ["leaders@initech.test"],
+          tags: [leadTags[2] ?? "referral"],
         },
       ])
       .returning();
@@ -254,6 +230,7 @@ export async function seedOrgModels(
       ])
       .returning();
 
+    const opportunityTags = TAGS_BY_TYPE.opportunity ?? [];
     const newOpportunities: NewOrgOpportunity[] = [
       {
         ...ownershipFields,
@@ -264,7 +241,7 @@ export async function seedOrgModels(
         currencyCode: "USD",
         nextStep: "Finalize security review",
         priority: "high",
-        tags: ["rollout"],
+        tags: [opportunityTags[0] ?? "rollout"],
       },
       {
         ...ownershipFields,
@@ -275,7 +252,7 @@ export async function seedOrgModels(
         currencyCode: "USD",
         nextStep: "Send proposal",
         priority: "medium",
-        tags: ["expansion"],
+        tags: [opportunityTags[1] ?? "expansion"],
       },
       {
         ...ownershipFields,
@@ -286,7 +263,7 @@ export async function seedOrgModels(
         currencyCode: "USD",
         nextStep: "Align on pricing",
         priority: "urgent",
-        tags: ["renewal"],
+        tags: [opportunityTags[2] ?? "renewal"],
       },
     ];
 
@@ -358,7 +335,9 @@ export async function seedOrgModels(
           sections: ("sections" in layout ? layout.sections : undefined) as
             | unknown[]
             | undefined,
-          supplementalFields: layout.supplementalFields as unknown[],
+          supplementalFields: ("supplementalFields" in layout
+            ? layout.supplementalFields
+            : []) as unknown[],
           autoIncludeCustomFields: true,
           isCustomized: false,
           isDeleted: false,
@@ -369,14 +348,12 @@ export async function seedOrgModels(
       .returning();
 
     return {
+      tags,
       activities,
       accounts,
       categories,
       contacts,
       leads,
-      emailDomains,
-      emailTemplates,
-      emailTestReceivers,
       events,
       opportunities,
       tasks,

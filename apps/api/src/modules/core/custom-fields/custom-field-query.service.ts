@@ -22,7 +22,8 @@ export interface CustomFieldFilter {
     | 'gte'
     | 'lt'
     | 'lte'
-    | 'array_contains';
+    | 'array_contains'
+    | 'array_contains_all';
   value: unknown;
 }
 
@@ -96,6 +97,12 @@ export class CustomFieldQueryService {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         const valueStr = `${filter.value}`;
         return sql`${customFieldsColumn}->${sql.raw(`'${filter.key}'`)} ? ${sql.raw(`'${valueStr}'`)}`;
+      }
+
+      case 'array_contains_all': {
+        if (!Array.isArray(filter.value)) return undefined;
+        const jsonValue = JSON.stringify(filter.value).replace(/'/g, "''");
+        return sql`${customFieldsColumn}->${sql.raw(`'${filter.key}'`)} @> ${sql.raw(`'${jsonValue}'::jsonb`)}`;
       }
 
       default:

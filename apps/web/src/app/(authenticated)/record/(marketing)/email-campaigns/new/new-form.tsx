@@ -145,6 +145,14 @@ const normalizeStringArray = (value?: string[] | string) => {
   return [] as string[];
 };
 
+type PreviewRecipientFilter = {
+  id: string;
+  value: string | string[];
+  variant: "multiSelectArray";
+  operator: "arrayIncludesAny" | "arrayIncludesAll";
+  filterId: string;
+};
+
 const buildPreviewRecipientsUrl = (
   endpoint: string,
   filters: {
@@ -156,22 +164,34 @@ const buildPreviewRecipientsUrl = (
   const url = new URL(buildUrl(endpoint));
   const normalizedTags = normalizeStringArray(filters.targetTags);
   const normalizedCategories = normalizeStringArray(filters.targetCategories);
+  const previewFilters: PreviewRecipientFilter[] = [];
 
-  if (filters.tagMatchType) {
-    url.searchParams.set("tagMatchType", filters.tagMatchType);
+  if (normalizedTags.length > 0) {
+    previewFilters.push({
+      id: "tags",
+      value: normalizedTags,
+      variant: "multiSelectArray",
+      operator:
+        filters.tagMatchType === "ANY"
+          ? "arrayIncludesAny"
+          : "arrayIncludesAll",
+      filterId: "tags-preview",
+    });
   }
 
-  normalizedTags.forEach((tag) => {
-    if (tag) {
-      url.searchParams.append("targetTags[]", tag);
-    }
-  });
+  if (normalizedCategories.length > 0) {
+    previewFilters.push({
+      id: "categories",
+      value: normalizedCategories,
+      variant: "multiSelectArray",
+      operator: "arrayIncludesAny",
+      filterId: "categories-preview",
+    });
+  }
 
-  normalizedCategories.forEach((category) => {
-    if (category) {
-      url.searchParams.append("targetCategories[]", category);
-    }
-  });
+  if (previewFilters.length > 0) {
+    url.searchParams.set("filters", JSON.stringify(previewFilters));
+  }
 
   return url.toString();
 };
