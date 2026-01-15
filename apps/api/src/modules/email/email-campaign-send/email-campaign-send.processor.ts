@@ -19,6 +19,7 @@ import type {
 
 import { DomainWarmupService } from '../domain-warmup/domain-warmup.service';
 import { SesEmailService } from '../ses-email/ses-email.service';
+import { EmailCampaignQueueService } from './email-campaign-send.queue';
 import {
   PROCESS_CAMPAIGN_BATCH_JOB_NAME,
   SEND_SINGLE_EMAIL_JOB_NAME,
@@ -33,6 +34,7 @@ export class EmailCampaignSendProcessor extends WorkerHost {
     @Inject(DRIZZLE_DB) private readonly db: Db,
     private readonly sesEmailService: SesEmailService,
     private readonly domainWarmupService: DomainWarmupService,
+    private readonly campaignQueueService: EmailCampaignQueueService,
   ) {
     super();
   }
@@ -163,8 +165,8 @@ export class EmailCampaignSendProcessor extends WorkerHost {
 
       // Schedule next batch for tomorrow
       const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+      tomorrow.setUTCHours(0, 0, 0, 0);
 
       const delay = tomorrow.getTime() - Date.now();
       await job.moveToDelayed(Date.now() + delay);
@@ -246,7 +248,7 @@ export class EmailCampaignSendProcessor extends WorkerHost {
           await this.db
             .update(orgEmailCampaignsTable)
             .set({
-              sentCount: sql<number>`"${orgEmailCampaignsTable.sentCount}" + 1`,
+              sentCount: sql<number>`${orgEmailCampaignsTable.sentCount} + 1`,
             })
             .where(eq(orgEmailCampaignsTable.id, campaignId));
 
@@ -300,9 +302,30 @@ export class EmailCampaignSendProcessor extends WorkerHost {
       );
 
     if (remainingCount[0]?.count ?? 0 > 0) {
-      // Queue next batch with a small delay
-      // Note: The next batch will be triggered by the send service
-      // since we can't inject the queue service directly in processors
+      const capacityAfter =
+        await this.domainWarmupService.getDailyCapacity(domainId);
+
+      let delay = 0;
+      if (capacityAfter.remaining <= 0) {
+        const tomorrow = new Date();
+        tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+        tomorrow.setUTCHours(0, 0, 0, 0);
+        delay = Math.max(0, tomorrow.getTime() - Date.now());
+      }
+
+      await this.campaignQueueService.addBatchJob(
+        {
+          campaignId,
+          organizationId,
+          domainId,
+          batchNumber: batchNumber + 1,
+        },
+        delay,
+      );
+
+      this.logger.log(
+        `Scheduled next batch ${batchNumber + 1} for campaign ${campaignId}`,
+      );
     }
   }
 

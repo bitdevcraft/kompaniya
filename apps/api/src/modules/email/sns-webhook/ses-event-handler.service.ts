@@ -2,6 +2,8 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { type Db } from '@repo/database';
 import {
   orgEmailBounceEventsTable,
+  orgEmailCampaignRecipientsTable,
+  orgEmailCampaignsTable,
   orgEmailClickEventsTable,
   orgEmailComplaintEventsTable,
   orgEmailDeliveryDelayEventsTable,
@@ -13,7 +15,7 @@ import {
   orgEmailSendEventsTable,
   orgEmailsTable,
 } from '@repo/database/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 import { DRIZZLE_DB } from '~/constants/provider';
 
@@ -38,22 +40,51 @@ export class SesEventHandlerService {
         break;
       case 'Bounce':
         await this.handleBounceEvent(data);
-        await this.updateOrgEmailStatus(messageId, 'BOUNCED');
+        {
+          const email = await this.updateOrgEmailStatus(messageId, 'BOUNCED');
+          await this.incrementCampaignCounters(email?.emailCampaignId, {
+            bouncedCount: 1,
+          });
+          if (email?.id) {
+            await this.updateRecipientStatus(email.id, 'BOUNCED');
+          }
+        }
         break;
       case 'Complaint':
         await this.handleComplaintEvent(data);
-        await this.updateOrgEmailStatus(messageId, 'COMPLAINT');
+        {
+          const email = await this.updateOrgEmailStatus(messageId, 'COMPLAINT');
+          await this.incrementCampaignCounters(email?.emailCampaignId, {
+            complainedCount: 1,
+          });
+        }
         break;
       case 'Delivery':
         await this.handleDeliveryEvent(data);
-        await this.updateOrgEmailStatus(messageId, 'DELIVERED');
+        {
+          const email = await this.updateOrgEmailStatus(messageId, 'DELIVERED');
+          await this.incrementCampaignCounters(email?.emailCampaignId, {
+            deliveredCount: 1,
+          });
+        }
         break;
       case 'Open':
         await this.handleOpenEvent(data);
-        await this.updateOrgEmailStatus(messageId, 'OPENED');
+        {
+          const email = await this.updateOrgEmailStatus(messageId, 'OPENED');
+          await this.incrementCampaignCounters(email?.emailCampaignId, {
+            openedCount: 1,
+          });
+        }
         break;
       case 'Click':
         await this.handleClickEvent(data);
+        await this.incrementCampaignCounters(
+          data.orgEmailId
+            ? await this.getEmailCampaignId(data.orgEmailId)
+            : null,
+          { clickedCount: 1 },
+        );
         break;
       case 'Reject':
         await this.handleRejectEvent(data);
@@ -80,6 +111,15 @@ export class SesEventHandlerService {
       .returning();
 
     return eventRecord[0];
+  }
+
+  private async getEmailCampaignId(orgEmailId: string): Promise<string | null> {
+    const email = await this.db.query.orgEmailsTable.findFirst({
+      where: eq(orgEmailsTable.id, orgEmailId),
+      columns: { emailCampaignId: true },
+    });
+
+    return email?.emailCampaignId ?? null;
   }
 
   private async handleBounceEvent(data: SesEventJobData) {
@@ -322,6 +362,48 @@ export class SesEventHandlerService {
     });
   }
 
+  private async incrementCampaignCounters(
+    campaignId: string | null | undefined,
+    increments: {
+      deliveredCount?: number;
+      openedCount?: number;
+      clickedCount?: number;
+      bouncedCount?: number;
+      complainedCount?: number;
+    },
+  ) {
+    if (!campaignId) return;
+
+    const updates: Record<string, unknown> = {};
+
+    if (increments.deliveredCount) {
+      updates.deliveredCount = sql<number>`${orgEmailCampaignsTable.deliveredCount} + ${increments.deliveredCount}`;
+    }
+
+    if (increments.openedCount) {
+      updates.openedCount = sql<number>`${orgEmailCampaignsTable.openedCount} + ${increments.openedCount}`;
+    }
+
+    if (increments.clickedCount) {
+      updates.clickedCount = sql<number>`${orgEmailCampaignsTable.clickedCount} + ${increments.clickedCount}`;
+    }
+
+    if (increments.bouncedCount) {
+      updates.bouncedCount = sql<number>`${orgEmailCampaignsTable.bouncedCount} + ${increments.bouncedCount}`;
+    }
+
+    if (increments.complainedCount) {
+      updates.complainedCount = sql<number>`${orgEmailCampaignsTable.complainedCount} + ${increments.complainedCount}`;
+    }
+
+    if (Object.keys(updates).length === 0) return;
+
+    await this.db
+      .update(orgEmailCampaignsTable)
+      .set(updates)
+      .where(eq(orgEmailCampaignsTable.id, campaignId));
+  }
+
   /**
    * Normalize SES event type to match database enum (uppercase)
    * SES sends: "Send", "Reject", "Bounce", etc.
@@ -356,9 +438,22 @@ export class SesEventHandlerService {
     messageId: string,
     status: 'BOUNCED' | 'COMPLAINT' | 'DELIVERED' | 'OPENED',
   ) {
-    await this.db
+    const [record] = await this.db
       .update(orgEmailsTable)
       .set({ status })
-      .where(eq(orgEmailsTable.messageId, messageId));
+      .where(eq(orgEmailsTable.messageId, messageId))
+      .returning({
+        id: orgEmailsTable.id,
+        emailCampaignId: orgEmailsTable.emailCampaignId,
+      });
+
+    return record ?? null;
+  }
+
+  private async updateRecipientStatus(orgEmailId: string, status: 'BOUNCED') {
+    await this.db
+      .update(orgEmailCampaignRecipientsTable)
+      .set({ status })
+      .where(eq(orgEmailCampaignRecipientsTable.orgEmailId, orgEmailId));
   }
 }

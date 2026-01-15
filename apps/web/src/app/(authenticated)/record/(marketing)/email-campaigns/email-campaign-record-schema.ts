@@ -21,7 +21,20 @@ export const emailCampaignRecordSchema = z.object({
   orgEmailTestReceiverId: z.string().optional(),
   status: z.string().optional(),
   subject: z.string().optional(),
+  tagMatchType: z.string().optional(),
   targetCategories: z.array(z.string()).optional().default([]),
+  targetTags: z.array(z.string()).optional().default([]),
+  scheduledFor: z.string().optional(),
+  startedAt: z.string().optional(),
+  completedAt: z.string().optional(),
+  cancelledAt: z.string().optional(),
+  totalRecipients: z.string().optional(),
+  sentCount: z.string().optional(),
+  deliveredCount: z.string().optional(),
+  openedCount: z.string().optional(),
+  clickedCount: z.string().optional(),
+  bouncedCount: z.string().optional(),
+  complainedCount: z.string().optional(),
 });
 
 export type EmailCampaignRecordFormValues = z.input<

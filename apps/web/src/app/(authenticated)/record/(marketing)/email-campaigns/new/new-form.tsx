@@ -19,6 +19,14 @@ import {
   FormMessage,
 } from "@kompaniya/ui-common/components/form";
 import { Input } from "@kompaniya/ui-common/components/input";
+import { MultiSelect } from "@kompaniya/ui-common/components/multi-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@kompaniya/ui-common/components/select";
 import {
   Tabs,
   TabsContent,
@@ -46,6 +54,7 @@ import z from "zod";
 
 import { env } from "@/env/client";
 import { authClient } from "@/lib/auth/client";
+import { useTagOptions } from "@/lib/hooks/use-tag-options";
 
 import { dictTranslation, model, modelEndpoint } from "../config";
 
@@ -56,6 +65,15 @@ type MjmlJsonNode = {
   content?: string;
 };
 
+type PreviewRecipientsResponse = {
+  count: number;
+  sample: Array<{
+    id?: string | null;
+    name?: string | null;
+    email?: string | null;
+  }>;
+};
+
 const PREVIEW_STYLES = `body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   padding: 1.5rem;
@@ -63,12 +81,26 @@ const PREVIEW_STYLES = `body {
   color: #0f172a;
 }`;
 
+const TAG_MATCH_OPTIONS = [
+  { label: "Match all tags", value: "ALL" },
+  { label: "Match any tag", value: "ANY" },
+];
+
+const CATEGORY_OPTIONS = [
+  { label: "Newsletter", value: "newsletter" },
+  { label: "Product updates", value: "product-updates" },
+  { label: "VIP", value: "vip" },
+];
+
 const FormSchema = z.object({
   name: z.string().min(1, "Campaign name is missing"),
   subject: z.string().min(1, "Email subject is missing"),
   orgEmailDomainId: z.string().optional(),
   orgEmailTemplateId: z.string().optional(),
   orgEmailTestReceiverId: z.string().optional(),
+  tagMatchType: z.string().optional(),
+  targetCategories: z.string().array().optional(),
+  targetTags: z.string().array().optional(),
   body: z.string().min(1, "Email content is required"),
   htmlContent: z.string().optional(),
   mjmlContent: z.string().optional(),
@@ -97,6 +129,52 @@ const buildUrl = (endpoint: string) => {
 };
 
 const normalizeEndpoint = (endpoint: string) => endpoint.replace(/\/$/, "");
+
+const normalizeStringArray = (value?: string[] | string) => {
+  if (Array.isArray(value)) {
+    return value.filter((entry): entry is string => typeof entry === "string");
+  }
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value
+      .split(/\n|,/)
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+  }
+
+  return [] as string[];
+};
+
+const buildPreviewRecipientsUrl = (
+  endpoint: string,
+  filters: {
+    tagMatchType?: string;
+    targetTags?: string[] | string;
+    targetCategories?: string[] | string;
+  },
+) => {
+  const url = new URL(buildUrl(endpoint));
+  const normalizedTags = normalizeStringArray(filters.targetTags);
+  const normalizedCategories = normalizeStringArray(filters.targetCategories);
+
+  if (filters.tagMatchType) {
+    url.searchParams.set("tagMatchType", filters.tagMatchType);
+  }
+
+  normalizedTags.forEach((tag) => {
+    if (tag) {
+      url.searchParams.append("targetTags[]", tag);
+    }
+  });
+
+  normalizedCategories.forEach((category) => {
+    if (category) {
+      url.searchParams.append("targetCategories[]", category);
+    }
+  });
+
+  return url.toString();
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -170,6 +248,10 @@ const stepMeta = [
     description: "Name and subject for your email campaign.",
   },
   {
+    title: "Audience",
+    description: "Choose tags, categories, and matching rules.",
+  },
+  {
     title: "Sending setup",
     description: "Choose the email domain and test receiver.",
   },
@@ -184,6 +266,7 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: activeOrganization } = authClient.useActiveOrganization();
+  const tagOptionsQuery = useTagOptions("contact");
 
   const form = useForm<FormValue>({
     resolver: zodResolver(FormSchema),
@@ -196,6 +279,9 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
       orgEmailDomainId: "",
       orgEmailTemplateId: "",
       orgEmailTestReceiverId: "",
+      tagMatchType: "ALL",
+      targetCategories: [],
+      targetTags: [],
       subject: "",
     },
   });
@@ -208,7 +294,13 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   const [editorMode, setEditorMode] = useState<"mjml" | "html">("mjml");
   const [initialMjml, setInitialMjml] = useState<MjmlJsonNode | null>(null);
   const [templateLoading, setTemplateLoading] = useState(false);
+  const [previewRecipients, setPreviewRecipients] =
+    useState<PreviewRecipientsResponse | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const htmlBody = useWatch({ control: form.control, name: "body" }) ?? "";
+
+  const tagOptions = tagOptionsQuery.data ?? [];
 
   const editorKey = useMemo(() => {
     const templateKey = selectedTemplate?.id ?? "new";
@@ -218,6 +310,7 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   const domainEndpoint = `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/domain`;
   const templateEndpoint = `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-template`;
   const testReceiverEndpoint = `${env.NEXT_PUBLIC_BASE_SERVER_URL}/api/organization/email-test-receiver`;
+  const previewRecipientsEndpoint = `${modelEndpoint}/preview-recipients`;
 
   const handleOutputsChange = useCallback(
     (outputs: EmailEditorOutputs) => {
@@ -300,8 +393,9 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
 
   const stepFields: Record<number, Array<keyof FormValue>> = {
     1: ["name", "subject"],
-    2: ["orgEmailDomainId", "orgEmailTestReceiverId"],
-    3: ["body"],
+    2: ["targetTags", "targetCategories", "tagMatchType"],
+    3: ["orgEmailDomainId", "orgEmailTestReceiverId"],
+    4: ["body"],
   };
 
   const handleNext = async () => {
@@ -313,6 +407,37 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
 
   const handleBack = () => {
     setStep((current) => Math.max(current - 1, 1));
+  };
+
+  const handlePreviewRecipients = async () => {
+    setPreviewLoading(true);
+    setPreviewError(null);
+    setPreviewRecipients(null);
+
+    try {
+      const values = form.getValues();
+      const url = buildPreviewRecipientsUrl(previewRecipientsEndpoint, {
+        tagMatchType: values.tagMatchType,
+        targetTags: values.targetTags ?? [],
+        targetCategories: values.targetCategories ?? [],
+      });
+      const response = await axios.get<PreviewRecipientsResponse>(url, {
+        withCredentials: true,
+      });
+      setPreviewRecipients(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setPreviewError(
+          error.response?.data?.message ||
+            error.message ||
+            "Unable to preview recipients.",
+        );
+      } else {
+        setPreviewError("Unable to preview recipients.");
+      }
+    } finally {
+      setPreviewLoading(false);
+    }
   };
 
   const handleFinish = () => {
@@ -417,6 +542,146 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
           <div className="grid gap-4">
             <FormField
               control={form.control}
+              name="targetTags"
+              render={({ field }) => {
+                const values = Array.isArray(field.value) ? field.value : [];
+                return (
+                  <FormItem>
+                    <FormLabel>Target tags</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        defaultValue={values}
+                        disabled={tagOptionsQuery.isLoading}
+                        key={values.join("|") || "empty"}
+                        onValueChange={(next) => field.onChange(next)}
+                        options={tagOptions}
+                        placeholder={
+                          tagOptionsQuery.isLoading
+                            ? "Loading tags..."
+                            : "Select tags"
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Filter recipients by contact tags.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <FormField
+              control={form.control}
+              name="tagMatchType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tag match rule</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || "ALL"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose match rule" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TAG_MATCH_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Choose how the selected tags are matched.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="targetCategories"
+              render={({ field }) => {
+                const values = Array.isArray(field.value) ? field.value : [];
+                return (
+                  <FormItem>
+                    <FormLabel>Target categories</FormLabel>
+                    <FormControl>
+                      <MultiSelect
+                        defaultValue={values}
+                        key={values.join("|") || "empty"}
+                        onValueChange={(next) => field.onChange(next)}
+                        options={CATEGORY_OPTIONS}
+                        placeholder="Select categories"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Narrow the audience using contact categories.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <div className="space-y-3 rounded-md border bg-muted/10 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-sm font-medium">Audience preview</div>
+                <Button
+                  disabled={previewLoading}
+                  onClick={handlePreviewRecipients}
+                  type="button"
+                  variant="outline"
+                >
+                  {previewLoading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
+                  Preview recipients
+                </Button>
+              </div>
+              {previewError ? (
+                <p className="text-sm text-destructive">{previewError}</p>
+              ) : null}
+              {previewRecipients ? (
+                <div className="space-y-2 text-sm">
+                  <p className="font-medium">
+                    {previewRecipients.count} recipients matched
+                  </p>
+                  {previewRecipients.sample.length > 0 ? (
+                    <ul className="space-y-1 text-muted-foreground">
+                      {previewRecipients.sample.map((contact, index) => (
+                        <li
+                          key={
+                            contact.id ??
+                            contact.email ??
+                            `${contact.name ?? "contact"}-${index}`
+                          }
+                        >
+                          {contact.name || "Unnamed contact"}
+                          {contact.email ? ` - ${contact.email}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No sample recipients available yet.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Run a preview to see how many contacts match this audience.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="grid gap-4">
+            <FormField
+              control={form.control}
               name="orgEmailDomainId"
               render={({ field }) => (
                 <FormItem>
@@ -493,7 +758,7 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <div className="space-y-4">
             <FormField
               control={form.control}

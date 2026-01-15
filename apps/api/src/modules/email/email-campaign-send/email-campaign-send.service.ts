@@ -5,8 +5,9 @@ import {
   orgEmailCampaignRecipientsTable,
   orgEmailCampaignsTable,
   orgEmailDomainsTable,
+  orgEmailTestReceiversTable,
 } from '@repo/database/schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 
 import { DRIZZLE_DB } from '~/constants/provider';
 
@@ -134,6 +135,10 @@ export class EmailCampaignSendService {
       organizationId,
       crmContactId: contact.id,
       email: contact.email,
+      recipientData: {
+        name: contact.name ?? null,
+        email: contact.email,
+      },
       status: 'PENDING' as const,
       isTest: false,
     }));
@@ -163,7 +168,7 @@ export class EmailCampaignSendService {
   async getMatchedContacts(
     organizationId: string,
     options: ContactMatchOptions,
-  ): Promise<Array<{ id: string; email: string }>> {
+  ): Promise<Array<{ id: string; email: string; name?: string | null }>> {
     const { targetTags, targetCategories, tagMatchType = 'ALL' } = options;
 
     // Build conditions
@@ -171,6 +176,7 @@ export class EmailCampaignSendService {
       eq(orgContactsTable.organizationId, organizationId),
       // Only contacts who have opted in to emails
       eq(orgContactsTable.emailOptIn, true),
+      isNotNull(orgContactsTable.email),
     ];
 
     // Add tag filter
@@ -196,10 +202,17 @@ export class EmailCampaignSendService {
       columns: {
         id: true,
         email: true,
+        name: true,
       },
     });
 
-    return contacts as Array<{ id: string; email: string }>;
+    return contacts
+      .filter((contact) => typeof contact.email === 'string')
+      .map((contact) => ({
+        id: contact.id,
+        email: contact.email as string,
+        name: contact.name ?? null,
+      }));
   }
 
   /**
@@ -347,8 +360,8 @@ export class EmailCampaignSendService {
   async sendTestEmails(
     campaignId: string,
     organizationId: string,
-    testEmails: string[],
-    testReceiverId?: string,
+    emailAddresses?: string[],
+    testReceiverIds?: string[],
   ): Promise<void> {
     const campaign = await this.db.query.orgEmailCampaignsTable.findFirst({
       where: and(
@@ -380,6 +393,16 @@ export class EmailCampaignSendService {
       );
     }
 
+    const testEmails = await this.resolveTestEmails(
+      organizationId,
+      emailAddresses,
+      testReceiverIds,
+    );
+
+    if (testEmails.length === 0) {
+      throw new Error('No test email addresses provided');
+    }
+
     // Create test recipient records
     const recipientRecords = testEmails.map((email) => ({
       orgEmailCampaignId: campaignId,
@@ -395,6 +418,7 @@ export class EmailCampaignSendService {
       .returning();
 
     // Update campaign with test receiver ID
+    const testReceiverId = testReceiverIds?.[0];
     if (testReceiverId) {
       await this.db
         .update(orgEmailCampaignsTable)
@@ -489,5 +513,36 @@ export class EmailCampaignSendService {
     this.logger.log(
       `Campaign ${campaignId} started with ${recipientCount} recipients`,
     );
+  }
+
+  private async resolveTestEmails(
+    organizationId: string,
+    emailAddresses?: string[],
+    testReceiverIds?: string[],
+  ): Promise<string[]> {
+    const directEmails = (emailAddresses ?? [])
+      .map((email) => email.trim())
+      .filter((email) => email.length > 0);
+
+    if (!testReceiverIds || testReceiverIds.length === 0) {
+      return Array.from(new Set(directEmails));
+    }
+
+    const receivers = await this.db.query.orgEmailTestReceiversTable.findMany({
+      where: and(
+        eq(orgEmailTestReceiversTable.organizationId, organizationId),
+        inArray(orgEmailTestReceiversTable.id, testReceiverIds),
+      ),
+      columns: {
+        emails: true,
+      },
+    });
+
+    const receiverEmails = receivers
+      .flatMap((receiver) => receiver.emails ?? [])
+      .map((email) => email.trim())
+      .filter((email) => email.length > 0);
+
+    return Array.from(new Set([...directEmails, ...receiverEmails]));
   }
 }

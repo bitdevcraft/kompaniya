@@ -6,10 +6,18 @@ import { env } from "@/env/client";
 import type { EmailCampaignRecordFormValues } from "./email-campaign-record-schema";
 
 const STATUS_OPTIONS: RecordFieldOption[] = [
-  { label: "Draft", value: "draft" },
-  { label: "Scheduled", value: "scheduled" },
-  { label: "Sending", value: "sending" },
-  { label: "Completed", value: "completed" },
+  { label: "Draft", value: "DRAFT" },
+  { label: "Scheduled", value: "SCHEDULED" },
+  { label: "Sending", value: "SENDING" },
+  { label: "Paused", value: "PAUSED" },
+  { label: "Completed", value: "COMPLETED" },
+  { label: "Cancelled", value: "CANCELLED" },
+  { label: "Failed", value: "FAILED" },
+];
+
+const TAG_MATCH_OPTIONS: RecordFieldOption[] = [
+  { label: "Match all tags", value: "ALL" },
+  { label: "Match any tag", value: "ANY" },
 ];
 
 const AUDIENCE_OPTIONS: RecordFieldOption[] = [
@@ -26,6 +34,18 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
           fieldId: "status",
           id: "campaign-status",
           label: "Status",
+        },
+        {
+          fieldId: "scheduledFor",
+          id: "campaign-scheduled",
+          label: "Scheduled for",
+          type: "datetime",
+        },
+        {
+          fieldId: "startedAt",
+          id: "campaign-started",
+          label: "Started",
+          type: "datetime",
         },
       ],
       subtitle: [{ fieldId: "subject", prefix: "Subject: " }],
@@ -49,9 +69,11 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
               },
               { id: "subject", label: "Email subject", type: "text" },
               {
+                availableOnCreate: false,
                 id: "status",
                 label: "Status",
                 options: STATUS_OPTIONS,
+                readOnly: true,
                 type: "picklist",
               },
             ],
@@ -102,6 +124,25 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
             fields: [
               {
                 description:
+                  "Use contact tags to build targeted segments for this campaign.",
+                id: "targetTags",
+                label: "Target tags",
+                placeholder: "Add tags.",
+                tag: {
+                  relatedType: "contact",
+                },
+                type: "tag",
+              },
+              {
+                description:
+                  "Choose whether all or any of the tags must match.",
+                id: "tagMatchType",
+                label: "Tag match rule",
+                options: TAG_MATCH_OPTIONS,
+                type: "picklist",
+              },
+              {
+                description:
                   "Use comma separated values to add multiple categories.",
                 id: "targetCategories",
                 label: "Target categories",
@@ -112,6 +153,98 @@ export const emailCampaignRecordLayout: RecordPageLayout<EmailCampaignRecordForm
             ],
             id: "campaign-audience",
             title: "Audience",
+          },
+          {
+            description: "Timing and lifecycle checkpoints for this campaign.",
+            fields: [
+              {
+                availableOnCreate: false,
+                id: "scheduledFor",
+                label: "Scheduled for",
+                readOnly: true,
+                type: "datetime",
+              },
+              {
+                availableOnCreate: false,
+                id: "startedAt",
+                label: "Started at",
+                readOnly: true,
+                type: "datetime",
+              },
+              {
+                availableOnCreate: false,
+                id: "completedAt",
+                label: "Completed at",
+                readOnly: true,
+                type: "datetime",
+              },
+              {
+                availableOnCreate: false,
+                id: "cancelledAt",
+                label: "Cancelled at",
+                readOnly: true,
+                type: "datetime",
+              },
+            ],
+            id: "campaign-scheduling",
+            title: "Scheduling",
+          },
+          {
+            columns: 3,
+            description: "Real-time performance metrics for the current send.",
+            fields: [
+              {
+                availableOnCreate: false,
+                id: "totalRecipients",
+                label: "Total recipients",
+                readOnly: true,
+                type: "number",
+              },
+              {
+                availableOnCreate: false,
+                id: "sentCount",
+                label: "Sent",
+                readOnly: true,
+                type: "number",
+              },
+              {
+                availableOnCreate: false,
+                id: "deliveredCount",
+                label: "Delivered",
+                readOnly: true,
+                type: "number",
+              },
+              {
+                availableOnCreate: false,
+                id: "openedCount",
+                label: "Opened",
+                readOnly: true,
+                type: "number",
+              },
+              {
+                availableOnCreate: false,
+                id: "clickedCount",
+                label: "Clicked",
+                readOnly: true,
+                type: "number",
+              },
+              {
+                availableOnCreate: false,
+                id: "bouncedCount",
+                label: "Bounced",
+                readOnly: true,
+                type: "number",
+              },
+              {
+                availableOnCreate: false,
+                id: "complainedCount",
+                label: "Complained",
+                readOnly: true,
+                type: "number",
+              },
+            ],
+            id: "campaign-performance",
+            title: "Performance",
           },
           {
             description:

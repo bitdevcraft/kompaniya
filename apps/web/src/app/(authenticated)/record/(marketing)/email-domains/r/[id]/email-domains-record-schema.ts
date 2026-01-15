@@ -15,8 +15,12 @@ import {
 export const emailDomainRecordSchema = z.object({
   name: z.string().optional(),
   verified: z.boolean().optional(),
+  status: z.string().optional(),
   dkimStatus: z.string().optional(),
   spfStatus: z.string().optional(),
+  firstEmailSentAt: z.string().optional(),
+  warmupCompletedAt: z.string().optional(),
+  dailyLimit: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
   customFields: z.record(z.string(), z.unknown()).optional(),

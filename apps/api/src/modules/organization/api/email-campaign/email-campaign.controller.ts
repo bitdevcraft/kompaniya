@@ -26,6 +26,7 @@ import { ZodValidationPipe } from '~/pipes/zod-validation-pipe';
 
 import { ActiveOrganization } from '../../decorator/active-organization/active-organization.decorator';
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
+import { CampaignRecipientsQueryDto } from './dto/campaign-recipients-query.dto';
 import { type CreateEmailCampaignDto } from './dto/create-email-campaign.dto';
 import { type DeleteEmailCampaignsDto } from './dto/delete-email-campaigns.dto';
 import { PreviewRecipientsDto } from './dto/preview-recipients.dto';
@@ -158,6 +159,29 @@ export class EmailCampaignController {
       count: contacts.length,
       sample: contacts.slice(0, 10),
     };
+  }
+
+  @Get('r/:id/recipients')
+  async recipients(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+    @Query() query: CampaignRecipientsQueryDto,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    return await this.emailCampaignService.getRecipients(id, organization.id, {
+      status: query.status,
+      isTest: query.isTest,
+      page: query.page,
+      perPage: query.perPage,
+    });
   }
 
   @Delete('r/:id')
@@ -311,27 +335,54 @@ export class EmailCampaignController {
       throw new NotFoundException("Email campaign doesn't exist");
     }
 
-    // If testReceiverIds are provided, fetch the test receiver emails
-    const testEmails = sendTestDto.emailAddresses ?? [];
-
-    if (sendTestDto.testReceiverIds && sendTestDto.testReceiverIds.length > 0) {
-      // Fetch test receivers and add their emails
-      // This would require injecting the test receiver service
-      // For now, we'll just use the provided email addresses
-    }
-
-    if (testEmails.length === 0) {
-      throw new BadRequestException('No test email addresses provided');
-    }
-
     await this.emailCampaignSendService.sendTestEmails(
       id,
       organization.id,
-      testEmails,
-      sendTestDto.testReceiverIds?.[0],
+      sendTestDto.emailAddresses ?? [],
+      sendTestDto.testReceiverIds ?? [],
     );
 
-    return { success: true, message: `Sent ${testEmails.length} test emails` };
+    return { success: true, message: 'Test emails queued for sending' };
+  }
+
+  @Get('r/:id/stats')
+  async stats(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    const recipientStats = await this.emailCampaignService.getRecipientStats(
+      id,
+      organization.id,
+    );
+
+    return {
+      id: record.id,
+      status: record.status,
+      scheduledFor: record.scheduledFor,
+      startedAt: record.startedAt,
+      completedAt: record.completedAt,
+      cancelledAt: record.cancelledAt,
+      totals: {
+        totalRecipients: record.totalRecipients ?? 0,
+        sentCount: record.sentCount ?? 0,
+        deliveredCount: record.deliveredCount ?? 0,
+        openedCount: record.openedCount ?? 0,
+        clickedCount: record.clickedCount ?? 0,
+        bouncedCount: record.bouncedCount ?? 0,
+        complainedCount: record.complainedCount ?? 0,
+      },
+      recipients: recipientStats.primary,
+      testRecipients: recipientStats.test,
+    };
   }
 
   @Patch('r/:id')

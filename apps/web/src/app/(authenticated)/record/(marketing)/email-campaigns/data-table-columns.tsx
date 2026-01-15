@@ -13,10 +13,12 @@ import {
   getTableColumns,
   makeRowAction,
 } from "@kompaniya/ui-data-table/utils/data-table-columns";
+import { convertCase } from "@repo/shared/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 import Link from "next/link";
 
+import { formatDateTime } from "@/components/record-page/utils";
 import { DataTableActionType } from "@/types/data-table-actions";
 
 import { tableType } from "./config";
@@ -76,6 +78,40 @@ export function useDataTableColumns(
         icon: Text,
       },
       enableColumnFilter: true,
+    },
+    {
+      id: "status",
+      accessorKey: "status",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) =>
+        row.original.status
+          ? convertCase(row.original.status, "constant", "title")
+          : "-",
+      meta: {
+        label: "Status",
+        placeholder: "Search status...",
+        variant: "text",
+        icon: Text,
+      },
+      enableColumnFilter: true,
+    },
+    {
+      id: "scheduledFor",
+      accessorKey: "scheduledFor",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Scheduled" />
+      ),
+      cell: ({ row }) => formatDateTime(row.original.scheduledFor) ?? "-",
+    },
+    {
+      id: "sentCount",
+      accessorKey: "sentCount",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Sent" />
+      ),
+      cell: ({ row }) => row.original.sentCount ?? 0,
     },
     {
       id: "actions",

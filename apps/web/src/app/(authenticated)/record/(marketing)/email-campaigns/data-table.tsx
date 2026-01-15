@@ -95,7 +95,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
         actionBar={<OrgDataTableActionBar table={table} />}
         enableGrid
         gridOptions={{
-          columns: ["email", "status"],
+          columns: ["status", "scheduledFor", "sentCount"],
           containerClassName: "",
           itemClassName: "",
           emptyState: <div>No Result</div>,

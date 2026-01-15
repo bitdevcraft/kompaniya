@@ -3,9 +3,10 @@ import { type Db } from '@repo/database';
 import {
   NewOrgEmailCampaign,
   OrgEmailCampaign,
+  orgEmailCampaignRecipientsTable,
   orgEmailCampaignsTable,
 } from '@repo/database/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 
 import { Keys } from '~/constants/cache-keys';
 import { DRIZZLE_DB } from '~/constants/provider';
@@ -120,6 +121,104 @@ export class EmailCampaignService {
       query,
       organizationId,
     });
+  }
+
+  async getRecipients(
+    campaignId: string,
+    organizationId: string,
+    options?: {
+      status?: 'PENDING' | 'QUEUED' | 'SENT' | 'FAILED' | 'BOUNCED';
+      isTest?: boolean;
+      page?: number;
+      perPage?: number;
+    },
+  ) {
+    const page = options?.page ?? 1;
+    const perPage = options?.perPage ?? 50;
+    const offset = (page - 1) * perPage;
+
+    const conditions = [
+      eq(orgEmailCampaignRecipientsTable.organizationId, organizationId),
+      eq(orgEmailCampaignRecipientsTable.orgEmailCampaignId, campaignId),
+    ];
+
+    if (options?.status) {
+      conditions.push(
+        eq(orgEmailCampaignRecipientsTable.status, options.status),
+      );
+    }
+
+    if (options?.isTest !== undefined) {
+      conditions.push(
+        eq(orgEmailCampaignRecipientsTable.isTest, options.isTest),
+      );
+    }
+
+    const [rows, totals] = await Promise.all([
+      this.db.query.orgEmailCampaignRecipientsTable.findMany({
+        where: and(...conditions),
+        limit: perPage,
+        offset,
+        orderBy: (table, { desc }) => [desc(table.createdAt)],
+      }),
+      this.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(orgEmailCampaignRecipientsTable)
+        .where(and(...conditions)),
+    ]);
+
+    const total = totals[0]?.count ?? 0;
+    const pageCount = Math.max(1, Math.ceil(total / perPage));
+
+    return {
+      data: rows,
+      page,
+      perPage,
+      total,
+      pageCount,
+    };
+  }
+
+  async getRecipientStats(campaignId: string, organizationId: string) {
+    const rows = await this.db
+      .select({
+        status: orgEmailCampaignRecipientsTable.status,
+        isTest: orgEmailCampaignRecipientsTable.isTest,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(orgEmailCampaignRecipientsTable)
+      .where(
+        and(
+          eq(orgEmailCampaignRecipientsTable.orgEmailCampaignId, campaignId),
+          eq(orgEmailCampaignRecipientsTable.organizationId, organizationId),
+        ),
+      )
+      .groupBy(
+        orgEmailCampaignRecipientsTable.status,
+        orgEmailCampaignRecipientsTable.isTest,
+      );
+
+    const buildStats = (isTest: boolean) => {
+      const filtered = rows.filter((row) => Boolean(row.isTest) === isTest);
+      const byStatus = Object.fromEntries(
+        filtered.map((row) => [row.status, row.count]),
+      ) as Record<string, number>;
+      const total = filtered.reduce((sum, row) => sum + row.count, 0);
+
+      return {
+        total,
+        pending: byStatus.PENDING ?? 0,
+        queued: byStatus.QUEUED ?? 0,
+        sent: byStatus.SENT ?? 0,
+        failed: byStatus.FAILED ?? 0,
+        bounced: byStatus.BOUNCED ?? 0,
+      };
+    };
+
+    return {
+      primary: buildStats(false),
+      test: buildStats(true),
+    };
   }
 
   async getRecordById(
