@@ -42,8 +42,8 @@ export const orgContactsTable = pgTable("org_contacts", {
   nationality: varchar("nationality", { length: 255 }),
 
   // Additional Data
-  tags: text("tags").array(),
-  categories: text("categories").array(),
+  tags: jsonb("tags").$type<string[]>().default([]),
+  categories: jsonb("categories").$type<string[]>().default([]),
 
   notes: text("notes"),
 

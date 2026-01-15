@@ -1,3 +1,5 @@
+CREATE TYPE "public"."csv_import_job_status" AS ENUM('queued', 'processing', 'completed', 'failed', 'partial_success');--> statement-breakpoint
+CREATE TYPE "public"."custom_field_type" AS ENUM('string', 'number', 'boolean', 'date', 'datetime', 'single_select', 'multi_select', 'json', 'reference');--> statement-breakpoint
 CREATE TYPE "public"."opportunity_forecast_category" AS ENUM('pipeline', 'best_case', 'commit', 'omitted', 'closed');--> statement-breakpoint
 CREATE TYPE "public"."opportunity_priority" AS ENUM('low', 'medium', 'high', 'urgent');--> statement-breakpoint
 CREATE TYPE "public"."opportunity_status" AS ENUM('open', 'won', 'lost', 'on_hold');--> statement-breakpoint
@@ -8,6 +10,8 @@ CREATE TYPE "public"."org_real_estate_project_status" AS ENUM('planning', 'activ
 CREATE TYPE "public"."org_real_estate_property_listing_type" AS ENUM('sale', 'rent');--> statement-breakpoint
 CREATE TYPE "public"."org_real_estate_property_status" AS ENUM('available', 'reserved', 'sold', 'rented', 'inactive');--> statement-breakpoint
 CREATE TYPE "public"."org_real_estate_property_type" AS ENUM('unit', 'plot', 'villa', 'apartment', 'other');--> statement-breakpoint
+CREATE TYPE "public"."record_layout_entity_type" AS ENUM('org_contacts', 'org_leads', 'org_accounts', 'org_opportunities', 'org_activities', 'org_categories', 'org_tags', 'org_events', 'org_tasks', 'org_email_templates', 'org_email_campaigns', 'org_email_domains', 'org_real_estate_projects', 'org_real_estate_properties', 'org_real_estate_bookings', 'org_payment_plans', 'org_payment_plan_templates', 'org_email_test_receivers', 'org_emails', 'org_email_clicks', 'org_real_estate_booking_buyers');--> statement-breakpoint
+CREATE TYPE "public"."table_preferences_entity_type" AS ENUM('org_contacts', 'org_leads', 'org_accounts', 'org_opportunities', 'org_activities', 'org_categories', 'org_tags', 'org_events', 'org_tasks', 'org_email_templates', 'org_email_campaigns', 'org_email_domains', 'org_real_estate_projects', 'org_real_estate_properties', 'org_real_estate_bookings', 'org_payment_plans', 'org_payment_plan_templates', 'org_email_test_receivers', 'org_emails', 'org_email_clicks', 'org_real_estate_booking_buyers');--> statement-breakpoint
 CREATE TABLE "accounts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"account_id" text NOT NULL,
@@ -67,17 +71,33 @@ CREATE TABLE "members" (
 	"created_at" timestamp NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "organization_roles" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"role" text NOT NULL,
+	"permission" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp
+);
+--> statement-breakpoint
 CREATE TABLE "organizations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"slug" text NOT NULL,
 	"logo" text,
 	"created_at" timestamp NOT NULL,
+	"deleted_at" timestamp,
 	"metadata" text,
 	"organization_size" text,
 	"industry" text,
+	"number_of_users" integer,
+	"number_of_email_domains" integer,
+	"number_of_roles" integer,
+	"number_of_teams" integer,
 	"active" boolean DEFAULT true,
-	CONSTRAINT "organizations_slug_unique" UNIQUE("slug")
+	"is_super" boolean,
+	CONSTRAINT "organizations_slug_unique" UNIQUE("slug"),
+	CONSTRAINT "organizations_is_super_unique" UNIQUE("is_super")
 );
 --> statement-breakpoint
 CREATE TABLE "sessions" (
@@ -142,6 +162,62 @@ CREATE TABLE "verifications" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "csv_import_job_row_results" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"job_id" uuid NOT NULL,
+	"row_number" integer NOT NULL,
+	"status" varchar(20) NOT NULL,
+	"row_data" text,
+	"error_message" text,
+	"error_field" varchar(255),
+	"record_id" uuid
+);
+--> statement-breakpoint
+CREATE TABLE "csv_import_jobs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"bull_job_id" varchar(255),
+	"table_id" varchar(255) NOT NULL,
+	"file_id" varchar(255) NOT NULL,
+	"file_name" varchar(1024),
+	"status" "csv_import_job_status" DEFAULT 'queued' NOT NULL,
+	"total_rows" integer,
+	"processed_rows" integer DEFAULT 0 NOT NULL,
+	"successful_rows" integer DEFAULT 0 NOT NULL,
+	"failed_rows" integer DEFAULT 0 NOT NULL,
+	"started_at" timestamp with time zone,
+	"completed_at" timestamp with time zone,
+	"error_message" text,
+	"error_details" text,
+	"created_by" uuid,
+	CONSTRAINT "csv_import_jobs_bull_job_id_unique" UNIQUE("bull_job_id")
+);
+--> statement-breakpoint
+CREATE TABLE "custom_field_definitions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"entity_type" varchar(128) NOT NULL,
+	"key" varchar(50) NOT NULL,
+	"label" varchar(255) NOT NULL,
+	"description" text,
+	"field_type" "custom_field_type" NOT NULL,
+	"is_required" boolean DEFAULT false NOT NULL,
+	"default_value" jsonb,
+	"choices" jsonb,
+	"reference_config" jsonb,
+	"validation" jsonb,
+	"is_indexed" boolean DEFAULT false NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL,
+	"created_by" uuid,
+	CONSTRAINT "custom_field_definitions_org_entity_key_unique" UNIQUE("organization_id","entity_type","key")
+);
+--> statement-breakpoint
 CREATE TABLE "org_accounts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -157,8 +233,8 @@ CREATE TABLE "org_accounts" (
 	"phone_e164" varchar(50),
 	"email" varchar(255),
 	"email_normalized" text,
-	"tags" text[],
-	"categories" text[],
+	"tags" jsonb DEFAULT '[]'::jsonb,
+	"categories" jsonb DEFAULT '[]'::jsonb,
 	"notes" text,
 	"last_activity_at" timestamp with time zone,
 	"next_activity_at" timestamp with time zone,
@@ -187,7 +263,8 @@ CREATE TABLE "org_accounts" (
 	"billing_postal_code" text,
 	"billing_country_code" char(3),
 	"billing_latitude" numeric(9, 6),
-	"billing_longitude" numeric(9, 6)
+	"billing_longitude" numeric(9, 6),
+	"custom_fields" jsonb
 );
 --> statement-breakpoint
 CREATE TABLE "org_activities" (
@@ -200,6 +277,7 @@ CREATE TABLE "org_activities" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(1024)
 );
 --> statement-breakpoint
@@ -213,6 +291,7 @@ CREATE TABLE "org_categories" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" text NOT NULL,
 	CONSTRAINT "category_per_organization" UNIQUE("organization_id","name")
 );
@@ -227,6 +306,7 @@ CREATE TABLE "org_contacts" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"first_name" varchar(255),
 	"last_name" varchar(255),
 	"salutation" varchar(255),
@@ -239,8 +319,8 @@ CREATE TABLE "org_contacts" (
 	"email" varchar(255),
 	"email_normalized" text,
 	"nationality" varchar(255),
-	"tags" text[],
-	"categories" text[],
+	"tags" jsonb DEFAULT '[]'::jsonb,
+	"categories" jsonb DEFAULT '[]'::jsonb,
 	"notes" text,
 	"last_activity_at" timestamp with time zone,
 	"next_activity_at" timestamp with time zone,
@@ -274,7 +354,6 @@ CREATE TABLE "org_contacts" (
 	"language_pref" text,
 	"dedupe_key" text,
 	"external_ids" jsonb,
-	"custom_fields" jsonb,
 	"linkedin_url" text,
 	"twitter_handle" text,
 	"website_url" text,
@@ -287,6 +366,46 @@ CREATE TABLE "org_contacts" (
 	"metadata" jsonb
 );
 --> statement-breakpoint
+CREATE TABLE "org_email_bounce_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"bounce_type" text NOT NULL,
+	"bounce_subtype" text,
+	"diagnostic_code" text,
+	"recipients" jsonb,
+	"event_timestamp" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_campaign_recipients" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"owner_id" uuid,
+	"created_by" uuid,
+	"last_updated_by" uuid,
+	"deleted_by" uuid,
+	"custom_fields" jsonb,
+	"org_email_campaign_id" uuid NOT NULL,
+	"crm_contact_id" uuid,
+	"org_email_id" uuid,
+	"email" text NOT NULL,
+	"recipient_data" jsonb,
+	"is_test" boolean DEFAULT false,
+	"status" text DEFAULT 'PENDING',
+	"queued_at" timestamp,
+	"sent_at" timestamp,
+	"failed_at" timestamp,
+	"failure_reason" text,
+	"batch_number" integer,
+	"retry_count" integer DEFAULT 0
+);
+--> statement-breakpoint
 CREATE TABLE "org_email_campaigns" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -297,6 +416,7 @@ CREATE TABLE "org_email_campaigns" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
 	"subject" varchar(998),
 	"body" text,
@@ -306,8 +426,35 @@ CREATE TABLE "org_email_campaigns" (
 	"org_email_domain_id" uuid,
 	"org_email_template_id" uuid,
 	"org_email_test_receiver_id" uuid,
-	"target_categories" text[],
-	"status" varchar(50)
+	"target_categories" jsonb DEFAULT '[]'::jsonb,
+	"target_tags" jsonb DEFAULT '[]'::jsonb,
+	"tag_match_type" text DEFAULT 'ALL',
+	"status" text DEFAULT 'DRAFT',
+	"scheduled_for" timestamp,
+	"started_at" timestamp,
+	"completed_at" timestamp,
+	"cancelled_at" timestamp,
+	"total_recipients" integer DEFAULT 0,
+	"sent_count" integer DEFAULT 0,
+	"delivered_count" integer DEFAULT 0,
+	"opened_count" integer DEFAULT 0,
+	"clicked_count" integer DEFAULT 0,
+	"bounced_count" integer DEFAULT 0,
+	"complained_count" integer DEFAULT 0
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_click_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"org_email_id" uuid,
+	"link" text NOT NULL,
+	"link_tags" jsonb,
+	"user_agent" text,
+	"event_timestamp" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "org_email_clicks" (
@@ -320,9 +467,68 @@ CREATE TABLE "org_email_clicks" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"link" text,
 	"org_email_id" uuid,
 	"org_email_domain_id" uuid
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_complaint_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"complaint_feedback_type" text,
+	"complaint_feedback_subtype" text,
+	"arrival_date" timestamp with time zone,
+	"recipients" jsonb,
+	"user_agent" text,
+	"complaint_feedback_id" text,
+	"event_timestamp" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_delivery_delay_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"delay_type" text,
+	"recipients" jsonb,
+	"delay_seconds" text,
+	"event_timestamp" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_delivery_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"status" text,
+	"processing_time_millis" text,
+	"smtp_response" text,
+	"reporting_mta" text,
+	"recipients" jsonb,
+	"event_timestamp" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_domain_daily_stats" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"org_email_domain_id" uuid NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"date" text NOT NULL,
+	"sent_count" integer DEFAULT 0,
+	"delivered_count" integer DEFAULT 0,
+	"bounced_count" integer DEFAULT 0,
+	"complained_count" integer DEFAULT 0
 );
 --> statement-breakpoint
 CREATE TABLE "org_email_domains" (
@@ -335,6 +541,7 @@ CREATE TABLE "org_email_domains" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
 	"verified" boolean DEFAULT false,
 	"email" varchar(255),
@@ -342,8 +549,73 @@ CREATE TABLE "org_email_domains" (
 	"secret" text NOT NULL,
 	"metadata" jsonb,
 	"status" text,
+	"first_email_sent_at" timestamp,
+	"warmup_completed_at" timestamp,
+	"daily_limit" integer,
 	CONSTRAINT "org_email_domains_public_unique" UNIQUE("public"),
 	CONSTRAINT "org_email_domains_secret_unique" UNIQUE("secret")
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"event_type" text NOT NULL,
+	"raw_event" jsonb,
+	"ses_data" jsonb,
+	"processed" text DEFAULT 'PENDING' NOT NULL,
+	"processing_error" text,
+	"event_timestamp" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_open_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"org_email_id" uuid,
+	"ip_address" text,
+	"user_agent" text,
+	"event_timestamp" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_reject_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"reason" text NOT NULL,
+	"event_timestamp" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_rendering_failure_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"template_name" text,
+	"error_message" text NOT NULL,
+	"event_timestamp" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "org_email_send_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"message_id" text NOT NULL,
+	"org_email_event_id" uuid,
+	"recipient_count" text,
+	"sending_account_id" text,
+	"event_timestamp" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "org_email_templates" (
@@ -356,6 +628,7 @@ CREATE TABLE "org_email_templates" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
 	"subject" varchar(998),
 	"body" text,
@@ -374,8 +647,9 @@ CREATE TABLE "org_email_test_receivers" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
-	"emails" text[]
+	"emails" jsonb DEFAULT '[]'::jsonb
 );
 --> statement-breakpoint
 CREATE TABLE "org_emails" (
@@ -388,6 +662,7 @@ CREATE TABLE "org_emails" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"message_id" text,
 	"subject" varchar(998),
 	"body" text,
@@ -409,6 +684,7 @@ CREATE TABLE "org_events" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" text,
 	"related_id" uuid,
 	"related_type" text,
@@ -426,6 +702,7 @@ CREATE TABLE "org_leads" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"first_name" varchar(255),
 	"last_name" varchar(255),
 	"salutation" varchar(255),
@@ -438,8 +715,8 @@ CREATE TABLE "org_leads" (
 	"email" varchar(255),
 	"email_normalized" text,
 	"nationality" varchar(255),
-	"tags" text[],
-	"categories" text[],
+	"tags" jsonb DEFAULT '[]'::jsonb,
+	"categories" jsonb DEFAULT '[]'::jsonb,
 	"notes" text,
 	"last_activity_at" timestamp with time zone,
 	"next_activity_at" timestamp with time zone,
@@ -456,6 +733,7 @@ CREATE TABLE "org_opportunities" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(1024),
 	"description" text,
 	"owner_user_id" uuid,
@@ -486,8 +764,7 @@ CREATE TABLE "org_opportunities" (
 	"lost_reason_id" varchar(36),
 	"lost_reason_note" text,
 	"priority" "opportunity_priority",
-	"tags" varchar(255)[],
-	"custom_fields" jsonb,
+	"tags" jsonb DEFAULT '[]'::jsonb,
 	"is_archived" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
@@ -501,6 +778,7 @@ CREATE TABLE "org_payment_plan_templates" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"code" varchar(100) NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
@@ -524,6 +802,7 @@ CREATE TABLE "org_payment_plans" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
 	"template_id" uuid,
 	"currency" char(3) NOT NULL,
@@ -544,6 +823,7 @@ CREATE TABLE "org_real_estate_booking_buyers" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"bookingId" uuid,
 	"contactId" uuid,
 	"is_primary_buyer" boolean DEFAULT false,
@@ -560,6 +840,7 @@ CREATE TABLE "org_real_estate_bookings" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
 	"reference_code" varchar(100),
 	"project_id" uuid,
@@ -584,6 +865,7 @@ CREATE TABLE "org_real_estate_projects" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
 	"description" text,
 	"developer_name" varchar(255),
@@ -608,6 +890,7 @@ CREATE TABLE "org_real_estate_properties" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"name" varchar(255),
 	"description" text,
 	"property_code" varchar(100),
@@ -633,6 +916,38 @@ CREATE TABLE "org_real_estate_properties" (
 	"parking_spots" integer
 );
 --> statement-breakpoint
+CREATE TABLE "org_record_layouts" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"entity_type" "record_layout_entity_type" NOT NULL,
+	"header" jsonb NOT NULL,
+	"sectionColumns" jsonb,
+	"sections" jsonb,
+	"supplemental_fields" jsonb,
+	"auto_include_custom_fields" boolean DEFAULT true NOT NULL,
+	"is_customized" boolean DEFAULT false NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL,
+	"created_by" uuid,
+	"updated_by" uuid
+);
+--> statement-breakpoint
+CREATE TABLE "org_tags" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid,
+	"owner_id" uuid,
+	"created_by" uuid,
+	"last_updated_by" uuid,
+	"deleted_by" uuid,
+	"name" text,
+	"related_type" text
+);
+--> statement-breakpoint
 CREATE TABLE "org_tasks" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -643,10 +958,24 @@ CREATE TABLE "org_tasks" (
 	"created_by" uuid,
 	"last_updated_by" uuid,
 	"deleted_by" uuid,
+	"custom_fields" jsonb,
 	"run_by" timestamp with time zone DEFAULT now() NOT NULL,
 	"related_id" uuid,
 	"related_type" text,
 	"metadata" jsonb
+);
+--> statement-breakpoint
+CREATE TABLE "org_user_table_preferences" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
+	"entity_type" "table_preferences_entity_type" NOT NULL,
+	"preferences" jsonb NOT NULL,
+	"is_customized" boolean DEFAULT false NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -655,10 +984,16 @@ ALTER TABLE "invitations" ADD CONSTRAINT "invitations_organization_id_organizati
 ALTER TABLE "invitations" ADD CONSTRAINT "invitations_inviter_id_users_id_fk" FOREIGN KEY ("inviter_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "members" ADD CONSTRAINT "members_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "members" ADD CONSTRAINT "members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "organization_roles" ADD CONSTRAINT "organization_roles_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "team_members" ADD CONSTRAINT "team_members_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "team_members" ADD CONSTRAINT "team_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "teams" ADD CONSTRAINT "teams_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "csv_import_job_row_results" ADD CONSTRAINT "csv_import_job_row_results_job_id_csv_import_jobs_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."csv_import_jobs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "csv_import_jobs" ADD CONSTRAINT "csv_import_jobs_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "csv_import_jobs" ADD CONSTRAINT "csv_import_jobs_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "custom_field_definitions" ADD CONSTRAINT "custom_field_definitions_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "custom_field_definitions" ADD CONSTRAINT "custom_field_definitions_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_accounts" ADD CONSTRAINT "org_accounts_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_accounts" ADD CONSTRAINT "org_accounts_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_accounts" ADD CONSTRAINT "org_accounts_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -679,14 +1014,25 @@ ALTER TABLE "org_contacts" ADD CONSTRAINT "org_contacts_owner_id_users_id_fk" FO
 ALTER TABLE "org_contacts" ADD CONSTRAINT "org_contacts_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_contacts" ADD CONSTRAINT "org_contacts_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_contacts" ADD CONSTRAINT "org_contacts_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_bounce_events" ADD CONSTRAINT "org_email_bounce_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_org_email_campaign_id_org_email_campaigns_id_fk" FOREIGN KEY ("org_email_campaign_id") REFERENCES "public"."org_email_campaigns"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_crm_contact_id_org_contacts_id_fk" FOREIGN KEY ("crm_contact_id") REFERENCES "public"."org_contacts"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaign_recipients" ADD CONSTRAINT "org_email_campaign_recipients_org_email_id_org_emails_id_fk" FOREIGN KEY ("org_email_id") REFERENCES "public"."org_emails"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_org_email_domain_id_org_email_domains_id_fk" FOREIGN KEY ("org_email_domain_id") REFERENCES "public"."org_email_domains"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_org_email_template_id_org_email_templates_id_fk" FOREIGN KEY ("org_email_template_id") REFERENCES "public"."org_email_templates"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_org_email_template_id_org_email_templates_id_fk" FOREIGN KEY ("org_email_template_id") REFERENCES "public"."org_email_templates"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_campaigns" ADD CONSTRAINT "org_email_campaigns_org_email_test_receiver_id_org_email_test_receivers_id_fk" FOREIGN KEY ("org_email_test_receiver_id") REFERENCES "public"."org_email_test_receivers"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_click_events" ADD CONSTRAINT "org_email_click_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_click_events" ADD CONSTRAINT "org_email_click_events_org_email_id_org_emails_id_fk" FOREIGN KEY ("org_email_id") REFERENCES "public"."org_emails"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_clicks" ADD CONSTRAINT "org_email_clicks_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_clicks" ADD CONSTRAINT "org_email_clicks_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_clicks" ADD CONSTRAINT "org_email_clicks_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -694,11 +1040,20 @@ ALTER TABLE "org_email_clicks" ADD CONSTRAINT "org_email_clicks_last_updated_by_
 ALTER TABLE "org_email_clicks" ADD CONSTRAINT "org_email_clicks_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_clicks" ADD CONSTRAINT "org_email_clicks_org_email_id_org_emails_id_fk" FOREIGN KEY ("org_email_id") REFERENCES "public"."org_emails"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_clicks" ADD CONSTRAINT "org_email_clicks_org_email_domain_id_org_email_domains_id_fk" FOREIGN KEY ("org_email_domain_id") REFERENCES "public"."org_email_domains"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_complaint_events" ADD CONSTRAINT "org_email_complaint_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_delivery_delay_events" ADD CONSTRAINT "org_email_delivery_delay_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_delivery_events" ADD CONSTRAINT "org_email_delivery_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_domain_daily_stats" ADD CONSTRAINT "org_email_domain_daily_stats_org_email_domain_id_org_email_domains_id_fk" FOREIGN KEY ("org_email_domain_id") REFERENCES "public"."org_email_domains"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_domains" ADD CONSTRAINT "org_email_domains_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_domains" ADD CONSTRAINT "org_email_domains_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_domains" ADD CONSTRAINT "org_email_domains_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_domains" ADD CONSTRAINT "org_email_domains_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_domains" ADD CONSTRAINT "org_email_domains_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_open_events" ADD CONSTRAINT "org_email_open_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_open_events" ADD CONSTRAINT "org_email_open_events_org_email_id_org_emails_id_fk" FOREIGN KEY ("org_email_id") REFERENCES "public"."org_emails"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_reject_events" ADD CONSTRAINT "org_email_reject_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_rendering_failure_events" ADD CONSTRAINT "org_email_rendering_failure_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_email_send_events" ADD CONSTRAINT "org_email_send_events_org_email_event_id_org_email_events_id_fk" FOREIGN KEY ("org_email_event_id") REFERENCES "public"."org_email_events"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_templates" ADD CONSTRAINT "org_email_templates_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_templates" ADD CONSTRAINT "org_email_templates_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_email_templates" ADD CONSTRAINT "org_email_templates_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -772,8 +1127,23 @@ ALTER TABLE "org_real_estate_properties" ADD CONSTRAINT "org_real_estate_propert
 ALTER TABLE "org_real_estate_properties" ADD CONSTRAINT "org_real_estate_properties_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_properties" ADD CONSTRAINT "org_real_estate_properties_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_real_estate_properties" ADD CONSTRAINT "org_real_estate_properties_project_id_org_real_estate_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."org_real_estate_projects"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_record_layouts" ADD CONSTRAINT "org_record_layouts_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_record_layouts" ADD CONSTRAINT "org_record_layouts_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_record_layouts" ADD CONSTRAINT "org_record_layouts_updated_by_users_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_tags" ADD CONSTRAINT "org_tags_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_tags" ADD CONSTRAINT "org_tags_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_tags" ADD CONSTRAINT "org_tags_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_tags" ADD CONSTRAINT "org_tags_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_tags" ADD CONSTRAINT "org_tags_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_tasks" ADD CONSTRAINT "org_tasks_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_tasks" ADD CONSTRAINT "org_tasks_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_tasks" ADD CONSTRAINT "org_tasks_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "org_tasks" ADD CONSTRAINT "org_tasks_last_updated_by_users_id_fk" FOREIGN KEY ("last_updated_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "org_tasks" ADD CONSTRAINT "org_tasks_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
+ALTER TABLE "org_tasks" ADD CONSTRAINT "org_tasks_deleted_by_users_id_fk" FOREIGN KEY ("deleted_by") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_user_table_preferences" ADD CONSTRAINT "org_user_table_preferences_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "org_user_table_preferences" ADD CONSTRAINT "org_user_table_preferences_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "csv_import_row_results_job_idx" ON "csv_import_job_row_results" USING btree ("job_id");--> statement-breakpoint
+CREATE INDEX "csv_import_row_results_status_idx" ON "csv_import_job_row_results" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "csv_import_jobs_org_created_idx" ON "csv_import_jobs" USING btree ("organization_id","created_at");--> statement-breakpoint
+CREATE INDEX "csv_import_jobs_status_idx" ON "csv_import_jobs" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "csv_import_jobs_bull_job_id_idx" ON "csv_import_jobs" USING btree ("bull_job_id");

@@ -1,4 +1,4 @@
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { jsonb, pgTable, varchar } from "drizzle-orm/pg-core";
 
 import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
@@ -14,7 +14,7 @@ export const orgEmailTestReceiversTable = pgTable("org_email_test_receivers", {
   ...baseCustomFieldModel,
 
   name: varchar("name", { length: 255 }),
-  emails: text("emails").array(),
+  emails: jsonb("emails").$type<string[]>().default([]),
 });
 
 export type NewOrgEmailTestReceiver =

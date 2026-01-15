@@ -95,7 +95,7 @@ export const orgOpportunitiesTable = pgTable("org_opportunities", {
   lostReasonNote: text("lost_reason_note"),
 
   priority: opportunityPriorityEnum("priority"),
-  tags: varchar("tags", { length: 255 }).array(),
+  tags: jsonb("tags").$type<string[]>().default([]),
 
   customFields: jsonb("custom_fields"),
   isArchived: boolean("is_archived").default(false).notNull(),

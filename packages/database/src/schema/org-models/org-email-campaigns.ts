@@ -1,5 +1,6 @@
 import {
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -45,8 +46,8 @@ export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
     () => orgEmailTestReceiversTable.id,
     { onDelete: "set null" },
   ),
-  targetCategories: text("target_categories").array(),
-  targetTags: text("target_tags").array(),
+  targetCategories: jsonb("target_categories").$type<string[]>().default([]),
+  targetTags: jsonb("target_tags").$type<string[]>().default([]),
   tagMatchType: text("tag_match_type", {
     enum: ["ALL", "ANY"],
   }).default("ALL"),
