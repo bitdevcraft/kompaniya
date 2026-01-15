@@ -99,6 +99,13 @@
       "when": 1768420708842,
       "tag": "0013_far_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1768423078193,
+      "tag": "0014_smooth_butterfly",
+      "breakpoints": true
     }
   ]
 }

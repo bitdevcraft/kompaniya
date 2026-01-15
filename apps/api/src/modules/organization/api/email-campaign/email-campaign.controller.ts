@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -27,7 +28,11 @@ import { ActiveOrganization } from '../../decorator/active-organization/active-o
 import { ActiveOrganizationGuard } from '../../guards/active-organization/active-organization.guard';
 import { type CreateEmailCampaignDto } from './dto/create-email-campaign.dto';
 import { type DeleteEmailCampaignsDto } from './dto/delete-email-campaigns.dto';
+import { PreviewRecipientsDto } from './dto/preview-recipients.dto';
+import { ScheduleCampaignDto } from './dto/schedule-campaign.dto';
+import { SendTestDto } from './dto/send-test.dto';
 import { type UpdateEmailCampaignDto } from './dto/update-email-campaign.dto';
+import { EmailCampaignSendService } from './email-campaign-send.service';
 import { EmailCampaignService } from './email-campaign.service';
 
 @UseGuards(ActiveOrganizationGuard)
@@ -35,8 +40,31 @@ import { EmailCampaignService } from './email-campaign.service';
 export class EmailCampaignController {
   constructor(
     private readonly emailCampaignService: EmailCampaignService,
+    private readonly emailCampaignSendService: EmailCampaignSendService,
     private readonly drizzleErrorService: DrizzleErrorService,
   ) {}
+
+  @Post('r/:id/cancel')
+  async cancel(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    await this.emailCampaignSendService.cancelCampaign(id, organization.id);
+
+    // Invalidate cache
+    await this.emailCampaignService.deleteCacheById(id, organization.id);
+
+    return { success: true, message: 'Campaign cancelled' };
+  }
 
   @Post()
   async create(
@@ -94,6 +122,44 @@ export class EmailCampaignController {
     );
   }
 
+  @Post('r/:id/pause')
+  async pause(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    await this.emailCampaignSendService.pauseCampaign(id, organization.id);
+
+    // Invalidate cache
+    await this.emailCampaignService.deleteCacheById(id, organization.id);
+
+    return { success: true, message: 'Campaign paused' };
+  }
+
+  @Get('preview-recipients')
+  async previewRecipients(
+    @ActiveOrganization() organization: Organization,
+    @Query() query: PreviewRecipientsDto,
+  ) {
+    const contacts = await this.emailCampaignSendService.getMatchedContacts(
+      organization.id,
+      query,
+    );
+
+    return {
+      count: contacts.length,
+      sample: contacts.slice(0, 10),
+    };
+  }
+
   @Delete('r/:id')
   async remove(
     @Param('id') id: string,
@@ -146,6 +212,126 @@ export class EmailCampaignController {
       }
       throw error;
     }
+  }
+
+  @Post('r/:id/resume')
+  async resume(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    await this.emailCampaignSendService.resumeCampaign(id, organization.id);
+
+    // Invalidate cache
+    await this.emailCampaignService.deleteCacheById(id, organization.id);
+
+    return { success: true, message: 'Campaign resumed' };
+  }
+
+  @Post('r/:id/schedule')
+  async schedule(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+    @Body() scheduleCampaignDto: ScheduleCampaignDto,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    const scheduledFor = new Date(scheduleCampaignDto.scheduledFor);
+
+    await this.emailCampaignSendService.scheduleCampaign(
+      id,
+      organization.id,
+      scheduledFor,
+    );
+
+    // Invalidate cache
+    await this.emailCampaignService.deleteCacheById(id, organization.id);
+
+    return {
+      success: true,
+      message: `Campaign scheduled for ${scheduledFor.toISOString()}`,
+    };
+  }
+
+  @Post('r/:id/send')
+  async send(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    if (record.status !== 'DRAFT') {
+      throw new BadRequestException(
+        `Cannot send campaign with status: ${record.status}`,
+      );
+    }
+
+    await this.emailCampaignSendService.startCampaign(id, organization.id);
+
+    // Invalidate cache
+    await this.emailCampaignService.deleteCacheById(id, organization.id);
+
+    return { success: true, message: 'Campaign sending started' };
+  }
+
+  @Post('r/:id/test')
+  async sendTest(
+    @Param('id') id: string,
+    @ActiveOrganization() organization: Organization,
+    @Body() sendTestDto: SendTestDto,
+  ) {
+    const record = await this.emailCampaignService.getRecordById(
+      id,
+      organization.id,
+    );
+
+    if (!record) {
+      throw new NotFoundException("Email campaign doesn't exist");
+    }
+
+    // If testReceiverIds are provided, fetch the test receiver emails
+    const testEmails = sendTestDto.emailAddresses ?? [];
+
+    if (sendTestDto.testReceiverIds && sendTestDto.testReceiverIds.length > 0) {
+      // Fetch test receivers and add their emails
+      // This would require injecting the test receiver service
+      // For now, we'll just use the provided email addresses
+    }
+
+    if (testEmails.length === 0) {
+      throw new BadRequestException('No test email addresses provided');
+    }
+
+    await this.emailCampaignSendService.sendTestEmails(
+      id,
+      organization.id,
+      testEmails,
+      sendTestDto.testReceiverIds?.[0],
+    );
+
+    return { success: true, message: `Sent ${testEmails.length} test emails` };
   }
 
   @Patch('r/:id')

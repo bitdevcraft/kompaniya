@@ -12,17 +12,24 @@ import { AWS_SES } from '~/constants/provider';
 
 import { AwsSesIdentityService } from './aws-ses-identity/aws-ses-identity.service';
 import { AwsSesVerificationService } from './aws-ses-verification/aws-ses-verification.service';
+import { DomainWarmupService } from './domain-warmup/domain-warmup.service';
+import { EmailCampaignSendProcessor } from './email-campaign-send/email-campaign-send.processor';
+import { EmailCampaignQueueService } from './email-campaign-send/email-campaign-send.queue';
+import { EmailCampaignSendService } from './email-campaign-send/email-campaign-send.service';
+import { EMAIL_CAMPAIGN_SEND_QUEUE_NAME } from './email-campaign-send/email-campaign-send.types';
 import { EmailDomainVerificationProcessor } from './email-domain-verification/email-domain-verification.processor';
 import {
   EMAIL_DOMAIN_VERIFICATION_QUEUE_NAME,
   EmailDomainVerificationQueueService,
 } from './email-domain-verification/email-domain-verification.queue';
+import { SesEmailService } from './ses-email/ses-email.service';
 import { SnsWebhookModule } from './sns-webhook/sns-webhook.module';
 
 @Global()
 @Module({
   imports: [
     BullModule.registerQueue({ name: EMAIL_DOMAIN_VERIFICATION_QUEUE_NAME }),
+    BullModule.registerQueue({ name: EMAIL_CAMPAIGN_SEND_QUEUE_NAME }),
     SnsWebhookModule,
   ],
   providers: [
@@ -44,7 +51,18 @@ import { SnsWebhookModule } from './sns-webhook/sns-webhook.module';
     AwsSesVerificationService,
     EmailDomainVerificationQueueService,
     EmailDomainVerificationProcessor,
+    SesEmailService,
+    DomainWarmupService,
+    EmailCampaignQueueService,
+    EmailCampaignSendProcessor,
+    EmailCampaignSendService,
   ],
-  exports: [AwsSesVerificationService, AwsSesIdentityService],
+  exports: [
+    AwsSesVerificationService,
+    AwsSesIdentityService,
+    SesEmailService,
+    DomainWarmupService,
+    EmailCampaignSendService,
+  ],
 })
 export class EmailModule {}

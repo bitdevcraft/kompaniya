@@ -1,4 +1,12 @@
-import { boolean, jsonb, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
@@ -20,6 +28,11 @@ export const orgEmailDomainsTable = pgTable("org_email_domains", {
   secret: text("secret").unique().notNull(),
   metadata: jsonb("metadata"),
   status: text("status", { enum: ["PENDING", "READY", "BLOCKED"] }),
+
+  // Warm-up tracking
+  firstEmailSentAt: timestamp("first_email_sent_at"),
+  warmupCompletedAt: timestamp("warmup_completed_at"),
+  dailyLimit: integer("daily_limit"),
 });
 
 export type NewOrgEmailDomain = typeof orgEmailDomainsTable.$inferInsert;

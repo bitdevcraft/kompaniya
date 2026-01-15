@@ -8,10 +8,7 @@ import {
   orgActivitiesTable,
   orgCategoriesTable,
   orgContactsTable,
-  orgEmailCampaignsTable,
-  orgEmailClicksTable,
   orgEmailDomainsTable,
-  orgEmailsTable,
   orgEmailTemplatesTable,
   orgEmailTestReceiversTable,
   orgEventsTable,
@@ -227,45 +224,6 @@ export async function seedOrgModels(
       ])
       .returning();
 
-    const emailCampaigns = await tx
-      .insert(orgEmailCampaignsTable)
-      .values([
-        {
-          ...ownershipFields,
-          name: "Onboarding Drip",
-          subject: "Get started with your workspace",
-          body: "Let's take you through the basics.",
-          orgEmailDomainId: emailDomains[0]?.id,
-          orgEmailTemplateId: emailTemplates[0]?.id,
-          orgEmailTestReceiverId: emailTestReceivers[0]?.id,
-          targetCategories: [categories[0]?.name ?? "Sales"],
-          status: "active",
-        },
-        {
-          ...ownershipFields,
-          name: "Quarterly Product Update",
-          subject: "See what's new",
-          body: "New modules and integrations are live.",
-          orgEmailDomainId: emailDomains[1]?.id,
-          orgEmailTemplateId: emailTemplates[1]?.id,
-          orgEmailTestReceiverId: emailTestReceivers[1]?.id,
-          targetCategories: [categories[1]?.name ?? "Marketing"],
-          status: "draft",
-        },
-        {
-          ...ownershipFields,
-          name: "NPS Survey",
-          subject: "How are we doing?",
-          body: "Share feedback to shape our roadmap.",
-          orgEmailDomainId: emailDomains[2]?.id,
-          orgEmailTemplateId: emailTemplates[2]?.id,
-          orgEmailTestReceiverId: emailTestReceivers[2]?.id,
-          targetCategories: [categories[2]?.name ?? "Product"],
-          status: "scheduled",
-        },
-      ])
-      .returning();
-
     const events = await tx
       .insert(orgEventsTable)
       .values([
@@ -292,63 +250,6 @@ export async function seedOrgModels(
           relatedType: "account",
           payload: { signals: ["low-usage"] },
           metadata: { healthScore: 52 },
-        },
-      ])
-      .returning();
-
-    const emails = await tx
-      .insert(orgEmailsTable)
-      .values([
-        {
-          ...ownershipFields,
-          messageId: `msg-${randomUUID()}`,
-          subject: "Welcome Aboard",
-          status: "SENT",
-          emailCampaignId: emailCampaigns[0]?.id,
-          emailDomainId: emailDomains[0]?.id,
-          crmContactId: contacts[0]?.id,
-        },
-        {
-          ...ownershipFields,
-          messageId: `msg-${randomUUID()}`,
-          subject: "Feature Highlights",
-          status: "DELIVERED",
-          emailCampaignId: emailCampaigns[1]?.id,
-          emailDomainId: emailDomains[1]?.id,
-          crmContactId: contacts[1]?.id,
-        },
-        {
-          ...ownershipFields,
-          messageId: `msg-${randomUUID()}`,
-          subject: "Share Your Feedback",
-          status: "OPENED",
-          emailCampaignId: emailCampaigns[2]?.id,
-          emailDomainId: emailDomains[2]?.id,
-          crmContactId: contacts[2]?.id,
-        },
-      ])
-      .returning();
-
-    const emailClicks = await tx
-      .insert(orgEmailClicksTable)
-      .values([
-        {
-          ...ownershipFields,
-          link: "https://example.test/getting-started",
-          orgEmailId: emails[0]?.id,
-          orgEmailDomainId: emailDomains[0]?.id,
-        },
-        {
-          ...ownershipFields,
-          link: "https://example.test/product-tour",
-          orgEmailId: emails[1]?.id,
-          orgEmailDomainId: emailDomains[1]?.id,
-        },
-        {
-          ...ownershipFields,
-          link: "https://example.test/nps",
-          orgEmailId: emails[2]?.id,
-          orgEmailDomainId: emailDomains[2]?.id,
         },
       ])
       .returning();
@@ -476,10 +377,7 @@ export async function seedOrgModels(
       emailDomains,
       emailTemplates,
       emailTestReceivers,
-      emailCampaigns,
       events,
-      emails,
-      emailClicks,
       opportunities,
       tasks,
       realEstateProjects,

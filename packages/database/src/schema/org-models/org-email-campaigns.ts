@@ -1,4 +1,11 @@
-import { pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { baseCustomFieldModel } from "../abstract/baseCustomFieldModel";
 import { baseIdModel } from "../abstract/baseIdModel";
@@ -39,8 +46,35 @@ export const orgEmailCampaignsTable = pgTable("org_email_campaigns", {
     { onDelete: "set null" },
   ),
   targetCategories: text("target_categories").array(),
+  targetTags: text("target_tags").array(),
+  tagMatchType: text("tag_match_type", {
+    enum: ["ALL", "ANY"],
+  }).default("ALL"),
 
-  status: varchar("status", { length: 50 }),
+  status: text("status", {
+    enum: [
+      "DRAFT",
+      "SCHEDULED",
+      "SENDING",
+      "PAUSED",
+      "COMPLETED",
+      "CANCELLED",
+      "FAILED",
+    ],
+  }).default("DRAFT"),
+
+  scheduledFor: timestamp("scheduled_for"),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  cancelledAt: timestamp("cancelled_at"),
+
+  totalRecipients: integer("total_recipients").default(0),
+  sentCount: integer("sent_count").default(0),
+  deliveredCount: integer("delivered_count").default(0),
+  openedCount: integer("opened_count").default(0),
+  clickedCount: integer("clicked_count").default(0),
+  bouncedCount: integer("bounced_count").default(0),
+  complainedCount: integer("complained_count").default(0),
 });
 
 export type NewOrgEmailCampaign = typeof orgEmailCampaignsTable.$inferInsert;
