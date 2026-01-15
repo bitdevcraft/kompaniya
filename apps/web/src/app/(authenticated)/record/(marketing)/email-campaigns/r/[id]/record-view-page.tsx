@@ -36,14 +36,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { RecordPageLayout } from "@/components/record-page/layout";
+
 import { toDateTimeInputValue } from "@/components/record-page/layout-helpers";
 import { RecordLayoutRenderer } from "@/components/record-page/record-layout-renderer";
+import { useLayout } from "@/components/record-page/use-layout";
 import { env } from "@/env/client";
 
 import type { EmailCampaignRecordFormValues } from "../../email-campaign-record-schema";
 
 import { modelEndpoint } from "../../config";
-import { emailCampaignRecordLayout } from "../../email-campaign-record-layout";
 import {
   createEmailCampaignFormDefaults,
   createEmailCampaignUpdatePayload,
@@ -149,6 +151,29 @@ const parseEmailList = (input: string) =>
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
 
+const normalizeEmailList = (value?: string[] | string) =>
+  normalizeStringArray(value)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+const mergeEmailAddresses = (current: string, additions: string[]) => {
+  const existing = parseEmailList(current);
+  const combined = [...existing, ...additions];
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const email of combined) {
+    const trimmed = email.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+  }
+
+  return result.join("\n");
+};
+
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -236,6 +261,9 @@ export function RecordViewPage({
   const [previewError, setPreviewError] = useState<string | null>(null);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const layout = useLayout(
+    "org_email_campaigns",
+  ) as RecordPageLayout<EmailCampaignRecordFormValues>;
 
   const queryKey = useMemo(
     () => emailCampaignRecordQueryKey(recordId),
@@ -267,10 +295,8 @@ export function RecordViewPage({
 
   const formDefaults = useMemo(
     () =>
-      record
-        ? createEmailCampaignFormDefaults(record, emailCampaignRecordLayout)
-        : undefined,
-    [record],
+      record ? createEmailCampaignFormDefaults(record, layout) : undefined,
+    [layout, record],
   );
 
   const form = useForm<EmailCampaignRecordFormValues>({
@@ -280,17 +306,40 @@ export function RecordViewPage({
 
   useEffect(() => {
     if (record) {
-      form.reset(
-        createEmailCampaignFormDefaults(record, emailCampaignRecordLayout),
-      );
+      form.reset(createEmailCampaignFormDefaults(record, layout));
     }
-  }, [form, record]);
+  }, [form, layout, record]);
 
   useEffect(() => {
     if (record?.orgEmailTestReceiverId) {
       setTestReceiverId(record.orgEmailTestReceiverId);
     }
   }, [record?.orgEmailTestReceiverId]);
+
+  useEffect(() => {
+    if (!testReceiverId) return;
+    let isActive = true;
+
+    const syncTestReceiverEmails = async () => {
+      try {
+        const receiver = await fetchTestReceiverById(testReceiverId);
+        if (!isActive) return;
+        const receiverEmails = normalizeEmailList(receiver?.emails ?? []);
+        if (receiverEmails.length === 0) return;
+        setTestEmails((current) =>
+          mergeEmailAddresses(current, receiverEmails),
+        );
+      } catch (_error) {
+        // ignore fetch failures; users can still type addresses manually
+      }
+    };
+
+    void syncTestReceiverEmails();
+
+    return () => {
+      isActive = false;
+    };
+  }, [testReceiverId]);
 
   useEffect(() => {
     if (isScheduleOpen) {
@@ -317,9 +366,7 @@ export function RecordViewPage({
       updateEmailCampaignRecord(recordId, payload),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      form.reset(
-        createEmailCampaignFormDefaults(updated, emailCampaignRecordLayout),
-      );
+      form.reset(createEmailCampaignFormDefaults(updated, layout));
       setIsEditing(false);
       toast.success("Email campaign updated");
     },
@@ -440,11 +487,7 @@ export function RecordViewPage({
     if (!record) return;
 
     const parsed = emailCampaignRecordSchema.parse(values);
-    const payload = createEmailCampaignUpdatePayload(
-      record,
-      parsed,
-      emailCampaignRecordLayout,
-    );
+    const payload = createEmailCampaignUpdatePayload(record, parsed, layout);
 
     try {
       await updateEmailCampaign.mutateAsync(payload);
@@ -694,6 +737,7 @@ export function RecordViewPage({
             />
             <p className="text-sm text-muted-foreground">
               Add one or more addresses, separated by commas or new lines.
+              Selected test receiver emails are added automatically.
             </p>
           </div>
         </div>
@@ -728,12 +772,7 @@ export function RecordViewPage({
           <Button
             disabled={updateEmailCampaign.isPending}
             onClick={() => {
-              form.reset(
-                createEmailCampaignFormDefaults(
-                  record,
-                  emailCampaignRecordLayout,
-                ),
-              );
+              form.reset(createEmailCampaignFormDefaults(record, layout));
               setIsEditing(false);
             }}
             type="button"
@@ -830,7 +869,7 @@ export function RecordViewPage({
           actionButtons={actionButtons}
           form={form}
           isEditing={isEditing}
-          layout={emailCampaignRecordLayout}
+          layout={layout}
           record={record as Record<string, unknown>}
         />
         <Card className="border-border/60">

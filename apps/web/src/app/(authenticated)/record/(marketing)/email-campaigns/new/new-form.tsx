@@ -57,22 +57,8 @@ import { authClient } from "@/lib/auth/client";
 import { useTagOptions } from "@/lib/hooks/use-tag-options";
 
 import { dictTranslation, model, modelEndpoint } from "../config";
-
-type MjmlJsonNode = {
-  tagName: string;
-  attributes?: Record<string, string>;
-  children?: MjmlJsonNode[];
-  content?: string;
-};
-
-type PreviewRecipientsResponse = {
-  count: number;
-  sample: Array<{
-    id?: string | null;
-    name?: string | null;
-    email?: string | null;
-  }>;
-};
+import { initialMjmlValue } from "./initial-starter-mjml";
+import { MjmlJsonNode, PreviewRecipientsResponse } from "./types";
 
 const PREVIEW_STYLES = `body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -312,7 +298,9 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   const [selectedTemplate, setSelectedTemplate] =
     useState<OrgEmailTemplate | null>(null);
   const [editorMode, setEditorMode] = useState<"mjml" | "html">("mjml");
-  const [initialMjml, setInitialMjml] = useState<MjmlJsonNode | null>(null);
+  const [initialMjml, setInitialMjml] = useState<MjmlJsonNode | null>(
+    initialMjmlValue,
+  );
   const [templateLoading, setTemplateLoading] = useState(false);
   const [previewRecipients, setPreviewRecipients] =
     useState<PreviewRecipientsResponse | null>(null);
@@ -371,7 +359,7 @@ export function NewRecordForm({ onFinish }: NewRecordFormProps) {
   useEffect(() => {
     if (!selectedTemplate) {
       setEditorMode("mjml");
-      setInitialMjml(null);
+      setInitialMjml(initialMjmlValue);
       return;
     }
 
