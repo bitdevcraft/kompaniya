@@ -1,5 +1,8 @@
 "use client";
 
+import type { ColumnDef } from "@tanstack/react-table";
+import type { Dispatch, SetStateAction } from "react";
+
 import { Button } from "@kompaniya/ui-common/components/button";
 import { Checkbox } from "@kompaniya/ui-common/components/checkbox";
 import {
@@ -15,7 +18,6 @@ import {
   getTableColumns,
   makeRowAction,
 } from "@kompaniya/ui-data-table/utils/data-table-columns";
-import { ColumnDef } from "@tanstack/react-table";
 import { Edit, Ellipsis, Text, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -24,19 +26,22 @@ import { useCustomFieldColumns } from "@/lib/hooks/use-custom-field-columns";
 import { useTagOptions } from "@/lib/hooks/use-tag-options";
 import { DataTableActionType } from "@/types/data-table-actions";
 
-import { tableType } from "./config";
+import type { RecordEntityConfig } from "./types";
 
-export function useDataTableColumns(
-  setRowAction: React.Dispatch<
-    React.SetStateAction<DataTableRowAction<tableType> | null>
-  >,
-) {
+export function useRecordEntityColumns<TData extends { id: string }>(
+  config: RecordEntityConfig<TData>,
+  setRowAction: Dispatch<SetStateAction<DataTableRowAction<TData> | null>>,
+): ColumnDef<TData>[] {
   const onDelete = makeRowAction(setRowAction, DataTableActionType.DELETE);
   const onUpdate = makeRowAction(setRowAction, DataTableActionType.UPDATE);
-  const customFieldColumns = useCustomFieldColumns<tableType>("org_accounts");
-  const tagOptionsQuery = useTagOptions("account");
+  const customFieldColumns = useCustomFieldColumns<TData>(
+    config.tablePreferencesEntityType,
+  );
+  const tagOptionsQuery = useTagOptions(config.tagType);
+  const extraColumns = config.getExtraColumns?.() ?? [];
+  const primaryAccessorKey = config.primaryColumn.accessorKey;
 
-  const columns: ColumnDef<tableType>[] = [
+  const columns: ColumnDef<TData>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -63,27 +68,37 @@ export function useDataTableColumns(
       size: 5,
     },
     {
-      id: "name",
-      accessorKey: "name",
+      id: primaryAccessorKey,
+      accessorKey: primaryAccessorKey,
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Name" />
+        <DataTableColumnHeader
+          column={column}
+          title={config.primaryColumn.header}
+        />
       ),
-      cell: ({ row }) => (
-        <Button asChild size={"sm"} variant={"link"}>
-          <Link href={`/record/accounts/r/${row.original.id}`}>
-            {row.original.name}
-          </Link>
-        </Button>
-      ),
+      cell: ({ row }) => {
+        const rawValue = row.getValue(primaryAccessorKey);
+        const label =
+          rawValue === null || rawValue === undefined ? "" : String(rawValue);
+
+        return (
+          <Button asChild size="sm" variant="link">
+            <Link href={config.primaryColumn.linkTemplate(row.original.id)}>
+              {label}
+            </Link>
+          </Button>
+        );
+      },
       meta: {
-        label: "Name",
-        placeholder: "Search names...",
+        label: config.primaryColumn.header,
+        placeholder: `Search ${config.primaryColumn.header.toLowerCase()}...`,
         variant: "text",
         icon: Text,
       },
       enableColumnFilter: true,
       enableHiding: false,
     },
+    ...extraColumns,
     {
       id: "actions",
       meta: defineMeta({
@@ -123,26 +138,27 @@ export function useDataTableColumns(
   ];
 
   const customColumns = customFieldColumns ?? [];
-  const actionsColumn = columns[2];
+  const actionsColumn = columns[columns.length - 1];
   const existingColumnIds = new Set(
     [...columns, ...customColumns]
       .map((column) => column.id)
       .filter(Boolean) as string[],
   );
-  const fieldDefinitionColumns = getFieldDefinitionColumns<tableType>(
-    "org_accounts",
+  const tagOptionsByRelatedType = config.tagType
+    ? { [config.tagType]: tagOptionsQuery.data ?? [] }
+    : undefined;
+  const fieldDefinitionColumns = getFieldDefinitionColumns<TData>(
+    config.entityType,
     existingColumnIds,
     {
-      tagOptionsByRelatedType: {
-        account: tagOptionsQuery.data ?? [],
-      },
+      tagOptionsByRelatedType,
     },
   );
 
-  return getTableColumns<tableType>({
+  return getTableColumns<TData>({
     setRowAction,
     columns: [
-      ...columns.slice(0, 2),
+      ...columns.slice(0, columns.length - 1),
       ...fieldDefinitionColumns,
       ...customColumns,
       actionsColumn,

@@ -40,7 +40,8 @@
       "Bash(pnpm --filter web lint:*)",
       "Bash(findstr:*)",
       "Bash(pnpm run build:pkg:*)",
-      "Bash(pnpm run typecheck)"
+      "Bash(pnpm run typecheck)",
+      "Bash(codex:*)"
     ]
   }
 }

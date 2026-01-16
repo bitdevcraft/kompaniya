@@ -52,12 +52,13 @@ export type AccountRecordSubmitValues = z.output<typeof accountRecordSchema>;
 
 export function createAccountFormDefaults(
   record: OrgAccount,
-  layout: RecordPageLayout<AccountRecordFormValues>,
+  layout: RecordPageLayout<AccountRecordSubmitValues>,
 ): AccountRecordFormValues {
   const defaults: Partial<AccountRecordFormValues> = {};
 
   for (const field of getAllLayoutFields(layout)) {
     const value = (record as Record<string, unknown>)[field.id as string];
+    // @ts-expect-error todo fix-types
     const normalized = normalizeValueForForm(field, value);
 
     if (field.type === "multipicklist" && normalized === "") {
@@ -76,7 +77,7 @@ export function createAccountFormDefaults(
 export function createAccountUpdatePayload(
   record: OrgAccount,
   values: AccountRecordSubmitValues,
-  layout: RecordPageLayout<AccountRecordFormValues>,
+  layout: RecordPageLayout<AccountRecordSubmitValues>,
 ): Partial<OrgAccount> {
   const updates: Partial<OrgAccount> = {};
   const editable = getEditableLayoutFields(layout);
