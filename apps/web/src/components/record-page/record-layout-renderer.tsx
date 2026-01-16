@@ -57,6 +57,11 @@ import {
 import { MjmlRecordField } from "./mjml-record-field";
 import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
+import {
+  PaymentPlanFeesField,
+  PaymentPlanMilestonesField,
+  PaymentPlanScheduleField,
+} from "./payment-plan-fields";
 import { PhoneRecordField } from "./phone-record-field";
 import { PicklistRecordField } from "./picklist-record-field";
 import { ReferenceRecordField } from "./reference-record-field";
@@ -321,6 +326,9 @@ const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
   tag: TagRecordField as FieldComponent,
   text: TextRecordField as FieldComponent,
   textarea: TextareaRecordField as FieldComponent,
+  payment_plan_milestones: PaymentPlanMilestonesField as FieldComponent,
+  payment_plan_fees: PaymentPlanFeesField as FieldComponent,
+  payment_schedule: PaymentPlanScheduleField as FieldComponent,
 };
 
 type SectionRenderContext<TFieldValues extends FieldValues> = {

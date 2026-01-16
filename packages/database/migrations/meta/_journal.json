@@ -8,6 +8,13 @@
       "when": 1768466432658,
       "tag": "0000_nosy_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1768520000000,
+      "tag": "0001_add_payment_plan_id_to_bookings",
+      "breakpoints": true
     }
   ]
 }

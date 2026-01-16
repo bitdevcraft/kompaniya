@@ -8,6 +8,7 @@ export default defineConfig({
     auth: "src/auth/index.ts",
     utils: "src/utils/index.ts",
     config: "src/config/index.ts",
+    "payment-plan": "src/payment-plan/index.ts",
   },
   format: ["cjs", "esm"],
   sourcemap: true,

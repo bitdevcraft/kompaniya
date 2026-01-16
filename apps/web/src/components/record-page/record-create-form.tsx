@@ -30,6 +30,11 @@ import { getCreateLayoutFields } from "./layout-helpers";
 import { MjmlRecordField } from "./mjml-record-field";
 import { MultipicklistRecordField } from "./multipicklist-record-field";
 import { NumberRecordField } from "./number-record-field";
+import {
+  PaymentPlanFeesField,
+  PaymentPlanMilestonesField,
+  PaymentPlanScheduleField,
+} from "./payment-plan-fields";
 import { PhoneRecordField } from "./phone-record-field";
 import { PicklistRecordField } from "./picklist-record-field";
 import { ReferenceRecordField } from "./reference-record-field";
@@ -69,6 +74,9 @@ const CREATE_FIELD_COMPONENTS: Record<
   text: TextRecordField as FieldComponent,
   textarea: TextareaRecordField as FieldComponent,
   mjml: MjmlRecordField as FieldComponent,
+  payment_plan_milestones: PaymentPlanMilestonesField as FieldComponent,
+  payment_plan_fees: PaymentPlanFeesField as FieldComponent,
+  payment_schedule: PaymentPlanScheduleField as FieldComponent,
 };
 
 export interface RecordCreateFormProps<TFieldValues extends FieldValues> {

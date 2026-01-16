@@ -1153,8 +1153,180 @@ export const DEFAULT_RECORD_LAYOUTS = {
   org_real_estate_projects: baseDefaultLayout,
   org_real_estate_properties: baseDefaultLayout,
   org_real_estate_bookings: baseDefaultLayout,
-  org_payment_plans: baseDefaultLayout,
-  org_payment_plan_templates: baseDefaultLayout,
+  org_payment_plans: {
+    header: {
+      title: { fieldId: "name", fallback: "Untitled plan" },
+      metadata: [
+        { fieldId: "status", id: "plan-status", label: "Status" },
+        { fieldId: "currency", id: "plan-currency", label: "Currency" },
+        {
+          fieldId: "startDate",
+          id: "plan-start",
+          label: "Start date",
+          type: "date",
+        },
+        { fieldId: "endDate", id: "plan-end", label: "End date", type: "date" },
+      ],
+    },
+    sectionColumns: {
+      header: {
+        sections: [
+          {
+            id: "plan-overview",
+            title: "Plan Overview",
+            fields: [
+              { id: "name", label: "Plan name", type: "text" },
+              {
+                id: "templateId",
+                label: "Template",
+                type: "text",
+                readOnly: true,
+              },
+              {
+                id: "principalAmount",
+                label: "Principal amount",
+                type: "number",
+                readOnly: true,
+              },
+              {
+                id: "currency",
+                label: "Currency",
+                type: "text",
+                readOnly: true,
+              },
+              { id: "status", label: "Status", type: "text", readOnly: true },
+            ],
+          },
+        ],
+      },
+      firstColumn: {
+        sections: [
+          {
+            id: "schedule",
+            title: "Payment Schedule",
+            description: "All scheduled payments for this plan",
+            fields: [
+              {
+                id: "instanceConfig.scheduleItems",
+                label: "Schedule",
+                type: "payment_schedule",
+                readOnly: true,
+              },
+            ],
+          },
+        ],
+      },
+      secondColumn: {
+        sections: [
+          {
+            id: "events",
+            title: "Key Events",
+            fields: [
+              {
+                id: "instanceConfig.events.bookingDate",
+                label: "Booking date",
+                type: "date",
+                readOnly: true,
+              },
+              {
+                id: "instanceConfig.events.contractSigningDate",
+                label: "Contract signing",
+                type: "date",
+                readOnly: true,
+              },
+              {
+                id: "instanceConfig.events.handoverDate",
+                label: "Handover date",
+                type: "date",
+                readOnly: true,
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+  org_payment_plan_templates: {
+    header: {
+      title: { fieldId: "name", fallback: "Untitled template" },
+      metadata: [
+        { fieldId: "code", id: "template-code", label: "Code" },
+        { fieldId: "isActive", id: "template-active", label: "Active" },
+        {
+          fieldId: "createdAt",
+          id: "template-created",
+          label: "Created",
+          type: "datetime",
+        },
+      ],
+    },
+    sectionColumns: {
+      header: {
+        sections: [
+          {
+            id: "template-info",
+            title: "Template Information",
+            fields: [
+              { id: "name", label: "Template name", type: "text" },
+              { id: "code", label: "Code", type: "text" },
+              { id: "description", label: "Description", type: "textarea" },
+              {
+                id: "defaultCurrency",
+                label: "Default currency",
+                type: "text",
+              },
+              { id: "subjectType", label: "Subject type", type: "text" },
+              {
+                id: "minPrincipal",
+                label: "Minimum principal",
+                type: "number",
+              },
+              {
+                id: "maxPrincipal",
+                label: "Maximum principal",
+                type: "number",
+              },
+              { id: "isActive", label: "Is active", type: "boolean" },
+            ],
+          },
+        ],
+      },
+      firstColumn: {
+        sections: [
+          {
+            id: "milestones",
+            title: "Payment Milestones",
+            description: "Configure when payments are due",
+            fields: [
+              {
+                id: "templateConfig.milestones",
+                label: "Milestone Configuration",
+                type: "payment_plan_milestones",
+                readOnly: true,
+              },
+            ],
+          },
+        ],
+      },
+      secondColumn: {
+        sections: [
+          {
+            id: "fee-rules",
+            title: "Fee Rules",
+            description: "Configure additional fees and charges",
+            fields: [
+              {
+                id: "templateConfig.feeRules",
+                label: "Fee Configuration",
+                type: "payment_plan_fees",
+                readOnly: true,
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
   org_email_test_receivers: baseDefaultLayout,
   org_emails: baseDefaultLayout,
   org_email_clicks: baseDefaultLayout,

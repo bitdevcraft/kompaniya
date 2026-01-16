@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint --max-warnings=0 src",
+    "lint": "eslint --max-warnings=0 src --fix",
     "format": "prettier --write ."
   },
   "devDependencies": {

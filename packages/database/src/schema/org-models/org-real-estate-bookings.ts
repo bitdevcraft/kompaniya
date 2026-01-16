@@ -13,6 +13,7 @@ import { baseIdModel } from "../abstract/baseIdModel";
 import { baseOrganizationModel } from "../abstract/baseOrganizationModel";
 import { baseOwnerModel } from "../abstract/baseOwnerModel";
 import { baseTimestampModel } from "../abstract/baseTimestampModel";
+import { orgPaymentPlansTable } from "./org-payment-plans";
 import { orgRealEstateProjectsTable } from "./org-real-estate-projects";
 import { orgRealEstatePropertiesTable } from "./org-real-estate-properties";
 
@@ -53,6 +54,10 @@ export const orgRealEstateBookingsTable = pgTable("org_real_estate_bookings", {
   }),
   contractSignedAt: timestamp("contract_signed_at", { withTimezone: true }),
   notes: text("notes"),
+  paymentPlanId: uuid("payment_plan_id").references(
+    () => orgPaymentPlansTable.id,
+    { onDelete: "set null" },
+  ),
 });
 
 export type NewOrgRealEstateBooking =

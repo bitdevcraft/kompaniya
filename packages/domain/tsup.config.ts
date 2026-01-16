@@ -8,6 +8,7 @@ export default defineConfig({
     "record-layouts": "src/record-layouts/index.ts",
     "custom-fields": "src/custom-fields/index.ts",
     entities: "src/entities/index.ts",
+    "payment-plans": "src/payment-plans/index.ts",
   },
   format: ["esm"],
   sourcemap: true,

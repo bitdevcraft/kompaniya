@@ -3,11 +3,16 @@ import { Button } from "@kompaniya/ui-common/components/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@kompaniya/ui-common/components/card";
 import { type OrgPaymentPlanTemplate } from "@repo/database/schema";
+import { generateSchedule } from "@repo/shared/payment-plan";
+import { format } from "date-fns";
 import Link from "next/link";
+
+import { ScheduleTable } from "@/components/payment-plan/schedule-table";
 
 interface RecordViewProps {
   record: OrgPaymentPlanTemplate;
@@ -22,6 +27,22 @@ export function RecordView({ record }: RecordViewProps) {
   const milestones = [...record.templateConfig.milestones].sort(
     (left, right) => left.sequenceNumber - right.sequenceNumber,
   );
+
+  // Generate a preview schedule with a sample principal amount
+  const samplePrincipal = record.minPrincipal
+    ? Number(record.minPrincipal)
+    : 100000;
+  const previewSchedule = generateSchedule({
+    template: record.templateConfig,
+    principalAmount: samplePrincipal,
+    currency: record.defaultCurrency || "USD",
+    startDate: format(new Date(), "yyyy-MM-dd"),
+    events: {
+      bookingDate: null,
+      contractSigningDate: null,
+      handoverDate: null,
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -59,8 +80,8 @@ export function RecordView({ record }: RecordViewProps) {
           <div>
             <p className="text-sm text-muted-foreground">Principal range</p>
             <p className="font-medium">
-              {formatNumber(parseInt(record.minPrincipal ?? "0"))} -{" "}
-              {formatNumber(parseInt(record.maxPrincipal ?? "0"))}
+              {formatNumber(Number(record.minPrincipal) || 0)} -{" "}
+              {formatNumber(Number(record.maxPrincipal) || 0)}
             </p>
           </div>
           <div className="md:col-span-3">
@@ -76,6 +97,22 @@ export function RecordView({ record }: RecordViewProps) {
 
       <Card>
         <CardHeader>
+          <CardTitle>Schedule Preview</CardTitle>
+          <CardDescription>
+            Based on a sample principal amount of{" "}
+            {formatNumber(samplePrincipal)} {record.defaultCurrency}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScheduleTable
+            currency={record.defaultCurrency || "USD"}
+            scheduleItems={previewSchedule.scheduleItems}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Milestones</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -86,32 +123,48 @@ export function RecordView({ record }: RecordViewProps) {
           )}
           {milestones.map((milestone) => (
             <Card className="border-dashed" key={milestone.code}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3">
                 <div>
                   <CardTitle className="text-base">{milestone.label}</CardTitle>
                   <p className="text-muted-foreground text-sm">
                     {milestone.code}
                   </p>
                 </div>
-                <Badge variant="secondary">#{milestone.sequenceNumber}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">#{milestone.sequenceNumber}</Badge>
+                  {milestone.anchorType !== "absolute_date" && (
+                    <Badge className="text-xs" variant="outline">
+                      Estimated
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
-              <CardContent className="grid gap-3 md:grid-cols-3">
+              <CardContent className="grid gap-3 md:grid-cols-3 py-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Anchor</p>
-                  <p className="font-medium">{milestone.anchorType}</p>
+                  <p className="font-medium capitalize">
+                    {milestone.anchorType.replace(/_/g, " ")}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Pattern</p>
-                  <p className="font-medium">{milestone.schedulePatternType}</p>
+                  <p className="font-medium capitalize">
+                    {milestone.schedulePatternType.replace(/_/g, " ")}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Amount mode</p>
-                  <p className="font-medium">{milestone.amountMode}</p>
+                  <p className="font-medium capitalize">
+                    {milestone.amountMode.replace(/_/g, " ")}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Amount value</p>
                   <p className="font-medium">
-                    {formatNumber(milestone.amountValue)}
+                    {milestone.amountMode === "percentage_of_principal" ||
+                    milestone.amountMode === "percentage_of_remaining_principal"
+                      ? `${formatNumber(milestone.amountValue)}%`
+                      : formatNumber(milestone.amountValue)}
                   </p>
                 </div>
                 <div>
@@ -125,18 +178,16 @@ export function RecordView({ record }: RecordViewProps) {
                   <p className="text-sm text-muted-foreground">Recurring</p>
                   <p className="font-medium">
                     {milestone.intervalUnit
-                      ? `${formatNumber(milestone.intervalValue)} ${milestone.intervalUnit} x ${formatNumber(milestone.intervalOccurrences)}`
+                      ? `Every ${formatNumber(milestone.intervalValue)} ${milestone.intervalUnit} x ${formatNumber(milestone.intervalOccurrences)}`
                       : "None"}
                   </p>
                 </div>
-                <div className="md:col-span-3">
-                  <p className="text-sm text-muted-foreground">Description</p>
-                  <p className="font-medium">
-                    {milestone.description?.trim()
-                      ? milestone.description
-                      : "No milestone description."}
-                  </p>
-                </div>
+                {milestone.description && (
+                  <div className="md:col-span-3">
+                    <p className="text-sm text-muted-foreground">Description</p>
+                    <p className="font-medium">{milestone.description}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -145,7 +196,7 @@ export function RecordView({ record }: RecordViewProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Fees</CardTitle>
+          <CardTitle>Fee Rules</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {record.templateConfig.feeRules.length === 0 && (
@@ -153,65 +204,51 @@ export function RecordView({ record }: RecordViewProps) {
           )}
           {record.templateConfig.feeRules.map((feeRule) => (
             <Card className="border-dashed" key={feeRule.code}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3">
                 <div>
                   <CardTitle className="text-base">{feeRule.name}</CardTitle>
                   <p className="text-muted-foreground text-sm">
                     {feeRule.code}
                   </p>
                 </div>
-                <Badge variant="secondary">{feeRule.triggerTiming}</Badge>
+                <Badge variant="secondary">
+                  {feeRule.triggerTiming.replace(/_/g, " ")}
+                </Badge>
               </CardHeader>
-              <CardContent className="grid gap-3 md:grid-cols-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Scope</p>
-                  <p className="font-medium">{feeRule.chargeScope}</p>
+              <CardContent className="py-3">
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                  <span>
+                    <span className="text-muted-foreground">Scope:</span>{" "}
+                    <span className="font-medium capitalize">
+                      {feeRule.chargeScope.replace(/_/g, " ")}
+                    </span>
+                  </span>
+                  <span>
+                    <span className="text-muted-foreground">Calculation:</span>{" "}
+                    <span className="font-medium capitalize">
+                      {feeRule.calculationType.replace(/_/g, " ")}
+                    </span>
+                  </span>
+                  <span>
+                    <span className="text-muted-foreground">Base:</span>{" "}
+                    <span className="font-medium capitalize">
+                      {feeRule.calculationBase.replace(/_/g, " ")}
+                    </span>
+                  </span>
+                  <span>
+                    <span className="text-muted-foreground">Rate:</span>{" "}
+                    <span className="font-medium">
+                      {feeRule.calculationType === "fixed"
+                        ? formatNumber(feeRule.rateValue)
+                        : `${formatNumber(feeRule.rateValue)}%`}
+                    </span>
+                  </span>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Calculation</p>
-                  <p className="font-medium">{feeRule.calculationType}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Base</p>
-                  <p className="font-medium">{feeRule.calculationBase}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Rate</p>
-                  <p className="font-medium">
-                    {formatNumber(feeRule.rateValue)}
+                {feeRule.description && (
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {feeRule.description}
                   </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Posting</p>
-                  <p className="font-medium">{feeRule.postingBehavior}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Milestone</p>
-                  <p className="font-medium">
-                    {feeRule.milestoneCode ?? "None"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Amount range</p>
-                  <p className="font-medium">
-                    {formatNumber(feeRule.minAmount)} -{" "}
-                    {formatNumber(feeRule.maxAmount)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Refundable</p>
-                  <p className="font-medium">
-                    {feeRule.isRefundable ? "Yes" : "No"}
-                  </p>
-                </div>
-                <div className="md:col-span-3">
-                  <p className="text-sm text-muted-foreground">Description</p>
-                  <p className="font-medium">
-                    {feeRule.description?.trim()
-                      ? feeRule.description
-                      : "No fee description."}
-                  </p>
-                </div>
+                )}
               </CardContent>
             </Card>
           ))}

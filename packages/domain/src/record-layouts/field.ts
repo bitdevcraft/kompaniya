@@ -61,7 +61,10 @@ export type FieldDataType =
   | "phone"
   | "html"
   | "mjml"
-  | "reference";
+  | "reference"
+  | "payment_plan_milestones"
+  | "payment_plan_fees"
+  | "payment_schedule";
 
 /**
  * Extended field definition with UI builder metadata

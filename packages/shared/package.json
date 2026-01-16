@@ -5,7 +5,7 @@
   "scripts": {
     "build:pkg": "tsup",
     "dev:pkg": "tsup --watch",
-    "lint": "eslint --max-warnings=0 src",
+    "lint": "eslint --max-warnings=0 src --fix",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
   },
@@ -16,6 +16,7 @@
     "tsup": "catalog:"
   },
   "dependencies": {
+    "@repo/database": "workspace:*",
     "better-auth": "catalog:",
     "uuid": "catalog:",
     "zod": "catalog:"
@@ -40,6 +41,11 @@
       "types": "./dist/config.d.ts",
       "import": "./dist/config.js",
       "default": "./dist/config.js"
+    },
+    "./payment-plan": {
+      "types": "./dist/payment-plan.d.ts",
+      "import": "./dist/payment-plan.js",
+      "default": "./dist/payment-plan.js"
     },
     "./package.json": "./package.json"
   }

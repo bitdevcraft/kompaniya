@@ -6283,6 +6283,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "payment_plan_id": {
+          "name": "payment_plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -6348,6 +6354,15 @@
           "columnsFrom": ["property_id"],
           "columnsTo": ["id"],
           "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "org_real_estate_bookings_payment_plan_id_org_payment_plans_id_fk": {
+          "name": "org_real_estate_bookings_payment_plan_id_org_payment_plans_id_fk",
+          "tableFrom": "org_real_estate_bookings",
+          "tableTo": "org_payment_plans",
+          "columnsFrom": ["payment_plan_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
