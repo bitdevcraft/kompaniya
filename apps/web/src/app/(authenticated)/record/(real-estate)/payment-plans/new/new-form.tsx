@@ -1,6 +1,6 @@
 "use client";
 
-import { PaymentPlanInstanceForm } from "@/components/payment-plan-instance-form";
+import { PaymentPlanInstanceForm } from "@/app/(authenticated)/record/(real-estate)/payment-plans/components/payment-plan-instance-form";
 
 interface NewRecordFormProps {
   bookingId?: string;

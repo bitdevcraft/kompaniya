@@ -1,9 +1,14 @@
 "use client";
 
+import type {
+  PaymentPlanTemplateConfig,
+  PaymentPlanTemplateFormData,
+} from "@repo/domain/payment-plans";
+
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { PaymentPlanTemplateBuilder } from "@/components/payment-plan-template-builder";
+import { PaymentPlanTemplateBuilder } from "@/app/(authenticated)/record/(real-estate)/payment-plan-templates/components/payment-plan-template-builder";
 import { authClient } from "@/lib/auth/client";
 
 import { modelEndpoint } from "../config";
@@ -12,9 +17,13 @@ export default function NewTemplatePage() {
   const router = useRouter();
   const { data: activeOrganization } = authClient.useActiveOrganization();
 
-  const handleSave = async (
-    config: import("@repo/domain/payment-plans").PaymentPlanTemplateConfig,
-  ) => {
+  const handleSave = async ({
+    config,
+    template,
+  }: {
+    config: PaymentPlanTemplateConfig;
+    template: PaymentPlanTemplateFormData;
+  }) => {
     try {
       const response = await fetch(`${modelEndpoint}`, {
         method: "POST",
@@ -24,11 +33,15 @@ export default function NewTemplatePage() {
         credentials: "include",
         body: JSON.stringify({
           organizationId: activeOrganization?.id,
-          name: "",
-          code: "",
-          defaultCurrency: "USD",
+          name: template.name,
+          code: template.code,
+          description: template.description,
+          defaultCurrency: template.defaultCurrency,
+          subjectType: template.subjectType,
+          minPrincipal: template.minPrincipal,
+          maxPrincipal: template.maxPrincipal,
           templateConfig: config,
-          isActive: true,
+          isActive: template.isActive,
         }),
       });
 

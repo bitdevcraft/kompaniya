@@ -59,7 +59,10 @@ import { SchedulePreview } from "./schedule-preview";
 
 export interface PaymentPlanTemplateBuilderProps {
   initialTemplate?: PaymentPlanTemplateFormData;
-  onSave: (config: PaymentPlanTemplateConfig) => void;
+  onSave: (payload: {
+    config: PaymentPlanTemplateConfig;
+    template: PaymentPlanTemplateFormData;
+  }) => void;
   onCancel?: () => void;
 }
 
@@ -188,7 +191,7 @@ export function PaymentPlanTemplateBuilder({
       return;
     }
 
-    onSave(config);
+    onSave({ config, template });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {

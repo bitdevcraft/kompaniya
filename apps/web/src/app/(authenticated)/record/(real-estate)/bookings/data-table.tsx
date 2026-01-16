@@ -7,19 +7,23 @@ import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
+  DataTableSkeleton,
   DataTableSortList,
+  DataTableViewOptions,
   DataTableViewToggle,
 } from "@kompaniya/ui-data-table/components/index";
 import { useDataTable } from "@kompaniya/ui-data-table/hooks/use-data-table";
 import { useDataTableViewMode } from "@kompaniya/ui-data-table/hooks/use-data-table-view-mode";
 import { DataTableRowAction } from "@kompaniya/ui-data-table/utils/data-table-columns";
-import { useQuery } from "@tanstack/react-query";
+import { convertCase } from "@repo/shared/utils";
+import { useIsFetching, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog";
 import { authClient } from "@/lib/auth/client";
+import { useTablePreferences } from "@/lib/hooks/use-table-preferences";
 import { DataTableActionType } from "@/types/data-table-actions";
 import { SearchParamsSchema } from "@/types/validations";
 
@@ -33,6 +37,8 @@ import { NewButton } from "./new/new-button";
 interface OrgDataTableProps {
   search: SearchParamsSchema;
 }
+
+const tablePreferencesEntityType = "org_real_estate_bookings";
 
 const useDataLoad = (
   activeOrganization: OrganizationModel,
@@ -89,6 +95,24 @@ export function OrgDataTable(props: OrgDataTableProps) {
     shallow: false,
   });
 
+  const tableTitle = convertCase(model.plural, "kebab", "title");
+
+  const { isReady } = useTablePreferences({
+    entityType: tablePreferencesEntityType,
+    table,
+    organizationId: activeOrganization?.data?.id,
+  });
+
+  const customFieldsFetching = useIsFetching({
+    queryKey: ["custom-field-definitions", tablePreferencesEntityType],
+  });
+
+  const isTableSetupLoading = !isReady || customFieldsFetching > 0;
+
+  if (isTableSetupLoading) {
+    return <DataTableSkeleton columnCount={6} filterCount={2} shrinkZero />;
+  }
+
   return (
     <>
       <DataTable
@@ -114,7 +138,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
       >
         <div className="flex flex-col items-end gap-4">
           <div className="flex items-center w-full">
-            <div className="text-xl pl-4 text-nowrap">{model.plural}</div>
+            <div className="text-xl pl-4 text-nowrap">{tableTitle}</div>
             <DataTableAdvancedToolbar hideViewColumns table={table}>
               <div className="flex gap-4">
                 <ButtonGroup>
@@ -134,6 +158,7 @@ export function OrgDataTable(props: OrgDataTableProps) {
                   paramKey={`${model.plural}View`}
                   viewMode={viewMode}
                 />
+                <DataTableViewOptions table={table} />
               </div>
             </DataTableAdvancedToolbar>
           </div>
