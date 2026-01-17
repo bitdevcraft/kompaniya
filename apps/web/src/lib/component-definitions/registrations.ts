@@ -4,6 +4,8 @@ import { ActivityTimeline } from "@/components/custom-components/activity-timeli
 import { EmailHistory } from "@/components/custom-components/email-history";
 import { PaymentSchedulePreview } from "@/components/custom-components/payment-schedule-preview";
 import { PaymentScheduleTable } from "@/components/custom-components/payment-schedule-table";
+import { RelatedRecordsMulti } from "@/components/custom-components/related-records-multi";
+import { RelatedRecordsSingle } from "@/components/custom-components/related-records-single";
 
 import { registerComponent } from "./registry";
 
@@ -57,6 +59,36 @@ const PAYMENT_SCHEDULE_PREVIEW_DEFINITION: CustomComponentDefinition = {
   },
 };
 
+const RELATED_RECORDS_SINGLE_DEFINITION: CustomComponentDefinition = {
+  id: "related-records-single",
+  label: "Related Records (Single)",
+  description: "Show related records from one entity type",
+  category: "organization",
+  iconName: "Link",
+  entityTypes: [],
+  props: {
+    title: "Related Records",
+    sourceEntityType: "",
+    perPage: 10,
+    showEmpty: true,
+  },
+};
+
+const RELATED_RECORDS_MULTI_DEFINITION: CustomComponentDefinition = {
+  id: "related-records-multi",
+  label: "Related Records (All)",
+  description: "Show all entity types that reference this record",
+  category: "organization",
+  iconName: "Network",
+  entityTypes: [],
+  props: {
+    title: "Related Records",
+    perPage: 5,
+    defaultExpanded: [],
+    showEmptySections: false,
+  },
+};
+
 export function registerAllCustomComponents() {
   registerComponent(ACTIVITY_TIMELINE_DEFINITION, ActivityTimeline);
   registerComponent(EMAIL_HISTORY_DEFINITION, EmailHistory);
@@ -65,4 +97,6 @@ export function registerAllCustomComponents() {
     PAYMENT_SCHEDULE_PREVIEW_DEFINITION,
     PaymentSchedulePreview,
   );
+  registerComponent(RELATED_RECORDS_SINGLE_DEFINITION, RelatedRecordsSingle);
+  registerComponent(RELATED_RECORDS_MULTI_DEFINITION, RelatedRecordsMulti);
 }

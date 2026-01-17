@@ -15,6 +15,7 @@ import { PaymentPlanModule } from './api/payment-plan/payment-plan.module';
 import { RealEstateBookingModule } from './api/real-estate-booking/real-estate-booking.module';
 import { RealEstateProjectModule } from './api/real-estate-project/real-estate-project.module';
 import { RealEstatePropertyModule } from './api/real-estate-property/real-estate-property.module';
+import { ReferencesModule } from './api/references/references.module';
 import { SystemAdminModule } from './api/system-admin/system-admin.module';
 import { TablePreferencesModule } from './api/table-preferences/table-preferences.module';
 import { TagModule } from './api/tag/tag.module';
@@ -41,6 +42,7 @@ import { UserModule } from './api/user/user.module';
     TablePreferencesModule,
     TagModule,
     UserModule,
+    ReferencesModule,
   ],
 })
 export class OrganizationModule {}
