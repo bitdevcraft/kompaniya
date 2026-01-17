@@ -137,13 +137,21 @@ export function RecordEntityDataTable<TData extends { id: string }>({
 
   const columns = useRecordEntityColumns(config, setRowAction);
 
+  const basePinning = config.tableInitialState?.columnPinning;
+  const rightPinned = new Set(basePinning?.right ?? []);
+  rightPinned.add("actions");
+
   const { table, shallow, debounceMs, throttleMs } = useDataTable({
     data: data?.data ?? [],
     columns,
     pageCount: data?.pageCount ?? 1,
     initialState: {
-      sorting: [],
-      columnPinning: { right: ["actions"] },
+      sorting: config.tableInitialState?.sorting ?? [],
+      ...config.tableInitialState,
+      columnPinning: {
+        ...basePinning,
+        right: Array.from(rightPinned),
+      },
     },
     getRowId: (row) => row.id,
     shallow: false,

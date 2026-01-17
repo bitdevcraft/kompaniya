@@ -1,4 +1,5 @@
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ExtendedColumnSort } from "@kompaniya/ui-data-table/types/data-table";
+import type { ColumnDef, TableState } from "@tanstack/react-table";
 import type { ReactNode } from "react";
 
 export interface RecordEntityConfig<TData extends { id: string }> {
@@ -14,6 +15,7 @@ export interface RecordEntityConfig<TData extends { id: string }> {
     header: string;
     linkTemplate: (id: string) => string;
   };
+  tableInitialState?: RecordEntityTableInitialState<TData>;
   tagType?: string;
   gridCardColumns?: string[];
   tableTitle?: ReactNode;
@@ -25,6 +27,14 @@ export interface RecordEntityConfig<TData extends { id: string }> {
 export type RecordEntityModel = {
   name: string;
   plural: string;
+  label?: string;
+};
+
+export type RecordEntityTableInitialState<TData> = Omit<
+  Partial<TableState>,
+  "sorting"
+> & {
+  sorting?: ExtendedColumnSort<TData>[];
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
