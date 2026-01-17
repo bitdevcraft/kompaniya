@@ -867,10 +867,12 @@ export function RecordViewPage({
       <form className="space-y-6" onSubmit={handleSubmit}>
         <RecordLayoutRenderer
           actionButtons={actionButtons}
+          entityType="org_email_campaigns"
           form={form}
           isEditing={isEditing}
           layout={layout}
           record={record as Record<string, unknown>}
+          recordId={recordId}
         />
         <Card className="border-border/60">
           <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

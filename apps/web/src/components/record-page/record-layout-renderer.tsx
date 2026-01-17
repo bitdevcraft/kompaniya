@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 import { ReactElement, type ReactNode, useEffect, useState } from "react";
 
+import { getComponent } from "@/lib/component-definitions";
+
 import type {
   RecordLayoutField,
   RecordLayoutHeaderChip,
@@ -126,17 +128,22 @@ interface RecordLayoutRendererProps<
   TFieldValues extends FieldValues,
 > {
   actionButtons?: ReactNode;
+  entityType?: string;
   form: UseFormReturn<TFieldValues>;
   isEditing: boolean;
   layout: RecordPageLayout<TFieldValues>;
   record: TRecord;
+  recordId?: string;
 }
 
 interface SectionProps<TFieldValues extends FieldValues> {
   columnsOverride?: 1 | 2 | 3 | 4;
+  entityType: string;
   form: UseFormReturn<TFieldValues>;
   isEditing: boolean;
+  layout: RecordPageLayout<TFieldValues>;
   record: Record<string, unknown>;
+  recordId: string;
   section: RecordLayoutSection<TFieldValues>;
 }
 
@@ -169,20 +176,26 @@ export function RecordLayoutRenderer<
   TFieldValues extends FieldValues,
 >({
   actionButtons,
+  entityType,
   form,
   isEditing,
   layout,
   record,
+  recordId,
 }: RecordLayoutRendererProps<TRecord, TFieldValues>) {
   const fields = getAllLayoutFields(layout);
   const fieldMap = new Map<Path<TFieldValues>, RecordLayoutField<TFieldValues>>(
     fields.map((field) => [field.id, field]),
   );
+  const resolvedRecordId = recordId ?? String(record.id ?? "");
 
   const sectionsContent = renderLayoutSections(layout, {
+    entityType: entityType ?? "",
     form,
     isEditing,
+    layout,
     record,
+    recordId: resolvedRecordId,
   });
 
   return (
@@ -332,10 +345,60 @@ const FIELD_COMPONENTS: Record<RecordLayoutField["type"], FieldComponent> = {
 };
 
 type SectionRenderContext<TFieldValues extends FieldValues> = {
+  entityType: string;
   form: UseFormReturn<TFieldValues>;
   isEditing: boolean;
+  layout: RecordPageLayout<TFieldValues>;
   record: Record<string, unknown>;
+  recordId: string;
 };
+
+function CustomComponentSection<TFieldValues extends FieldValues>({
+  entityType,
+  layout,
+  record,
+  recordId,
+  section,
+}: {
+  entityType: string;
+  layout: RecordPageLayout<TFieldValues>;
+  record: Record<string, unknown>;
+  recordId: string;
+  section: RecordLayoutSection<TFieldValues>;
+}) {
+  const registered = section.componentId
+    ? getComponent(section.componentId)
+    : undefined;
+
+  if (!registered) {
+    return (
+      <Card className="border-destructive/40 bg-destructive/5">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-base">Missing component</CardTitle>
+          <CardDescription>
+            Component &quot;{section.componentId}&quot; is not registered.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const { component: Component, definition } = registered;
+  const config = {
+    ...(definition.props ?? {}),
+    ...(section.componentProps ?? {}),
+  };
+
+  return (
+    <Component
+      config={config}
+      entityType={entityType}
+      layout={layout as RecordPageLayout<Record<string, unknown>>}
+      record={record}
+      recordId={recordId}
+    />
+  );
+}
 
 function fallbackFormat(
   value: unknown,
@@ -782,17 +845,27 @@ function renderLayoutSections<TFieldValues extends FieldValues>(
   layout: RecordPageLayout<TFieldValues>,
   context: SectionRenderContext<TFieldValues>,
 ) {
-  const { form, isEditing, record } = context;
+  const {
+    entityType,
+    form,
+    isEditing,
+    layout: layoutContext,
+    record,
+    recordId,
+  } = context;
   const renderSection = (
     section: RecordLayoutSection<TFieldValues>,
     columnsOverride?: 1 | 2 | 3 | 4,
   ) => (
     <Section
       columnsOverride={columnsOverride}
+      entityType={entityType}
       form={form}
       isEditing={isEditing}
       key={section.id}
+      layout={layoutContext}
       record={record}
+      recordId={recordId}
       section={section}
     />
   );
@@ -890,11 +963,26 @@ function resolveFieldValue<TFieldValues extends FieldValues>(
 
 function Section<TFieldValues extends FieldValues>({
   columnsOverride,
+  entityType,
   form,
   isEditing,
+  layout,
   record,
+  recordId,
   section,
 }: SectionProps<TFieldValues>) {
+  if (section.componentId) {
+    return (
+      <CustomComponentSection
+        entityType={entityType}
+        layout={layout}
+        record={record}
+        recordId={recordId}
+        section={section}
+      />
+    );
+  }
+
   const gridClass = getGridClass(section.columns ?? columnsOverride);
 
   return (

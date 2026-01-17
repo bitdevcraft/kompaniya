@@ -84,6 +84,10 @@ export interface LayoutSection {
   columns?: 1 | 2 | 3 | 4;
   /** Fields in this section */
   fields: LayoutField[];
+  /** Custom component identifier (renders section as component) */
+  componentId?: string;
+  /** Instance props for the custom component */
+  componentProps?: Record<string, unknown>;
 }
 
 /**

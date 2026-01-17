@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 
 import { modelEndpoint } from "../../config";
-import { RecordView } from "./record-view";
+import { RecordViewPage } from "./record-view-page";
 
 interface PaymentPlanTemplateRecordPageProps {
   params: Promise<{ id: string }>;
@@ -34,5 +34,5 @@ export default async function Page({
     throw error;
   }
 
-  return <RecordView record={record} />;
+  return <RecordViewPage initialRecord={record} recordId={id} />;
 }

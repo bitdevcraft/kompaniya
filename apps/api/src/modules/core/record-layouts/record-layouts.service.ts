@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   type Db,
   DEFAULT_RECORD_LAYOUTS,
+  type LayoutSectionItem,
   type OrgRecordLayout,
   type RecordLayoutEntityType,
   type RecordLayoutHeader,
@@ -254,7 +255,7 @@ export class RecordLayoutsService {
         .set({
           header: layout.header,
           sectionColumns: layout.sectionColumns ?? null,
-          sections: layout.sections ?? null,
+          sections: (layout.sections ?? null) as LayoutSectionItem[] | null,
           supplementalFields: layout.supplementalFields ?? null,
           autoIncludeCustomFields: layout.autoIncludeCustomFields ?? true,
           isCustomized: true,
@@ -273,7 +274,7 @@ export class RecordLayoutsService {
           updatedBy: userId,
           header: layout.header,
           sectionColumns: layout.sectionColumns ?? null,
-          sections: layout.sections ?? null,
+          sections: (layout.sections ?? null) as LayoutSectionItem[] | null,
           supplementalFields: layout.supplementalFields ?? null,
           autoIncludeCustomFields: layout.autoIncludeCustomFields ?? true,
           isCustomized: true,

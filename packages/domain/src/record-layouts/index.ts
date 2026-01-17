@@ -1,3 +1,9 @@
+// Custom component types
+export type {
+  ComponentCategory,
+  CustomComponentDefinition,
+} from "./component.js";
+
 // Field types
 export type {
   BaseFieldDefinition,

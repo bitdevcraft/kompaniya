@@ -17,6 +17,7 @@ import React from "react";
 import type { RecordLayoutSection } from "@/components/record-page/layout";
 import type { BuilderActions } from "@/lib/hooks/use-record-layout-builder";
 
+import { CustomComponentSectionCard } from "./custom-component-section-card";
 import { FieldItem } from "./field-item";
 
 export interface SectionCardProps {
@@ -29,6 +30,39 @@ export interface SectionCardProps {
 }
 
 export function SectionCard({
+  section,
+  columnKey,
+  index,
+  actions,
+  isSelected,
+  onSelect,
+}: SectionCardProps) {
+  if (section.componentId) {
+    return (
+      <CustomComponentSectionCard
+        actions={actions}
+        columnKey={columnKey}
+        index={index}
+        isSelected={isSelected}
+        onSelect={onSelect}
+        section={section}
+      />
+    );
+  }
+
+  return (
+    <FieldSectionCard
+      actions={actions}
+      columnKey={columnKey}
+      index={index}
+      isSelected={isSelected}
+      onSelect={onSelect}
+      section={section}
+    />
+  );
+}
+
+function FieldSectionCard({
   section,
   columnKey,
   index,

@@ -22,6 +22,34 @@ import { RecordLayoutsService } from './record-layouts.service';
  * Schema for validating layout updates
  * Matches the TypeScript interfaces from RecordPageLayout
  */
+const sectionItemSchema = z
+  .object({
+    id: z.string(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    columns: z.number().int().min(1).max(4).optional(),
+    fields: z.array(z.any()).optional(),
+    componentId: z.string().optional(),
+    componentProps: z.record(z.string(), z.any()).optional(),
+  })
+  .passthrough();
+
+const sectionGroupSchema = z
+  .object({
+    sections: z.array(sectionItemSchema).optional(),
+    fieldsGridColumns: z.number().int().min(1).max(4).optional(),
+  })
+  .passthrough();
+
+const sectionColumnsSchema = z
+  .object({
+    header: sectionGroupSchema.optional(),
+    firstColumn: sectionGroupSchema.optional(),
+    secondColumn: sectionGroupSchema.optional(),
+    sidebar: z.enum(['firstColumn', 'secondColumn']).nullable().optional(),
+  })
+  .passthrough();
+
 const updateLayoutSchema = z.object({
   header: z.object({
     title: z.object({
@@ -70,8 +98,8 @@ const updateLayoutSchema = z.object({
       )
       .optional(),
   }),
-  sectionColumns: z.any().optional(),
-  sections: z.array(z.any()).optional().nullable(),
+  sectionColumns: sectionColumnsSchema.optional(),
+  sections: z.array(sectionItemSchema).optional().nullable(),
   supplementalFields: z.array(z.any()).optional().nullable(),
   autoIncludeCustomFields: z.boolean().optional(),
 });

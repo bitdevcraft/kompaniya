@@ -41,7 +41,9 @@
       "Bash(findstr:*)",
       "Bash(pnpm run build:pkg:*)",
       "Bash(pnpm run typecheck)",
-      "Bash(codex:*)"
+      "Bash(codex:*)",
+      "Bash(pnpm --filter web tsc:*)",
+      "Bash(pnpm build:web:*)"
     ]
   }
 }

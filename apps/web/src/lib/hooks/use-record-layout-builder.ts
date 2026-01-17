@@ -50,6 +50,11 @@ export interface BuilderActions {
     section: RecordLayoutSection,
     index?: number,
   ) => void;
+  addComponentSection: (
+    columnKey: ColumnKey,
+    componentId: string,
+    index?: number,
+  ) => void;
   removeSection: (sectionId: string, columnKey: ColumnKey) => void;
   moveSection: (
     fromColumnKey: ColumnKey,
@@ -365,6 +370,41 @@ export function useRecordLayoutBuilder(
           newSections.splice(index, 0, section);
         } else {
           newSections.push(section);
+        }
+
+        return {
+          ...prev,
+          layout: {
+            ...prev.layout,
+            sectionColumns: setSectionsInColumn(
+              prev.layout.sectionColumns,
+              columnKey,
+              newSections,
+            ),
+          },
+          isDirty: true,
+        };
+      });
+    },
+
+    // Add a component section
+    addComponentSection: (columnKey, componentId, index) => {
+      const newSection: RecordLayoutSection = {
+        id: `section-${Date.now()}`,
+        fields: [],
+        componentId,
+      };
+
+      setState((prev) => {
+        const sections = getSectionsFromColumn(
+          prev.layout.sectionColumns,
+          columnKey,
+        );
+        const newSections = [...sections];
+        if (index !== undefined) {
+          newSections.splice(index, 0, newSection);
+        } else {
+          newSections.push(newSection);
         }
 
         return {

@@ -36,6 +36,19 @@ export const recordLayoutEntityTypeEnum = pgEnum("record_layout_entity_type", [
 ]);
 
 /**
+ * Record layout section columns configuration
+ */
+export interface LayoutSectionItem {
+  id: string;
+  title?: string;
+  description?: string;
+  columns?: number;
+  fields?: unknown[];
+  componentId?: string;
+  componentProps?: Record<string, unknown>;
+}
+
+/**
  * Record layout header configuration
  */
 export interface RecordLayoutHeader {
@@ -61,13 +74,10 @@ export interface RecordLayoutHeader {
   title: { fieldId: string; fallback?: string };
 }
 
-/**
- * Record layout section columns configuration
- */
 export interface RecordLayoutSectionColumns {
-  firstColumn?: { sections: unknown[]; fieldsGridColumns?: number };
-  header?: { sections: unknown[]; fieldsGridColumns?: number };
-  secondColumn?: { sections: unknown[]; fieldsGridColumns?: number };
+  firstColumn?: { sections?: LayoutSectionItem[]; fieldsGridColumns?: number };
+  header?: { sections?: LayoutSectionItem[]; fieldsGridColumns?: number };
+  secondColumn?: { sections?: LayoutSectionItem[]; fieldsGridColumns?: number };
   sidebar?: "firstColumn" | "secondColumn" | null;
 }
 
@@ -89,7 +99,7 @@ export const orgRecordLayoutsTable = pgTable("org_record_layouts", {
   // Layout configuration (matches RecordPageLayout interface structure)
   header: jsonb("header").$type<RecordLayoutHeader>().notNull(),
   sectionColumns: jsonb("sectionColumns").$type<RecordLayoutSectionColumns>(),
-  sections: jsonb("sections").$type<unknown[]>(),
+  sections: jsonb("sections").$type<LayoutSectionItem[]>(),
   supplementalFields: jsonb("supplemental_fields").$type<unknown[]>(),
 
   // Configuration flags

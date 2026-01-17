@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@kompaniya/ui-common/components/table";
 
-import { ScheduleTable } from "@/app/(authenticated)/record/(real-estate)/payment-plans/components/payment-plan/schedule-table";
+import { ScheduleTable } from "@/components/payment-plan/schedule-table";
 
 import type { BaseRecordFieldProps } from "./record-field-types";
 

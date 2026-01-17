@@ -12,7 +12,7 @@ import { generateSchedule } from "@repo/shared/payment-plan";
 import { format } from "date-fns";
 import Link from "next/link";
 
-import { ScheduleTable } from "@/app/(authenticated)/record/(real-estate)/payment-plans/components/payment-plan/schedule-table";
+import { ScheduleTable } from "@/components/payment-plan/schedule-table";
 
 interface RecordViewProps {
   record: OrgPaymentPlanTemplate;

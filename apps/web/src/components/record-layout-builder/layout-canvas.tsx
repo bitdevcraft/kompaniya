@@ -149,7 +149,10 @@ function ColumnContainer({
   const sectionsList = sections || [];
   const { active } = useDndContext();
   const activeType = active?.data.current?.type;
-  const showSectionDrop = activeType === "section";
+  const showSectionDrop =
+    activeType === "section" ||
+    activeType === "component-section" ||
+    activeType === "component-palette";
 
   const { setNodeRef, isOver } = useDroppable({
     data: {

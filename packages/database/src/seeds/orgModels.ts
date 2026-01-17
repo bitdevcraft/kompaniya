@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, Db } from "@/db";
 import { DEFAULT_RECORD_LAYOUTS } from "@/defaults/record-layouts";
 import {
+  LayoutSectionItem,
   NewOrgOpportunity,
   orgAccountsTable,
   orgActivitiesTable,
@@ -333,7 +334,7 @@ export async function seedOrgModels(
           header: layout.header as RecordLayoutHeader,
           sectionColumns: layout.sectionColumns as RecordLayoutSectionColumns,
           sections: ("sections" in layout ? layout.sections : undefined) as
-            | unknown[]
+            | LayoutSectionItem[]
             | undefined,
           supplementalFields: ("supplementalFields" in layout
             ? layout.supplementalFields

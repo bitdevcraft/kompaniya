@@ -215,10 +215,12 @@ export function RecordViewPage({
       <form className="space-y-6" onSubmit={handleSubmit}>
         <RecordLayoutRenderer
           actionButtons={actionButtons}
+          entityType="org_email_domains"
           form={form}
           isEditing={isEditing}
           layout={resolvedLayout}
           record={record as Record<string, unknown>}
+          recordId={recordId}
         />
         {record.status === "PENDING" ? (
           <DnsRecordsSection record={record as Record<string, unknown>} />

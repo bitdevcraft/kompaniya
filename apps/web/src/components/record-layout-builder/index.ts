@@ -1,6 +1,9 @@
 export { BuilderToolbar } from "./builder-toolbar";
+export { ComponentPalette } from "./component-palette";
+export { CustomComponentSectionCard } from "./custom-component-section-card";
 export { FieldItem } from "./field-item";
 export { FieldPalette } from "./field-palette";
 export { LayoutCanvas } from "./layout-canvas";
+export { PaletteSidebar } from "./palette-sidebar";
 export { RecordLayoutBuilder } from "./record-layout-builder";
 export { SectionCard } from "./section-card";

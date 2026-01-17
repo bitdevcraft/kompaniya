@@ -180,10 +180,12 @@ export function RecordViewPage({
       <form className="space-y-6" onSubmit={handleSubmit}>
         <RecordLayoutRenderer
           actionButtons={actionButtons}
+          entityType="org_real_estate_bookings"
           form={form}
           isEditing={isEditing}
           layout={layout}
           record={record as Record<string, unknown>}
+          recordId={recordId}
         />
       </form>
     </div>

@@ -194,10 +194,12 @@ export function RecordViewPage({
       <form className="space-y-6" onSubmit={handleSubmit}>
         <RecordLayoutRenderer
           actionButtons={actionButtons}
+          entityType="org_email_test_receivers"
           form={form}
           isEditing={isEditing}
           layout={layout}
           record={displayRecord as Record<string, unknown>}
+          recordId={recordId}
         />
       </form>
     </div>

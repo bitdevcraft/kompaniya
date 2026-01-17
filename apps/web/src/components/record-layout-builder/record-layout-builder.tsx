@@ -13,13 +13,15 @@ import {
 import { useState } from "react";
 
 import type { RecordLayoutField } from "@/components/record-page/layout";
+import type { CustomComponentDefinition } from "@/lib/component-definitions";
 import type { RecordLayoutResponse } from "@/lib/record-layouts";
 
+import { getComponentsForEntity } from "@/lib/component-definitions";
 import { useRecordLayoutBuilder } from "@/lib/hooks/use-record-layout-builder";
 
 import { BuilderToolbar } from "./builder-toolbar";
-import { FieldPalette } from "./field-palette";
 import { LayoutCanvas } from "./layout-canvas";
+import { PaletteSidebar } from "./palette-sidebar";
 
 export interface RecordLayoutBuilderProps {
   entityType: string;
@@ -35,6 +37,10 @@ type DragData =
       field: RecordLayoutField;
     }
   | {
+      type: "component-palette";
+      component: CustomComponentDefinition;
+    }
+  | {
       type: "field";
       fieldId: string;
       sectionId: string;
@@ -44,6 +50,13 @@ type DragData =
     }
   | {
       type: "section";
+      sectionId: string;
+      columnKey: ColumnKey;
+      index: number;
+      label?: string;
+    }
+  | {
+      type: "component-section";
       sectionId: string;
       columnKey: ColumnKey;
       index: number;
@@ -65,9 +78,11 @@ export function RecordLayoutBuilder({
   onSave,
 }: RecordLayoutBuilderProps) {
   const { state, actions } = useRecordLayoutBuilder(entityType, initialLayout);
+  const availableComponents = getComponentsForEntity(entityType);
   const [activeData, setActiveData] = useState<{
     type: string;
     field?: RecordLayoutField;
+    component?: CustomComponentDefinition;
     label?: string;
   } | null>(null);
   const sensors = useSensors(
@@ -102,6 +117,15 @@ export function RecordLayoutBuilder({
       return;
     }
 
+    if (data.type === "component-palette") {
+      setActiveData({
+        type: "component-palette",
+        component: data.component,
+        label: data.component.label,
+      });
+      return;
+    }
+
     if (data.type === "field") {
       setActiveData({
         type: "field",
@@ -114,6 +138,14 @@ export function RecordLayoutBuilder({
       setActiveData({
         type: "section",
         label: data.label || "Section",
+      });
+      return;
+    }
+
+    if (data.type === "component-section") {
+      setActiveData({
+        type: "component-section",
+        label: data.label || "Component",
       });
       return;
     }
@@ -183,6 +215,34 @@ export function RecordLayoutBuilder({
       }
     }
 
+    // Case 1b: Palette component -> Section or column
+    if (activeData.type === "component-palette") {
+      if (
+        overData.type === "section" ||
+        overData.type === "component-section"
+      ) {
+        const toIndex = findSectionIndex(
+          overData.columnKey,
+          overData.sectionId,
+        );
+        if (toIndex > -1) {
+          actions.addComponentSection(
+            overData.columnKey,
+            activeData.component.id,
+            toIndex,
+          );
+        }
+      }
+
+      if (overData.type === "column") {
+        actions.addComponentSection(
+          overData.columnKey,
+          activeData.component.id,
+          getSections(overData.columnKey).length,
+        );
+      }
+    }
+
     // Case 2: Field reordering within or between sections
     if (
       activeData.type === "field" &&
@@ -227,12 +287,15 @@ export function RecordLayoutBuilder({
 
     // Case 3: Section reordering/moving
     if (
-      activeData.type === "section" &&
-      (overData.type === "section" || overData.type === "column")
+      (activeData.type === "section" ||
+        activeData.type === "component-section") &&
+      (overData.type === "section" ||
+        overData.type === "component-section" ||
+        overData.type === "column")
     ) {
       const toColumnKey = overData.columnKey;
       const toIndex =
-        overData.type === "section"
+        overData.type === "section" || overData.type === "component-section"
           ? findSectionIndex(overData.columnKey, overData.sectionId)
           : getSections(overData.columnKey).length;
 
@@ -242,7 +305,8 @@ export function RecordLayoutBuilder({
       }
 
       if (
-        overData.type === "section" &&
+        (overData.type === "section" ||
+          overData.type === "component-section") &&
         activeData.sectionId === overData.sectionId &&
         activeData.columnKey === toColumnKey
       ) {
@@ -276,7 +340,10 @@ export function RecordLayoutBuilder({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Field Palette Sidebar */}
         <div className="lg:col-span-1">
-          <FieldPalette fields={state.availableFields} />
+          <PaletteSidebar
+            components={availableComponents}
+            fields={state.availableFields}
+          />
         </div>
 
         {/* Main Builder Area */}
@@ -301,6 +368,14 @@ export function RecordLayoutBuilder({
             <div className="text-sm font-medium">{activeData.field.label}</div>
           </div>
         )}
+        {activeData?.type === "component-palette" && activeData.component && (
+          <div className="p-2 border rounded bg-card shadow-lg">
+            <div className="text-sm font-medium">
+              {activeData.component.label}
+            </div>
+            <div className="text-xs text-muted-foreground">Component</div>
+          </div>
+        )}
         {activeData?.type === "field" && (
           <div className="p-2 border rounded bg-card shadow-lg">
             <div className="text-sm font-medium">
@@ -311,6 +386,13 @@ export function RecordLayoutBuilder({
         {activeData?.type === "section" && (
           <div className="p-3 border rounded bg-card shadow-lg">
             <div className="font-semibold">{activeData.label || "Section"}</div>
+          </div>
+        )}
+        {activeData?.type === "component-section" && (
+          <div className="p-3 border rounded bg-card shadow-lg">
+            <div className="font-semibold">
+              {activeData.label || "Component"}
+            </div>
           </div>
         )}
       </DragOverlay>
