@@ -77,6 +77,7 @@ export interface BuilderActions {
 
   // State operations
   reset: () => void;
+  markAsSaved: () => void;
   setSelectedSection: (sectionId: string | null) => void;
   setSelectedField: (fieldId: string | null) => void;
 }
@@ -564,6 +565,11 @@ export function useRecordLayoutBuilder(
     // Reset to initial state
     reset: () => {
       setState(getInitialState());
+    },
+
+    // Mark as saved (clear dirty state)
+    markAsSaved: () => {
+      setState((prev) => ({ ...prev, isDirty: false }));
     },
 
     // Set selected section

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { RecordLayoutBuilder } from "@/components/record-layout-builder";
 import { fetchRecordLayout, updateRecordLayout } from "@/lib/record-layouts";
@@ -76,6 +77,10 @@ export function EntityDetail({ entity }: EntityDetailProps) {
       queryClient.invalidateQueries({
         queryKey: ["record-layout", entity.entityType],
       });
+      toast.success("Layout saved successfully");
+    },
+    onError: () => {
+      toast.error("Failed to save layout. Please try again.");
     },
   });
 
@@ -118,7 +123,9 @@ export function EntityDetail({ entity }: EntityDetailProps) {
             <RecordLayoutBuilder
               entityType={entity.entityType}
               initialLayout={layout}
-              onSave={mutation.mutate}
+              onSave={(data) =>
+                mutation.mutateAsync(data).then(() => undefined)
+              }
             />
           ) : (
             <div className="p-4">No layout found.</div>

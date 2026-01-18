@@ -26,7 +26,7 @@ import { PaletteSidebar } from "./palette-sidebar";
 export interface RecordLayoutBuilderProps {
   entityType: string;
   initialLayout: RecordLayoutResponse;
-  onSave: (layout: unknown) => void;
+  onSave: (layout: unknown) => Promise<void> | void;
 }
 
 type ColumnKey = "firstColumn" | "secondColumn" | "header";
@@ -91,8 +91,13 @@ export function RecordLayoutBuilder({
     }),
   );
 
-  const handleSave = () => {
-    onSave(state.layout);
+  const handleSave = async () => {
+    try {
+      await onSave(state.layout);
+      actions.markAsSaved();
+    } catch {
+      // Error handled by parent
+    }
   };
 
   const handleReset = () => {
@@ -339,7 +344,7 @@ export function RecordLayoutBuilder({
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Field Palette Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 lg:sticky lg:top-4 lg:self-start">
           <PaletteSidebar
             components={availableComponents}
             fields={state.availableFields}
