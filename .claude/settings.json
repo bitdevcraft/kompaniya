@@ -1,5 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(npm run db:generate:*)"]
+    "allow": [
+      "Bash(npm run db:generate:*)",
+      "Bash(for file in *.layout.ts)",
+      "Bash(do sed:*)",
+      "Bash(done:*)"
+    ]
   }
 }

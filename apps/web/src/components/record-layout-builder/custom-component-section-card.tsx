@@ -20,12 +20,15 @@ import {
   Settings,
   Trash2,
 } from "lucide-react";
+import { useState } from "react";
 
 import type { RecordLayoutSection } from "@/components/record-page/layout";
 import type { ComponentCategory } from "@/lib/component-definitions";
 import type { BuilderActions } from "@/lib/hooks/use-record-layout-builder";
 
 import { getComponent } from "@/lib/component-definitions";
+
+import { ComponentConfigDialog } from "./component-config-dialog";
 
 export interface CustomComponentSectionCardProps {
   section: RecordLayoutSection;
@@ -57,6 +60,8 @@ export function CustomComponentSectionCard({
   isSelected,
   onSelect,
 }: CustomComponentSectionCardProps) {
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+
   const registered = section.componentId
     ? getComponent(section.componentId)
     : undefined;
@@ -133,6 +138,19 @@ export function CustomComponentSectionCard({
           </div>
         </div>
         <div className="flex items-center gap-1">
+          {definition && Object.keys(definition.props || {}).length > 0 ? (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsConfigOpen(true);
+              }}
+              size="sm"
+              title="Configure component"
+              variant="ghost"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          ) : null}
           <Button
             className="text-destructive"
             onClick={(e) => {
@@ -140,6 +158,7 @@ export function CustomComponentSectionCard({
               handleDelete();
             }}
             size="sm"
+            title="Delete component"
             variant="ghost"
           >
             <Trash2 className="h-4 w-4" />
@@ -159,6 +178,22 @@ export function CustomComponentSectionCard({
         <div className="mt-3 text-xs text-destructive">
           Component &quot;{section.componentId}&quot; is not registered.
         </div>
+      ) : null}
+
+      {definition && Object.keys(definition.props || {}).length > 0 ? (
+        <ComponentConfigDialog
+          component={definition}
+          currentProps={
+            section.componentProps as Record<string, unknown> | undefined
+          }
+          onClose={() => setIsConfigOpen(false)}
+          onSave={(props) => {
+            actions.updateSection(section.id, columnKey, {
+              componentProps: props,
+            });
+          }}
+          open={isConfigOpen}
+        />
       ) : null}
     </Card>
   );
