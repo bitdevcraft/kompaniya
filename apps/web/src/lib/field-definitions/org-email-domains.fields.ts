@@ -11,6 +11,7 @@ export const orgEmailDomainsFields: NativeFieldDefinition[] = [
     category: "identity",
     group: "Domain Info",
     sortOrder: 1,
+    fieldMode: "immutable",
   },
   {
     id: "verified",

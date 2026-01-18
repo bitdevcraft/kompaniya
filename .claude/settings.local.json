@@ -45,7 +45,8 @@
       "Bash(pnpm --filter web tsc:*)",
       "Bash(pnpm build:web:*)",
       "Bash(pnpm --filter web run lint:*)",
-      "Bash(pnpm --filter api run lint:*)"
+      "Bash(pnpm --filter api run lint:*)",
+      "Bash(pnpm run:*)"
     ]
   }
 }

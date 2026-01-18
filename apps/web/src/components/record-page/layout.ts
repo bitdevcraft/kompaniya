@@ -19,6 +19,7 @@ import type { FieldValues, Path } from "react-hook-form";
  * Re-export domain icon and link types for convenience
  */
 export type {
+  FieldMode,
   HeaderDataType,
   HeaderIconType,
   HeaderLinkType,

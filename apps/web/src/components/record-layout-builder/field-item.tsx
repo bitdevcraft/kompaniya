@@ -1,5 +1,7 @@
 "use client";
 
+import type { FieldMode } from "@repo/domain";
+
 import { useDndContext } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -10,6 +12,27 @@ import { GripVertical, X } from "lucide-react";
 
 import type { RecordLayoutField } from "@/components/record-page/layout";
 import type { NativeFieldDefinition } from "@/lib/field-definitions";
+
+const FIELD_MODE_COLORS: Record<FieldMode, string> = {
+  always: "bg-green-100 text-green-800 hover:bg-green-200",
+  createOnly: "bg-blue-100 text-blue-800 hover:bg-blue-200",
+  updateOnly: "bg-purple-100 text-purple-800 hover:bg-purple-200",
+  immutable: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+};
+
+const FIELD_MODE_LABELS: Record<FieldMode, string> = {
+  always: "Always",
+  createOnly: "Create only",
+  updateOnly: "Update only",
+  immutable: "Read-only",
+};
+
+const FIELD_MODE_DESCRIPTIONS: Record<FieldMode, string> = {
+  always: "Editable on create and update",
+  createOnly: "Editable when creating, read-only after",
+  updateOnly: "Hidden on create, editable when updating",
+  immutable: "Always read-only (system set)",
+};
 
 const FIELD_TYPE_COLORS: Record<string, string> = {
   text: "bg-blue-100 text-blue-800",
@@ -103,6 +126,31 @@ export function FieldItem({
             >
               {field.type}
             </Badge>
+            {/* field mode selector for non-system fields */}
+            {!("isSystem" in field && field.isSystem) && onUpdateField && (
+              <button
+                className={cn(
+                  "text-xs px-2 py-0.5 rounded border transition-colors cursor-pointer",
+                  FIELD_MODE_COLORS[field.fieldMode ?? "always"],
+                )}
+                onClick={() => {
+                  const modes: FieldMode[] = [
+                    "always",
+                    "createOnly",
+                    "updateOnly",
+                    "immutable",
+                  ];
+                  const currentMode = field.fieldMode ?? "always";
+                  const currentIndex = modes.indexOf(currentMode);
+                  const nextMode = modes[(currentIndex + 1) % modes.length];
+                  onUpdateField(field.id, { fieldMode: nextMode });
+                }}
+                title={`Mode: ${FIELD_MODE_LABELS[field.fieldMode ?? "always"]} - ${FIELD_MODE_DESCRIPTIONS[field.fieldMode ?? "always"]}`}
+                type="button"
+              >
+                {FIELD_MODE_LABELS[field.fieldMode ?? "always"]}
+              </button>
+            )}
             {/* availableOnCreate toggle for non-system fields */}
             {!("isSystem" in field && field.isSystem) && onUpdateField && (
               <button

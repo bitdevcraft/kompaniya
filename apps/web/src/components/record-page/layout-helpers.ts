@@ -1,6 +1,7 @@
 import type { FieldValues } from "react-hook-form";
 
 import type {
+  FieldMode,
   RecordLayoutField,
   RecordLayoutSection,
   RecordPageLayout,
@@ -13,7 +14,7 @@ export function createDefaultValuesForLayout<
   const fields = getAllLayoutFields(layout);
 
   for (const field of fields) {
-    if (field.availableOnCreate === false || field.readOnly) {
+    if (field.availableOnCreate === false || !isFieldEditable(field, true)) {
       continue;
     }
 
@@ -83,14 +84,20 @@ export function getCreateLayoutFields<TFieldValues extends FieldValues>(
   layout: RecordPageLayout<TFieldValues>,
 ): RecordLayoutField<TFieldValues>[] {
   return getAllLayoutFields(layout).filter(
-    (field) => field.availableOnCreate !== false && !field.readOnly,
+    (field) =>
+      field.availableOnCreate !== false &&
+      isFieldEditable(field, true) &&
+      isFieldVisible(field, true),
   );
 }
 
 export function getEditableLayoutFields<TFieldValues extends FieldValues>(
   layout: RecordPageLayout<TFieldValues>,
+  isCreateContext: boolean = false,
 ): RecordLayoutField<TFieldValues>[] {
-  return getAllLayoutFields(layout).filter((field) => !field.readOnly);
+  return getAllLayoutFields(layout).filter((field) =>
+    isFieldEditable(field, isCreateContext),
+  );
 }
 
 export function getValueAtPath(source: Record<string, unknown>, path: string) {
@@ -109,6 +116,71 @@ export function getValueAtPath(source: Record<string, unknown>, path: string) {
   }
 
   return current;
+}
+
+/**
+ * Determines if a field is editable based on its mode and current context
+ * @param field - The layout field to check
+ * @param isCreateContext - Whether we're in a create context (vs update context)
+ * @returns true if the field should be editable
+ */
+export function isFieldEditable<T extends FieldValues>(
+  field: RecordLayoutField<T>,
+  isCreateContext: boolean,
+): boolean {
+  // Handle legacy readOnly property for backward compatibility
+  if (field.readOnly === true) {
+    return false;
+  }
+
+  // If no fieldMode specified, default to "always" (editable)
+  const mode = field.fieldMode ?? "always";
+
+  switch (mode) {
+    case "always":
+      return true;
+    case "createOnly":
+      return isCreateContext;
+    case "updateOnly":
+      return !isCreateContext;
+    case "immutable":
+      return false;
+    default:
+      return true;
+  }
+}
+
+/**
+ * Determines if a field should be visible based on its mode and context
+ * For updateOnly fields, they should be hidden on create forms
+ * @param field - The layout field to check
+ * @param isCreateContext - Whether we're in a create context
+ * @returns true if the field should be visible
+ */
+export function isFieldVisible<T extends FieldValues>(
+  field: RecordLayoutField<T>,
+  isCreateContext: boolean,
+): boolean {
+  const mode = field.fieldMode ?? "always";
+
+  // updateOnly fields are hidden on create forms
+  if (mode === "updateOnly" && isCreateContext) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Normalizes a field to use fieldMode, converting legacy readOnly
+ */
+export function normalizeFieldMode<T extends FieldValues>(
+  field: RecordLayoutField<T>,
+): RecordLayoutField<T> {
+  if (field.readOnly === true && !field.fieldMode) {
+    return { ...field, fieldMode: "immutable" as FieldMode };
+  }
+  return field;
 }
 
 export function normalizeValueForForm(

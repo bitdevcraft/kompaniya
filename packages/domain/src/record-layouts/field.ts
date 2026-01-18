@@ -1,4 +1,13 @@
 /**
+ * Field behavior mode determines when a field can be edited
+ */
+export type FieldMode =
+  | "always" // Default: field can be edited on both create and update
+  | "createOnly" // Field can be edited only on create, becomes read-only after creation
+  | "updateOnly" // Field is hidden on create, but can be edited after creation
+  | "immutable"; // Field is always read-only, set by system only
+
+/**
  * Base field definition - completely framework agnostic
  * This is the core domain type that can be shared across all layers
  */
@@ -19,7 +28,9 @@ export interface BaseFieldDefinition {
   placeholder?: string;
   /** Column span in grid layout (1-4) */
   colSpan?: number;
-  /** Whether this field is read-only */
+  /** Field behavior mode - determines when field can be edited */
+  fieldMode?: FieldMode;
+  /** @deprecated Use fieldMode instead. When true, behaves as "immutable" */
   readOnly?: boolean;
   /** Options for picklist/multipicklist fields */
   options?: FieldOption[];

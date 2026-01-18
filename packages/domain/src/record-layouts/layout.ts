@@ -1,5 +1,6 @@
 import type {
   FieldDataType,
+  FieldMode,
   FieldOption,
   ReferenceFieldConfig,
   TagFieldConfig,
@@ -22,6 +23,7 @@ export type {
   FieldCategory,
   FieldDataType,
   FieldDefinition,
+  FieldMode,
   FieldOption,
   ReferenceFieldConfig,
   TagFieldConfig,
@@ -59,7 +61,9 @@ export interface LayoutField {
   availableOnCreate?: boolean;
   /** Placeholder text */
   placeholder?: string;
-  /** Whether the field is read-only */
+  /** Field behavior mode - determines when field can be edited */
+  fieldMode?: FieldMode;
+  /** @deprecated Use fieldMode instead */
   readOnly?: boolean;
   /** Options for picklist fields */
   options?: FieldOption[];

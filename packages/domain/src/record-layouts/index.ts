@@ -10,6 +10,7 @@ export type {
   FieldCategory,
   FieldDataType,
   FieldDefinition,
+  FieldMode,
   FieldOption,
   ReferenceFieldConfig,
   TagFieldConfig,

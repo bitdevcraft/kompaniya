@@ -50,6 +50,7 @@ import { DateRecordField } from "./date-record-field";
 import { DatetimeRecordField } from "./datetime-record-field";
 import { HtmlRecordField } from "./html-record-field";
 import { InfoChip } from "./info-chip";
+import { isFieldEditable, isFieldVisible } from "./layout-helpers";
 import {
   getAllLayoutFields,
   getValueAtPath,
@@ -150,9 +151,10 @@ interface SectionProps<TFieldValues extends FieldValues> {
 export function extractEditableValues<TFieldValues extends FieldValues>(
   values: TFieldValues,
   layout: RecordPageLayout<TFieldValues>,
+  isCreateContext: boolean = false,
 ) {
-  const editableFields = getAllLayoutFields(layout).filter(
-    (field) => !field.readOnly,
+  const editableFields = getAllLayoutFields(layout).filter((field) =>
+    isFieldEditable(field, isCreateContext),
   );
   const data: Record<string, unknown> = {};
 
@@ -431,11 +433,13 @@ function FieldRenderer<TFieldValues extends FieldValues>({
   form,
   isEditing,
   record,
+  recordId,
 }: {
   field: RecordLayoutField<TFieldValues>;
   form: UseFormReturn<TFieldValues>;
   isEditing: boolean;
   record: Record<string, unknown>;
+  recordId?: string;
 }) {
   const Component = FIELD_COMPONENTS[field.type];
 
@@ -443,7 +447,17 @@ function FieldRenderer<TFieldValues extends FieldValues>({
     return null;
   }
 
-  if (isEditing && !field.readOnly) {
+  // Determine if we're in create context (no recordId means creating)
+  const creating = !recordId || recordId === "new";
+  const editable = isFieldEditable(field, creating);
+  const visible = isFieldVisible(field, creating);
+
+  // Hide fields that should not be visible in this context
+  if (!visible) {
+    return null;
+  }
+
+  if (isEditing && editable) {
     return (
       <FormField
         control={form.control}
@@ -1009,6 +1023,7 @@ function Section<TFieldValues extends FieldValues>({
                 form={form}
                 isEditing={isEditing}
                 record={record}
+                recordId={recordId}
               />
             </div>
           ))}
